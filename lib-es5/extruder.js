@@ -26,6 +26,7 @@ var extruder = {
         //get the inner triangles
         var horizontalGeom = extruder.getInnerHorizontalGeom(topoPathsByDepth);
         var verticalGeom = extruder.getInnerVerticalGeom(pathsByDepth, horizontalGeom.offset);
+        debugger;
         var totalGeom = geomHelper.concatGeometries([horizontalGeom, verticalGeom], false);
         // let totalGeom = verticalGeom;
 
@@ -51,24 +52,42 @@ var extruder = {
         });
 
         var geom = [];
-
-        var _loop = function _loop(indexDepth) {
+        for (var indexDepth = pathsByDepth.depths.length - 1; indexDepth >= 0; indexDepth--) {
             var pathsAtDepth = pathsByDepth.paths[indexDepth];
             //for each point at each path at each depth we look for the corresponding point into the upper paths:
-            Object.values(pathsAtDepth).forEach(function (path) {
-                Object.keys(path).forEach(function (indexPtDwn) {
-                    var ptDwn = path[indexPtDwn];
-                    var nPtDwn = path[(+indexPtDwn + 1) % path.length];
-                    var currgeom = geomHelper.getOneInnerVerticalGeom(ptDwn, nPtDwn, +indexDepth, pathsByDepth, +offset);
-                    if (!currgeom) return;
-                    geom.push(currgeom);
-                    offset = currgeom.offset;
-                });
-            });
-        };
+            var _iteratorNormalCompletion = true;
+            var _didIteratorError = false;
+            var _iteratorError = undefined;
 
-        for (var indexDepth = pathsByDepth.depths.length - 1; indexDepth >= 0; indexDepth--) {
-            _loop(indexDepth);
+            try {
+                for (var _iterator = pathsAtDepth[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                    var path = _step.value;
+
+                    for (var indexPtDwn in path) {
+                        var ptDwn = path[indexPtDwn];
+                        var nPtDwn = path[(+indexPtDwn + 1) % path.length];
+                        var currgeom = geomHelper.getOneInnerVerticalGeom(ptDwn, nPtDwn, +indexDepth, pathsByDepth, +offset);
+                        if (!currgeom) {
+                            continue;
+                        }
+                        geom.push(currgeom);
+                        offset = currgeom.offset;
+                    }
+                }
+            } catch (err) {
+                _didIteratorError = true;
+                _iteratorError = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion && _iterator.return) {
+                        _iterator.return();
+                    }
+                } finally {
+                    if (_didIteratorError) {
+                        throw _iteratorError;
+                    }
+                }
+            }
         }
         return geomHelper.concatGeometries(geom, false);
     },
@@ -144,7 +163,7 @@ var extruder = {
         var res = [];
 
         //add zero depth
-        if (depths[0] != 0) {
+        if (depths[0] !== 0) {
             depths = [0].concat(depths);
         }
 

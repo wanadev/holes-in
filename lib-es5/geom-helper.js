@@ -38,8 +38,8 @@ var geomHelper = {
     getOuterGeom: function getOuterGeom(pathOuter, depths, options) {},
 
     /*
-    * Returns two triangles representing the larger face we can build from the edge ptDwn->nPtDwn
-    */
+     * Returns two triangles representing the larger face we can build from the edge ptDwn->nPtDwn
+     */
     getOneInnerVerticalGeom: function getOneInnerVerticalGeom(ptDwn, nPtDwn, indexDepthDwn, pathsByDepth) {
         var offset = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0;
 
@@ -94,9 +94,9 @@ var geomHelper = {
     },
 
     /**
-    * Returns the depths at which they are two edges with the same 2D coords.
-    * If it does not exists such a edge, returns the current depth and the depth above
-    */
+     * Returns the depths at which they are two edges with the same 2D coords.
+     * If it does not exists such a edge, returns the current depth and the depth above
+     */
     getMatchDepths: function getMatchDepths(ptDwn, nPtDwn, indexDepth, pathsByDepth) {
         //for each depth deeper than pathUp,we look for a corresponding point:
         var depthUp = pathsByDepth.depths[indexDepth - 1];

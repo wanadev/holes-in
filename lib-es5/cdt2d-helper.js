@@ -1,7 +1,8 @@
 "use strict";
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 var cdt2d = require('cdt2d');
-var lodash = require("lodash");
 
 var cdt2dHelper = {
 
@@ -9,11 +10,12 @@ var cdt2dHelper = {
         // let points= xor.concat(intersection).concat(pathOuter);
         var cdtPoints = cdt2dHelper.clipperTocdt2d(points);
         var cdtEdges = cdt2dHelper.pathsToEdges(points);
-        if (!options) options = {
-            exterior: false,
-            interior: true
-        };
-
+        if (!options) {
+            options = {
+                exterior: false,
+                interior: true
+            };
+        }
         var triangles = cdt2d(cdtPoints, cdtEdges, options);
         return {
             points: cdtPoints,
@@ -29,16 +31,27 @@ var cdt2dHelper = {
         var points = [];
         var triangles = [];
         var offset = 0;
-        if (triangulations.length == 1) return triangulations;
+        if (triangulations.length == 1) {
+            return triangulations;
+        }
         for (var i in triangulations) {
-            if (!triangulations[i].points || !triangulations[i].triangles) continue;
-            points = points.concat(triangulations[i].points);
-            triangles = triangles.concat(lodash.forEach(triangulations[i].triangles, function (val) {
-                return val + offset;
-            }));
+            if (!triangulations[i].points || !triangulations[i].triangles) {
+                continue;
+            }
+            points.push.apply(points, _toConsumableArray(triangulations[i].points));
+            cdt2dHelper.pushTriangles(triangulations[i].triangles, triangles, offset);
             offset += triangulations[i].points.length;
         }
-        return { points: points, triangles: triangles };
+        return {
+            points: points,
+            triangles: triangles
+        };
+    },
+
+    pushTriangles: function pushTriangles(src, dst, offset) {
+        dst.push.apply(dst, _toConsumableArray(src.map(function (val) {
+            return val + offset;
+        })));
     },
 
     pathsToEdges: function pathsToEdges(paths) {
@@ -81,10 +94,12 @@ var cdt2dHelper = {
     },
 
     drawTriangle: function drawTriangle(ctx, points, triangle, translation) {
-        if (!translation) translation = {
-            X: 0,
-            Y: 0
-        };
+        if (!translation) {
+            translation = {
+                X: 0,
+                Y: 0
+            };
+        }
         ctx.beginPath();
         ctx.moveTo(points[triangle[0]][0] + translation.X, points[triangle[0]][1] + translation.Y);
         ctx.lineTo(points[triangle[1]][0] + translation.X, points[triangle[1]][1] + translation.Y);

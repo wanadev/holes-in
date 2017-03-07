@@ -37,9 +37,9 @@ var pathHelper = {
      */
     executeClipper: function executeClipper(pathsSubj, pathsClip) {
         var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {
-            clipType: ClipperLib.ClipType.ctUnion,
-            subjectFill: lipperLib.PolyFillType.pftNonZero,
-            clipFill: lipperLib.PolyFillType.pftNonZero
+            clipType: clipperLib.ClipType.ctUnion,
+            subjectFill: clipperLib.PolyFillType.pftNonZero,
+            clipFill: clipperLib.PolyFillType.pftNonZero
         };
 
         if (!pathsSubj && !pathsClip) {
@@ -53,7 +53,9 @@ var pathHelper = {
         //settup and execute clipper
         var cpr = new clipperLib.Clipper();
         cpr.AddPaths(pathsSubj, clipperLib.PolyType.ptSubject, true);
-        if (pathsClip) cpr.AddPaths(pathsClip, clipperLib.PolyType.ptClip, true);
+        if (pathsClip) {
+            cpr.AddPaths(pathsClip, clipperLib.PolyType.ptClip, true);
+        }
         var res = new clipperLib.Paths();
         cpr.Execute(options.clipType, res, options.subjectFill, options.clipFill);
         return res;
