@@ -1,0 +1,5 @@
+Copyright (c)  <%= new Date().getFullYear() %> Wanadev
+- <a href="http://www.wanadev.fr/">www.wanadev.fr</a><br />
+Unless otherwise specified, this documentation is published under the
+<a href="http://creativecommons.org/licenses/by-sa/3.0/deed.en">cc by-sa 3.0</a> license<br />
+Generated using <a href="https://wanadev.github.io/enlightme/\">Enlight'me</a> <%= enlightmeVersion %>
