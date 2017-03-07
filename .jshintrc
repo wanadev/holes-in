@@ -1,0 +1,20 @@
+{
+  "esnext": true,
+  "futurehostile": true,
+  "freeze": true,
+  "latedef": "nofunc",
+  "noarg": true,
+  "nocomma": true,
+  "nonbsp": true,
+  "nonew": true,
+  "undef": true,
+  "browser": true,
+  "browserify": true,
+  "curly": true,
+  "globals": {
+    "describe": false,
+    "it": false,
+    "before": false,
+    "ImageData": false
+  }
+}

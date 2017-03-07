@@ -1,0 +1,46 @@
+{
+  "name": "holes-in",
+  "version": "0.0.0",
+  "description": "Generates a 3D mesh from a 2D outer path and 2D inner paths",
+  "main": "lib-es5/index.js",
+  "scripts": {
+    "test": "jshint lib",
+    "build": "npm run build-es5 && npm run build-dist && npm run build-uglify",
+    "build-dist": "mkdir -p dist/ && browserify -t [ babelify --presets [ es2015 ] ] -s holesIn lib/index.js -o dist/holes-in.js",
+    "build-es5": "cd lib/ && babel *.js -d ../lib-es5",
+    "build-uglify": "uglifyjs dist/holes-in.js -o dist/holes-in.min.js",
+    "watchify": "mkdir -p dist && watchify -v --debug -s holes-in lib/index.js -o dist/holes-in.js",
+    "prepublish": "npm run build-es5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wanadev/holes-in.git"
+  },
+  "keywords": [
+    "extrude",
+    "mesh",
+    "3D",
+    "hole"
+  ],
+  "author": "Wanadev <http://www.wanadev.fr/>",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/wanadev/holes-in/issues"
+  },
+  "homepage": "https://github.com/wanadev/holes-in#readme",
+  "devDependencies": {
+    "babel": "^6.23.0",
+    "babel-cli": "^6.23.0",
+    "babel-preset-es2015": "^6.22.0",
+    "babelify": "^7.3.0",
+    "babylonjs": "^2.5.0",
+    "browserify": "^14.1.0",
+    "jshint": "^2.9.4",
+    "uglifyjs": "^2.4.10",
+    "watchify": "^3.9.0"
+  },
+  "dependencies": {
+    "cdt2d": "^1.0.0",
+    "clipper-lib": "git+https://github.com/wanadev/clipper-lib.git"
+  }
+}
