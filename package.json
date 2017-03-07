@@ -35,6 +35,7 @@
     "babelify": "^7.3.0",
     "babylonjs": "^2.5.0",
     "browserify": "^14.1.0",
+    "enlightme": "^0.1.1",
     "jshint": "^2.9.4",
     "uglifyjs": "^2.4.10",
     "watchify": "^3.9.0"

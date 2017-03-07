@@ -3,3 +3,4 @@ dist/
 .jshintrc
 .travis.yml
 .babelrc
+*.generated
