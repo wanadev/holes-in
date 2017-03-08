@@ -27,7 +27,7 @@ var extruder = {
         var horizontalGeom = extruder.getInnerHorizontalGeom(topoPathsByDepth);
         var verticalGeom = extruder.getInnerVerticalGeom(pathsByDepth, horizontalGeom.offset);
         debugger;
-        var totalGeom = geomHelper.concatGeometries([horizontalGeom, verticalGeom], false);
+        var totalGeom = geomHelper.mergeMeshes([horizontalGeom, verticalGeom], false);
         // let totalGeom = verticalGeom;
 
         var faces = totalGeom.faces;
@@ -89,7 +89,7 @@ var extruder = {
                 }
             }
         }
-        return geomHelper.concatGeometries(geom, false);
+        return geomHelper.mergeMeshes(geom, false);
     },
 
     /**

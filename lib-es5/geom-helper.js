@@ -6,15 +6,15 @@ var pathHelper = require("./path-helper.js");
 
 var geomHelper = {
 
-    concatGeometries: function concatGeometries(geoms, considerOffset) {
+    mergeMeshes: function mergeMeshes(geoms, considerOffset) {
         var res = geoms[0];
         for (var i = 1; i < geoms.length; i++) {
-            res = geomHelper.concatGeometry(res, geoms[i], considerOffset);
+            res = geomHelper.mergeMesh(res, geoms[i], considerOffset);
         }
         return res;
     },
 
-    concatGeometry: function concatGeometry(geom1, geom2, considerOffset) {
+    mergeMesh: function mergeMesh(geom1, geom2, considerOffset) {
         var _geom1$points, _geom1$normals;
 
         if (considerOffset) {
