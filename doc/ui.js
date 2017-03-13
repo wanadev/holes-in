@@ -11,8 +11,6 @@ let h3 = {path: hole3, depth: 0};
 
 let outerShape= {path: geom1, depth: 180};
 let baseholes=[h2,h1,h3];
-let radius= [10,10,10];
-let center;
 
 let holes = JSON.parse(JSON.stringify(baseholes));
 let colors= ["#c02525","#84c025","#8d4ead"];
@@ -25,9 +23,9 @@ let vertexData;
 let mesh;
 let material;
 let texture;
-let options= {inMesh:true, outMesh:false, frontMesh:true, backMesh:false,
+let options= {inMesh:true, outMesh:true, frontMesh:true, backMesh:false,
             wireframe:false, backFaceCulling:false,normals:false,
-            animate: false
+            animate: true
             };
 
 let meshDirty=true;
@@ -88,7 +86,7 @@ if(!meshDirty){return;}
   vertexData.positions = geomMerged.points;
   vertexData.indices = geomMerged.faces;
   vertexData.normals = geomMerged.normals;
-  vertexData.uvs = geomMerged.uvs;
+  // vertexData.uvs = geomMerged.uvs;
   vertexData.applyToMesh(mesh, 1);
 
   if(nullMesh){return;}
@@ -149,7 +147,7 @@ function createScene(engine,scene,canvas) {
 function createMesh(scene){
     mesh= new BABYLON.Mesh("DemoMesh", scene);
     mesh.position = BABYLON.Vector3.Zero();
-     vertexData = new BABYLON.VertexData()
+     vertexData = new BABYLON.VertexData();
 
    material = new BABYLON.StandardMaterial("mat1",scene);
    material.diffuseColor= new BABYLON.Color3(0/255,73/255,79/255);
