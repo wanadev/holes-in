@@ -1,0 +1,96 @@
+{
+  "_args": [
+    [
+      "babylonjs",
+      "/home/leo/Documents/holes-in"
+    ]
+  ],
+  "_from": "babylonjs@latest",
+  "_id": "babylonjs@2.5.0",
+  "_inCache": true,
+  "_installable": true,
+  "_location": "/babylonjs",
+  "_nodeVersion": "6.9.1",
+  "_npmOperationalInternal": {
+    "host": "packages-12-west.internal.npmjs.com",
+    "tmp": "tmp/babylonjs-2.5.0.tgz_1481045172821_0.753742293920368"
+  },
+  "_npmUser": {
+    "email": "contact@babylonjs.com",
+    "name": "babylonjs"
+  },
+  "_npmVersion": "3.10.8",
+  "_phantomChildren": {},
+  "_requested": {
+    "name": "babylonjs",
+    "raw": "babylonjs",
+    "rawSpec": "",
+    "scope": null,
+    "spec": "latest",
+    "type": "tag"
+  },
+  "_requiredBy": [
+    "#DEV:/"
+  ],
+  "_resolved": "https://registry.npmjs.org/babylonjs/-/babylonjs-2.5.0.tgz",
+  "_shasum": "82e72922b6d681d46c766aeaaafda74f572a6ed3",
+  "_shrinkwrap": null,
+  "_spec": "babylonjs",
+  "_where": "/home/leo/Documents/holes-in",
+  "author": {
+    "name": "David CATUHE"
+  },
+  "bugs": {
+    "url": "https://github.com/BabylonJS/Babylon.js/issues"
+  },
+  "contributors": [
+    {
+      "name": "David ROUSSET"
+    }
+  ],
+  "dependencies": {},
+  "description": "Babylon.js is a JavaScript 3D engine based on webgl.",
+  "devDependencies": {},
+  "directories": {},
+  "dist": {
+    "shasum": "82e72922b6d681d46c766aeaaafda74f572a6ed3",
+    "tarball": "https://registry.npmjs.org/babylonjs/-/babylonjs-2.5.0.tgz"
+  },
+  "engines": {
+    "node": "*"
+  },
+  "files": [
+    "Oimo.js",
+    "babylon.core.js",
+    "babylon.d.ts",
+    "babylon.js",
+    "babylon.max.js",
+    "babylon.noworker.js",
+    "package.json"
+  ],
+  "homepage": "https://github.com/BabylonJS/Babylon.js#readme",
+  "keywords": [
+    "3D",
+    "html5",
+    "javascript",
+    "webgl"
+  ],
+  "license": "Apache-2.0",
+  "main": "babylon.js",
+  "maintainers": [
+    {
+      "name": "babylonjs",
+      "email": "contact@babylonjs.com"
+    }
+  ],
+  "name": "babylonjs",
+  "optionalDependencies": {},
+  "readme": "ERROR: No README data found!",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BabylonJS/Babylon.js.git"
+  },
+  "scripts": {},
+  "typings": "babylon.d.ts",
+  "version": "2.5.0"
+}

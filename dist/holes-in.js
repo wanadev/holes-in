@@ -1,1 +1,0 @@
-console.error("Error: Parsing file /home/leo/Documents/holes-in/lib/path-helper.js: Unexpected token (272:4)");
