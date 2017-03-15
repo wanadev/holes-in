@@ -1,16 +1,18 @@
 
 let geom1= [{X:0,Y:0},{X:200,Y:0},{X:200,Y:200},{X:0,Y:200}];
 
-let hole1= [{X:40,Y:40},{X:40,Y:90},{X:100,Y:90},{X:100,Y:40}];
-let hole2= [{X:20,Y:20},{X:20,Y:100},{X:100,Y:100},{X:100,Y:20}];
-let hole3= [{X:15,Y:20},{X:80,Y:20},{X:80,Y:50},{X:15,Y:50}];
+let hole1= [{X:50,Y:50},{X:50,Y:100},{X:100,Y:100},{X:100,Y:50}];
+let hole3= [{X:50,Y:50},{X:50,Y:100},{X:75,Y:100},{X:75,Y:50}];
 
-let h1 = {path: hole1, depth: 150};
+let hole2= [{X:20,Y:20},{X:20,Y:100},{X:100,Y:100},{X:100,Y:20}];
+// let hole3= [{X:15,Y:20},{X:80,Y:20},{X:80,Y:50},{X:15,Y:50}];
+
+let h1 = {path: hole1, depth: 50};
 let h2 = {path: hole2, depth: 50};
-let h3 = {path: hole3, depth: 0};
+let h3 = {path: hole3, depth: 110};
 
 let outerShape= {path: geom1, depth: 180};
-let baseholes=[h2,h1,h3];
+let baseholes=[h3,h1];
 
 let holes = JSON.parse(JSON.stringify(baseholes));
 let colors= ["#c02525","#84c025","#8d4ead"];
@@ -23,7 +25,7 @@ let vertexData;
 let mesh;
 let material;
 let texture;
-let options= {inMesh:true, outMesh:true, frontMesh:true, backMesh:false,
+let options= {inMesh:true, outMesh:false, frontMesh:false, backMesh:false,
             wireframe:false, backFaceCulling:false,normals:false,
             animate: true
             };
@@ -86,7 +88,7 @@ if(!meshDirty){return;}
   vertexData.positions = geomMerged.points;
   vertexData.indices = geomMerged.faces;
   vertexData.normals = geomMerged.normals;
-  // vertexData.uvs = geomMerged.uvs;
+  vertexData.uvs = geomMerged.uvs;
   vertexData.applyToMesh(mesh, 1);
 
   if(nullMesh){return;}
@@ -141,6 +143,19 @@ function createScene(engine,scene,canvas) {
 
   light2.diffuse = new BABYLON.Color3(1, 1, 1);
   light2.specular = new BABYLON.Color3(1, 1, 1);
+
+  scene.onPointerDown = function (evt, pickResult) {
+    // if the click hits the ground object, we change the impact position
+    var textureCoordinates = pickResult.getTextureCoordinates();
+    console.log(textureCoordinates);
+};
+
+
+  // scene.debugLayer.show();
+
+  // var box= BABYLON.Mesh.CreateBox("box1",1, scene);
+  // var vertexData= BABYLON.VertexData.ExtractFromMesh(box);
+  // debugger;
 
   return scene;
 }
