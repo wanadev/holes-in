@@ -11,7 +11,7 @@ let h3 = {path: hole3, depth: 75};
 
 
 let outerShape= {path: geom1, depth: 180};
-let baseholes=[h2,h1];
+let baseholes=[];
 
 let holes = JSON.parse(JSON.stringify(baseholes));
 let colors= ["#c02525","#84c025","#8d4ead"];
@@ -30,7 +30,6 @@ let options= {inMesh:true, outMesh:true, frontMesh:true, backMesh:true,
             };
 
 let meshDirty=true;
-
 
 function displayPaths(canvas){
     // if(!dirty) return;

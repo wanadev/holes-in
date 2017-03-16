@@ -230,20 +230,20 @@ var extruder = {
             res.frontMesh = extruder.getInnerHorizontalGeom(topoPathsByDepth, {
                 frontMesh: true
             });
-            uvHelper.getUVHorFaces(pathsByDepth, outerShape, res.frontMesh);
+            uvHelper.getUVHorFaces(pathsByDepth, outerShape, res.frontMesh, options);
         }
         if (options.backMesh) {
             res.backMesh = extruder.getInnerHorizontalGeom(topoPathsByDepth, {
                 backMesh: true
             });
-            uvHelper.getUVHorFaces(pathsByDepth, outerShape, res.backMesh);
+            uvHelper.getUVHorFaces(pathsByDepth, outerShape, res.backMesh, options);
         }
         if (options.inMesh) {
             // let inMeshHor;
             var inMeshHor = extruder.getInnerHorizontalGeom(topoPathsByDepth, {
                 inMesh: true
             });
-            uvHelper.getUVHorFaces(pathsByDepth, outerShape, inMeshHor);
+            uvHelper.getUVHorFaces(pathsByDepth, outerShape, inMeshHor, options);
 
             var offset = 0;
             if (inMeshHor) {
@@ -1197,9 +1197,9 @@ var uvHelper = {
         Don't care about discontinuities between vertical and horizontal.
     ***************************************/
 
-    getUVHorFaces: function getUVHorFaces(pathsByDepth, outerShape, horizontalGeom) {
+    getUVHorFaces: function getUVHorFaces(pathsByDepth, outerShape, horizontalGeom, options) {
         var points = horizontalGeom.points;
-        var boundaries = uvHelper.getBoundaries(pathsByDepth, outerShape);
+        var boundaries = uvHelper.getBoundaries(pathsByDepth, outerShape, options);
 
         var uv = uvHelper.mapHorizontal(pathsByDepth, outerShape, boundaries, points);
         uvHelper.addUvToGeom(uv, horizontalGeom);
@@ -1228,7 +1228,7 @@ var uvHelper = {
         }
     },
 
-    getBoundaries: function getBoundaries(pathsByDepth, outerShape) {
+    getBoundaries: function getBoundaries(pathsByDepth, outerShape, options) {
         var boundary = void 0;
         var boundaryTex = void 0;
         if (!options.ratio) {
