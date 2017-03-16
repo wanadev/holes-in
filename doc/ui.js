@@ -1,16 +1,5 @@
 
 let geom1= [{X:0,Y:0},{X:200,Y:0},{X:200,Y:200},{X:0,Y:200}];
-/*
-let hole1= [{X:50,Y:50},{X:50,Y:100},{X:100,Y:100},{X:100,Y:50}];
-let hole3= [{X:50,Y:50},{X:50,Y:100},{X:75,Y:100},{X:75,Y:50}];
-
-let hole2= [{X:20,Y:20},{X:20,Y:100},{X:100,Y:100},{X:100,Y:20}];
-// let hole3= [{X:15,Y:20},{X:80,Y:20},{X:80,Y:50},{X:15,Y:50}];
-
-let h1 = {path: hole1, depth: 50};
-let h2 = {path: hole2, depth: 50};
-let h3 = {path: hole3, depth: 110};
-*/
 
 let hole1= [{X:40,Y:40},{X:40,Y:90},{X:120,Y:90},{X:120,Y:40}];
 let hole2= [{X:20,Y:20},{X:20,Y:100},{X:100,Y:100},{X:100,Y:20}];
@@ -35,9 +24,9 @@ let vertexData;
 let mesh;
 let material;
 let texture;
-let options= {inMesh:true, outMesh:true, frontMesh:true, backMesh:false,
-            wireframe:true, backFaceCulling:false,normals:false,
-            animate: false,isoRatioUV:true
+let options= {inMesh:true, outMesh:true, frontMesh:true, backMesh:true,
+            wireframe:false, backFaceCulling:false,normals:false,
+            animate: true,isoRatioUV:true
             };
 
 let meshDirty=true;

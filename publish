@@ -2,5 +2,5 @@ cp ./dist/holes-in.js ./doc/holes-in.js
 ./node_modules/.bin/enlightme
 sed 's|<script src="../dist/holes-in.js"></script>|<script src="./holes-in.js"></script>|g' -i ./doc/demo.md
 ./node_modules/.bin/enlightme publish
-sed 's|<script src="./holes-in.js"></script>|<script src="../dist/holes-in.js"></script>|g' -i ./doc/demo.md
-./compileExample
+#sed 's|<script src="./holes-in.js"></script>|<script src="../dist/holes-in.js"></script>|g' -i ./doc/demo.md
+#./compileExample

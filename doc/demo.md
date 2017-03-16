@@ -5,7 +5,7 @@ autotoc: false
 ---
 
 # Demo
-<script src="../dist/holes-in.js"></script>
+<script src="./holes-in.js"></script>
 <script src="./babylonjs/babylon.js"></script>
 <script src="./ui.js"></script>
 
