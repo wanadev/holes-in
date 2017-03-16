@@ -50,7 +50,7 @@ var extruder = {
                 offset = inMeshHor.offset;
             }
 
-            var inMeshVert = extruder.getInnerVerticalGeom(pathsByDepth, outerShape, optionsUV, +offset);
+            var inMeshVert = extruder.getInnerVerticalGeom(pathsByDepth, outerShape, options, +offset);
             res.inMesh = geomHelper.mergeMeshes([inMeshHor, inMeshVert], false);
         }
 
