@@ -12,7 +12,7 @@ let h2 = {path: hole2, depth: 50};
 let h3 = {path: hole3, depth: 110};
 */
 
-let hole1= [{X:40,Y:40},{X:40,Y:90},{X:100,Y:90},{X:100,Y:40}];
+let hole1= [{X:40,Y:40},{X:40,Y:90},{X:120,Y:90},{X:120,Y:40}];
 let hole2= [{X:20,Y:20},{X:20,Y:100},{X:100,Y:100},{X:100,Y:20}];
 let hole3= [{X:15,Y:20},{X:80,Y:20},{X:80,Y:50},{X:15,Y:50}];
 
@@ -22,7 +22,7 @@ let h3 = {path: hole3, depth: 75};
 
 
 let outerShape= {path: geom1, depth: 180};
-let baseholes=[h3,h2,h1];
+let baseholes=[h2,h1];
 
 let holes = JSON.parse(JSON.stringify(baseholes));
 let colors= ["#c02525","#84c025","#8d4ead"];
@@ -36,7 +36,7 @@ let mesh;
 let material;
 let texture;
 let options= {inMesh:true, outMesh:true, frontMesh:true, backMesh:false,
-            wireframe:false, backFaceCulling:false,normals:false,
+            wireframe:true, backFaceCulling:false,normals:false,
             animate: false,isoRatioUV:true
             };
 
@@ -156,7 +156,7 @@ function createScene(engine,scene,canvas) {
   scene.onPointerDown = function (evt, pickResult) {
     // if the click hits the ground object, we change the impact position
     var textureCoordinates = pickResult.getTextureCoordinates();
-    console.log(textureCoordinates);
+    console.log("tex ", textureCoordinates, " point ", pickResult.pickedPoint);
 };
 
   return scene;
