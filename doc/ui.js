@@ -17,8 +17,8 @@ let hole2= [{X:20,Y:20},{X:20,Y:100},{X:100,Y:100},{X:100,Y:20}];
 let hole3= [{X:15,Y:20},{X:80,Y:20},{X:80,Y:50},{X:15,Y:50}];
 
 let h1 = {path: hole1, depth: 150};
-let h2 = {path: hole2, depth: 50};
-let h3 = {path: hole3, depth: 0};
+let h2 = {path: hole2, depth: 0};
+let h3 = {path: hole3, depth: 75};
 
 
 let outerShape= {path: geom1, depth: 180};
@@ -35,9 +35,9 @@ let vertexData;
 let mesh;
 let material;
 let texture;
-let options= {inMesh:true, outMesh:false, frontMesh:false, backMesh:false,
+let options= {inMesh:true, outMesh:true, frontMesh:true, backMesh:false,
             wireframe:false, backFaceCulling:false,normals:false,
-            animate: true,isoRatioUV:true
+            animate: false,isoRatioUV:true
             };
 
 let meshDirty=true;
@@ -85,7 +85,6 @@ function updateMesh(){
 if(!meshDirty){return;}
 
   let geom= holesIn.getGeometry(outerShape,holes,options,options);
-
   let geomMerged= holesIn.mergeMeshes([geom.frontMesh, geom.backMesh, geom.inMesh, geom.outMesh]);
   let nullMesh= false;
   if(!geomMerged){
@@ -109,7 +108,6 @@ if(!meshDirty){return;}
       material.diffuseTexture =texture;
   }
   mesh.material= material;
-
 
 
 }
@@ -161,13 +159,6 @@ function createScene(engine,scene,canvas) {
     console.log(textureCoordinates);
 };
 
-
-  // scene.debugLayer.show();
-
-  // var box= BABYLON.Mesh.CreateBox("box1",1, scene);
-  // var vertexData= BABYLON.VertexData.ExtractFromMesh(box);
-  // debugger;
-
   return scene;
 }
 function createMesh(scene){
@@ -190,6 +181,9 @@ function createMesh(scene){
 }
 
 function initBabylon(){
+
+    document.querySelectorAll('input').forEach(el =>
+        el.checked =options[el.getAttribute("data-target")]);
 
     let canvas2d= document.getElementById("paths");
     let canvas3d= document.getElementById("babylon");
