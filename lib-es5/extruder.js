@@ -55,7 +55,7 @@ var extruder = {
         }
 
         if (options.outMesh) {
-            uvHelper.getUVOuterShape(pathsByDepth, outerShape);
+            uvHelper.getUVOuterShape(pathsByDepth, outerShape, options);
             res.outMesh = geomHelper.getOuterVerticalGeom(outerShape, outerShape.depth);
         }
         Object.values(res).forEach(function (elt) {

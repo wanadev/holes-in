@@ -250,12 +250,12 @@ var extruder = {
                 offset = inMeshHor.offset;
             }
 
-            var inMeshVert = extruder.getInnerVerticalGeom(pathsByDepth, outerShape, optionsUV, +offset);
+            var inMeshVert = extruder.getInnerVerticalGeom(pathsByDepth, outerShape, options, +offset);
             res.inMesh = geomHelper.mergeMeshes([inMeshHor, inMeshVert], false);
         }
 
         if (options.outMesh) {
-            uvHelper.getUVOuterShape(pathsByDepth, outerShape);
+            uvHelper.getUVOuterShape(pathsByDepth, outerShape, options);
             res.outMesh = geomHelper.getOuterVerticalGeom(outerShape, outerShape.depth);
         }
         Object.values(res).forEach(function (elt) {
@@ -1198,6 +1198,9 @@ var uvHelper = {
     ***************************************/
 
     getUVHorFaces: function getUVHorFaces(pathsByDepth, outerShape, horizontalGeom, options) {
+        if (!horizontalGeom) {
+            return;
+        }
         var points = horizontalGeom.points;
         var boundaries = uvHelper.getBoundaries(pathsByDepth, outerShape, options);
 
