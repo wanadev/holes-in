@@ -1,17 +1,22 @@
 
-let geom1= [{X:0,Y:0},{X:200,Y:0},{X:200,Y:200},{X:0,Y:200}];
+let geom1= [{X:50,Y:50},{X:150,Y:50},{X:150,Y:150},{X:50,Y:150}];
 
-let hole1= [{X:40,Y:40},{X:40,Y:90},{X:120,Y:90},{X:120,Y:40}];
-let hole2= [{X:20,Y:20},{X:20,Y:100},{X:100,Y:100},{X:100,Y:20}];
-let hole3= [{X:15,Y:20},{X:80,Y:20},{X:80,Y:50},{X:15,Y:50}];
+// let hole1= [{X:40,Y:40},{X:40,Y:90},{X:120,Y:90},{X:120,Y:40}];
+let hole1= [{X:0,Y:70},{X:0,Y:90},{X:110,Y:90},{X:110,Y:70}];
+let hole2= [{X:70,Y:0},{X:90,Y:0},{X:90,Y:110},{X:70,Y:110}];
 
-let h1 = {path: hole1, depth: 150};
+// let hole2= [{X:20,Y:20},{X:20,Y:100},{X:100,Y:100},{X:100,Y:20}];
+// let hole3= [{X:15,Y:20},{X:80,Y:20},{X:80,Y:50},{X:15,Y:50}];
+let hole3= [{X:80,Y:20},{X:120,Y:20},{X:120,Y:60},{X:80,Y:60}];
+
+
+let h1 = {path: hole1, depth: 0};
 let h2 = {path: hole2, depth: 0};
-let h3 = {path: hole3, depth: 75};
+let h3 = {path: hole3, depth: 50};
 
 
 let outerShape= {path: geom1, depth: 180};
-let baseholes=[];
+let baseholes=[h1,h2,h3];
 
 let holes = JSON.parse(JSON.stringify(baseholes));
 let colors= ["#c02525","#84c025","#8d4ead"];
@@ -26,7 +31,7 @@ let material;
 let texture;
 let options= {inMesh:true, outMesh:true, frontMesh:true, backMesh:true,
             wireframe:false, backFaceCulling:false,normals:false,
-            animate: true,isoRatioUV:true
+            animate: true,isoRatioUV:true,swapToBabylon:true,
             };
 
 let meshDirty=true;
@@ -36,11 +41,11 @@ function displayPaths(canvas){
     let ctx= canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-   holesIn.drawPath(ctx, outerShape.path,point0 ,"#00494f");
+   drawHelper.drawPath(ctx, outerShape.path,point0 ,"#00494f");
    for(let i in holes){
-       holesIn.drawPath(ctx ,holes[i].path,point0 ,colors[i]);
+       drawHelper.drawPath(ctx ,holes[i].path,point0 ,colors[i]);
    }
-   // dirty=false;
+   dirty=false;
 
 }
 
@@ -51,14 +56,18 @@ function animatePaths(){
         for(let i in holes)
         {
             if(i%3==0){
-                movePath(baseholes[i].path,holes[i].path,10,100, "X");
+                movePath(baseholes[i].path,holes[i].path,-10,100, "X");
+                //  animateScale(baseholes[i].path,holes[i].path, "X",1.0,1.5);
             }
             else if (i%3==1){
-                movePath(baseholes[i].path,holes[i].path,50,120, "Y");
+                movePath(baseholes[i].path,holes[i].path,-10,100, "Y");
+                // animateScale(baseholes[i].path,holes[i].path, "Y",1.0,1.5);
+
             }
             else{
-                    movePath(baseholes[i].path,holes[i].path,20,150, "XY");
+                movePath(baseholes[i].path,holes[i].path,20,150, "Y");
             }
+
         }
         angle+=0.01;
         if(angle>2*Math.PI){
@@ -80,6 +89,7 @@ if(!meshDirty){return;}
       geomMerged.points=[];
       geomMerged.faces=[];
       geomMerged.normals=[];
+      geomMerged.uvs=[];
       nullMesh=true;
   }
   meshDirty=false;
@@ -125,11 +135,22 @@ function movePath(basePath, path,min,max, direction){
     }
 }
 
+function animateDepth(baseDepth,hole, min,max ){
+        hole.depth=  baseDepth+ Math.cos(angle)*(max-min)+min;
+}
+
+function animateScale(basePath, path, direction,min,max){
+    let scale= Math.cos(angle)* (max-min)+min;
+    for(let i in path){
+        path[i][direction]= basePath[i][direction]*scale;
+    }
+}
+
 
 function createScene(engine,scene,canvas) {
-  camera= new BABYLON.ArcRotateCamera("camera1",-1.32483, 1.2899, 500,new BABYLON.Vector3(0,0,0), scene);
+  camera= new BABYLON.ArcRotateCamera("camera1",0, 0, 200,new BABYLON.Vector3(0,0,0), scene);
   camera.radius = 200;
-  camera.setTarget(new BABYLON.Vector3(100,100,100));
+  camera.setTarget(new BABYLON.Vector3(100,-90,-100));
   camera.attachControl(canvas, false);
 
   var light1 = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(0,1,0), scene);
@@ -155,9 +176,9 @@ function createMesh(scene){
      vertexData = new BABYLON.VertexData();
 
    material = new BABYLON.StandardMaterial("mat1",scene);
-   material.diffuseColor= new BABYLON.Color3(0/255,73/255,79/255);
-   material.ambientColor= new BABYLON.Color3(0/255,73/255,79/255);
-   material.specularColor= new BABYLON.Color3(0/255,73/255,79/255);
+   // material.diffuseColor= new BABYLON.Color3(0/255,73/255,79/255);
+   // material.ambientColor= new BABYLON.Color3(0/255,73/255,79/255);
+   // material.specularColor= new BABYLON.Color3(0/255,73/255,79/255);
 
 
    material.wireframe=options.wireframe;

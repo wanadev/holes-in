@@ -12,7 +12,7 @@ var extruder = {
     /**
     * returns a mesh from an outer shape and holes
      */
-    getGeometry: function getGeometry(outerShape, holes, options, optionsUV) {
+    getGeometry: function getGeometry(outerShape, holes, options) {
         //get the topology 2D paths by depth
 
         var pathsByDepth = extruder.getPathsByDepth(holes, outerShape);
@@ -43,10 +43,10 @@ var extruder = {
             var inMeshHor = extruder.getInnerHorizontalGeom(topoPathsByDepth, {
                 inMesh: true
             });
-            uvHelper.getUVHorFaces(pathsByDepth, outerShape, inMeshHor, options);
 
             var offset = 0;
             if (inMeshHor) {
+                uvHelper.getUVHorFaces(pathsByDepth, outerShape, inMeshHor, options);
                 offset = inMeshHor.offset;
             }
 
@@ -58,9 +58,7 @@ var extruder = {
             uvHelper.getUVOuterShape(pathsByDepth, outerShape, options);
             res.outMesh = geomHelper.getOuterVerticalGeom(outerShape, outerShape.depth);
         }
-        Object.values(res).forEach(function (elt) {
-            return uvHelper.addUvToGeom({}, elt);
-        });
+        // Object.values(res).forEach( elt =>  uvHelper.addUvToGeom({},elt) );
         return res;
     },
 
@@ -204,6 +202,19 @@ var extruder = {
         }
     },
 
+    fitPathsIntoOuterPath: function fitPathsIntoOuterPath(holes, outerPath) {
+
+        for (var i = 0; i < holes.length; i++) {
+            var h = holes[i].path;
+            if (pathHelper.getDiffOfPaths([h], [outerPath.path]).length > 0) {
+                outerPath.path = pathHelper.getDiffOfPaths([outerPath.path], [h])[0];
+                pathHelper.setDirectionPath(outerPath.path, 1);
+                holes.splice(i, 1);
+                i = -1;
+            }
+        }
+    },
+
     /**
      *  Takes an array of paths representing holes at different depths.
      *  One depth value/ path.
@@ -218,7 +229,7 @@ var extruder = {
             holes[i].path=pathHelper.getInterOfPaths([holes[i].path],[outerPath.path])[0];
             }
         }*/
-
+        extruder.fitPathsIntoOuterPath(holes, outerPath);
         //scales up all holes to prevent from int imprecision
         pathHelper.scaleUpPath(outerPath.path);
 

@@ -1,6 +1,6 @@
 {
   "name": "holes-in",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Generates a 3D mesh from a 2D outer path and 2D inner paths",
   "main": "lib-es5/index.js",
   "scripts": {
@@ -9,7 +9,7 @@
     "build-dist": "mkdir -p dist/ && browserify -t [ babelify --presets [ es2015 ] ] -s holesIn lib/index.js -o dist/holes-in.js",
     "build-es5": "cd lib/ && babel *.js -d ../lib-es5",
     "build-uglify": "uglifyjs dist/holes-in.js -o dist/holes-in.min.js",
-    "watchify": "mkdir -p dist && watchify -v --debug -s holes-in lib/index.js -o dist/holes-in.js",
+    "watchify": "mkdir -p dist && watchify -v --debug -s holes-in lib/index.js -o dist/holes-in.js && npm run build",
     "prepublish": "npm run build-es5"
   },
   "repository": {
