@@ -46,24 +46,6 @@ var geomHelper = {
         return geom1;
     },
 
-    getOuterVerticalGeom: function getOuterVerticalGeom(outerShape, depth) {
-        var offset = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
-
-
-        var res = [];
-
-        for (var i = 0; i < outerShape.path.length; i++) {
-            var pt1 = outerShape.path[i];
-            var pt2 = outerShape.path[(i + 1) % outerShape.path.length];
-            var geom = geomHelper.getPtsNormsIndx2d(pt1, pt2, 0, depth, +offset, true);
-            offset = geom.offset;
-            geom.uvs = [];
-            geomHelper.addUvsToOuterVertGeom(geom, pt1, pt2);
-            res.push(geom);
-        }
-        return geomHelper.mergeMeshes(res, false);
-    },
-
     /*
      * Returns two triangles representing the larger face we can build from the edge ptDwn->nPtDwn
      */
@@ -96,6 +78,10 @@ var geomHelper = {
         var pathUpRes = void 0;
         for (var i = indexDepth - 1; i >= 0; i--) {
             var pathsAtDepth = pathsByDepth[i].paths;
+            if (!pathsAtDepth) {
+                continue;
+            }
+
             for (var j = 0; j < pathsAtDepth.length; j++) {
                 //for each path at each depth:
                 var pathUp = pathsAtDepth[j];
@@ -168,37 +154,18 @@ var geomHelper = {
     addUvsToInnerVertGeom: function addUvsToInnerVertGeom(geom, indexPtDwn, pathUp, pathDwn, pathsByDepth, indexDepth) {
         var _geom$uvs;
 
-        var vUp = void 0;
-        if (pathUp) {
-            vUp = pathUp[0].UV[1];
-        } else {
-            vUp = pathsByDepth[indexDepth - 1].paths[0][0].UV[1];
-        }
+        var vUp = pathsByDepth[indexDepth - 1].V;
+        var vDwn = pathsByDepth[indexDepth].V;
 
         var nIndexPtDwn = (indexPtDwn + 1) % pathDwn.length;
-        var u = pathDwn[indexPtDwn].UV[0];
-        var v = pathDwn[indexPtDwn].UV[1];
-        var nu = pathDwn[nIndexPtDwn].UV[0];
+        var u = pathDwn[indexPtDwn].U;
+        var nu = pathDwn[nIndexPtDwn].U;
 
-        if (pathDwn[nIndexPtDwn].UV2) {
-            nu = pathDwn[nIndexPtDwn].UV2[0];
+        if (pathDwn[nIndexPtDwn].U2) {
+            nu = pathDwn[nIndexPtDwn].U2;
         }
-        var uvs = [u, vUp, u, v, nu, v, nu, vUp];
+        var uvs = [u, vUp, u, vDwn, nu, vDwn, nu, vUp];
         (_geom$uvs = geom.uvs).push.apply(_geom$uvs, uvs);
-    },
-
-    addUvsToOuterVertGeom: function addUvsToOuterVertGeom(geom, pt1, pt2) {
-        var _geom$uvs2;
-
-        var u1 = pt1.UV[0];
-        var u2 = pt2.UV[0];
-        if (pt2.UV2) {
-            u2 = pt2.UV2[0];
-        }
-        var vUp = pt1.UV[1];
-        var vDwn = pt2.VDown;
-        var uvs = [u1, vUp, u1, vDwn, u2, vDwn, u2, vUp];
-        (_geom$uvs2 = geom.uvs).push.apply(_geom$uvs2, uvs);
     },
 
     getInnerHorizontalGeom: function getInnerHorizontalGeom(trianglesByDepth, options) {

@@ -15,3 +15,5 @@
 * **0.0.0:** Initial release
 
 * **0.1.1:** Added Uvs generation
+
+* **0.1.5:** Added gestion of paths that modifies the outer geometry

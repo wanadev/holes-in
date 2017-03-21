@@ -5,12 +5,21 @@ autotoc: false
 ---
 
 # Demo
+<style>
+#paths {
+    -ms-transform: rotate(180deg); /* IE 9 */
+    -webkit-transform: rotate(180deg); /* Safari */
+    transform: rotate(180deg); /* Standard syntax */
+    margin: auto;
+}
+</style>
+
 <script src="./holes-in.js"></script>
 <script src="./babylonjs/babylon.js"></script>
 <script src="./ui.js"></script>
 
 <canvas id="babylon" width="512" height="256" ></canvas>
-<canvas id="paths" width="512" height="256"></canvas>
+<canvas id="paths" width="256" height="256"  align=center ></canvas>
 
 <div id ="form">
 

@@ -8,7 +8,6 @@ var holesIn = {
 
     meshesToObj: exportHelper.meshesToObj,
     meshToObj: exportHelper.meshToObj,
-
     getGeometry: extruder.getGeometry,
     mergeMeshes: geomHelper.mergeMeshes
 
