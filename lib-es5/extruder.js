@@ -1,7 +1,5 @@
 "use strict";
 
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
 var clipperLib = require("clipper-lib");
 var pathHelper = require("./path-helper.js");
 var geomHelper = require("./geom-helper.js");
@@ -17,68 +15,65 @@ var extruder = {
      */
     getGeometry: function getGeometry(outerShape, holes, options) {
         //get the topology 2D paths by depth
+        var data = extruder.getDataByDepth(outerShape, holes);
+        var outerPathsByDepth = data.outerPathsByDepth;
+        var innerPathsByDepth = data.innerPathsByDepth;
+        var horrizontalPathsByDepth = data.horrizontalPathsByDepth;
 
-        var pathsByDepth = extruder.getPathsByDepth(holes, outerShape);
-        var outerPathsByDepth = extruder.getOuterPathsByDepth(pathsByDepth, outerShape);
-        var topoPathsByDepth = extruder.getTopoPathByDepth(pathsByDepth, outerPathsByDepth, options);
-        extruder.scaleDownHoles(holes);
-        extruder.scaleDownTopoByDepth(topoPathsByDepth, outerShape);
-        extruder.scaleDownPathsByDepth(pathsByDepth);
-        extruder.scaleDownOuterPathsByDepth(outerPathsByDepth);
-        extruder.setDirectionPaths(pathsByDepth, outerPathsByDepth, topoPathsByDepth);
-        //set all paths to positive:
+        uvHelper.mapVertical(outerPathsByDepth, outerShape, options);
 
-
-        // uvHelper.mapVertical(pathsByDepth, outerShape, options);
         var res = {};
+
         if (options.frontMesh) {
-            res.frontMesh = extruder.getInnerHorizontalGeom(topoPathsByDepth, {
+            res.frontMesh = extruder.getHorrizontalGeom(horrizontalPathsByDepth, {
                 frontMesh: true
-            });
-            uvHelper.getUVHorFaces(pathsByDepth, outerShape, res.frontMesh, options);
+            }, 0, false);
+            uvHelper.mapHorrizontal(innerPathsByDepth, outerShape, res.frontMesh, options);
         }
         if (options.backMesh) {
-            res.backMesh = extruder.getInnerHorizontalGeom(topoPathsByDepth, {
+            res.backMesh = extruder.getHorrizontalGeom(horrizontalPathsByDepth, {
                 backMesh: true
             });
-            uvHelper.getUVHorFaces(pathsByDepth, outerShape, res.backMesh, options);
+            uvHelper.mapHorrizontal(innerPathsByDepth, outerShape, res.backMesh, options);
         }
         if (options.inMesh) {
-            uvHelper.mapVertical(pathsByDepth, outerShape, options);
-            // let inMeshHor;
-            var inMeshHor = extruder.getInnerHorizontalGeom(topoPathsByDepth, {
+            uvHelper.mapVertical(innerPathsByDepth, outerShape, options);
+            var inMeshHor = extruder.getHorrizontalGeom(horrizontalPathsByDepth, {
                 inMesh: true
             });
 
             var offset = 0;
             if (inMeshHor) {
-                uvHelper.getUVHorFaces(pathsByDepth, outerShape, inMeshHor, options);
+                uvHelper.mapHorrizontal(innerPathsByDepth, outerShape, inMeshHor, options);
                 offset = inMeshHor.offset;
             }
 
-            var inMeshVert = extruder.getInnerVerticalGeom(pathsByDepth, +offset);
+            var inMeshVert = extruder.getVerticalGeom(innerPathsByDepth, +offset, true);
+            if (inMeshVert) {
+                offset = inMeshVert.offset;
+            }
+
             res.inMesh = geomHelper.mergeMeshes([inMeshHor, inMeshVert], false);
         }
-
         if (options.outMesh) {
-            uvHelper.mapVertical(outerPathsByDepth, outerShape, options);
-            var outMesh = extruder.getInnerVerticalGeom(outerPathsByDepth, 0);
+            var outMesh = extruder.getVerticalGeom(outerPathsByDepth, 0, false);
             res.outMesh = outMesh;
         }
 
         if (options.swapToBabylon) {
             babylonHelper.swapAllToBabylon(res);
         }
-
         return res;
     },
 
-    getInnerVerticalGeom: function getInnerVerticalGeom(pathsByDepth) {
+    getVerticalGeom: function getVerticalGeom(innerPathsByDepth) {
         var offset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+        var invertNormal = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
 
         var geom = [];
-        for (var indexDepth = pathsByDepth.length - 1; indexDepth > 0; indexDepth--) {
-            var pathsAtDepth = pathsByDepth[indexDepth].paths;
+
+        for (var indexDepth = innerPathsByDepth.length - 1; indexDepth > 0; indexDepth--) {
+            var pathsAtDepth = innerPathsByDepth[indexDepth].paths;
             //for each point at each path at each depth we look for the corresponding point into the upper paths:
             var _iteratorNormalCompletion = true;
             var _didIteratorError = false;
@@ -91,7 +86,7 @@ var extruder = {
                     for (var indexPtDwn in path) {
                         var idxPtDwn = indexPtDwn;
                         var idxNPtDwn = (+indexPtDwn + 1) % path.length;
-                        var currgeom = geomHelper.getOneInnerVerticalGeom(idxPtDwn, idxNPtDwn, +indexDepth, path, pathsByDepth, +offset);
+                        var currgeom = geomHelper.getOneVerticalGeom(idxPtDwn, idxNPtDwn, +indexDepth, path, innerPathsByDepth, +offset, invertNormal);
                         if (!currgeom) {
                             continue;
                         }
@@ -118,135 +113,99 @@ var extruder = {
     },
 
     /**
-     * Returns the geometry of the inner horizontal facess
+     * Returns the geometry of the inner horrizontal facess
      */
-    getInnerHorizontalGeom: function getInnerHorizontalGeom(topoPathsByDepth, options) {
+    getHorrizontalGeom: function getHorrizontalGeom(horrizontalPathsByDepth, options) {
         var offset = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+        var invertNormal = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
 
         //gets all the triangles by depth:
         var trianglesByDepth = [];
         var innerHorGeom = [];
-        for (var i in topoPathsByDepth) {
-            var totaltopo = topoPathsByDepth[i].pos.concat(topoPathsByDepth[i].neg);
+        for (var i in horrizontalPathsByDepth) {
+            var totaltopo = horrizontalPathsByDepth[i].paths;
             trianglesByDepth.push(cdt2dHelper.computeTriangulation(totaltopo));
-            trianglesByDepth[i].depth = topoPathsByDepth[i].depth;
+            trianglesByDepth[i].depth = horrizontalPathsByDepth[i].depth;
         }
         // get points, normal and faces from it:
-        var horizontalGeomByDepth = geomHelper.getInnerHorizontalGeom(trianglesByDepth, options, +offset);
-        return geomHelper.mergeMeshes(horizontalGeomByDepth, false);
+        var horrizontalGeomByDepth = geomHelper.getHorrizontalGeom(trianglesByDepth, options, +offset, invertNormal);
+        return geomHelper.mergeMeshes(horrizontalGeomByDepth, false);
     },
 
-    /**
-     * Returns the paths sorted by sens. Negativess paths are holes.
-     * Positives paths are the end of holes( solids)
-     * For convinience, all paths are set to positive
-     */
-    getTopoPathByDepth: function getTopoPathByDepth(pathsByDepth, outerPathsByDepth, options) {
-        // let paths = pathsByDepth.paths;
-        var topoByDepth = [];
-        // pathHelper.setDirectionPath(outerShape.path, 1);
+    getDataByDepth: function getDataByDepth(outerShape, holes) {
+        var outerPaths = [];
+        var innerPaths = [];
+        var horrizontalPaths = [];
 
-        topoByDepth.push({
-            pos: outerPathsByDepth[0].paths,
-            neg: pathsByDepth[0].paths,
-            depth: 0
-        });
-
-        for (var i = 1; i < pathsByDepth.length - 1; i++) {
-
-            //compute xor for inner paths
-            var xor = pathHelper.getXorOfPaths(pathsByDepth[i].paths, pathsByDepth[i + 1].paths);
-            var posxor = xor.filter(pathHelper.isPositivePath);
-            var negxor = xor.filter(pathHelper.isNegativePath);
-            //compute xor for outer paths
-            xor = pathHelper.getXorOfPaths(outerPathsByDepth[i].paths, outerPathsByDepth[i + 1].paths);
-            posxor.push.apply(posxor, _toConsumableArray(xor.filter(pathHelper.isPositivePath)));
-
-            pathHelper.setDirectionPaths(negxor, 1);
-            topoByDepth.push({
-                pos: posxor,
-                neg: negxor,
-                depth: pathsByDepth[i].depth
-            });
-        }
-
-        pathHelper.setDirectionPaths(pathsByDepth[pathsByDepth.length - 1], 1);
-        topoByDepth.push({
-            pos: outerPathsByDepth[outerPathsByDepth.length - 1].paths,
-            neg: pathsByDepth[pathsByDepth.length - 1].paths,
-            depth: pathsByDepth[pathsByDepth.length - 1].depth
-        });
-        return topoByDepth;
-    },
-
-    scaleUpHoles: function scaleUpHoles(holes) {
+        pathHelper.scaleUpPath(outerShape.path);
         for (var i in holes) {
             pathHelper.scaleUpPath(holes[i].path);
         }
-    },
 
-    scaleDownHoles: function scaleDownHoles(holes) {
-        for (var i in holes) {
-            pathHelper.scaleDownPath(holes[i].path);
-        }
-    },
-    scaleDownPathsByDepth: function scaleDownPathsByDepth(pathsByDepth) {
-        for (var i in pathsByDepth) {
-            pathHelper.scaleDownPaths(pathsByDepth[i].paths);
-        }
-    },
-    scaleDownOuterPathsByDepth: function scaleDownOuterPathsByDepth(outerPathsByDepth) {
-        for (var i in outerPathsByDepth) {
-            if (outerPathsByDepth[i].toScaleDown) {
-                pathHelper.scaleDownPaths(outerPathsByDepth[i].paths);
+        var holesByDepth = extruder.getHolesByDepth(holes, outerShape);
+        var outer = [outerShape.path];
+
+        var stack = 0;
+        for (var _i = holesByDepth.length - 1; _i >= 0; _i--) {
+            //compute the outer path:
+            var removeFromOuter = pathHelper.getUnionOfPaths(holesByDepth[_i].keep.concat(holesByDepth[_i].stop));
+            var diffInOut = pathHelper.getDiffOfPaths(removeFromOuter, outer);
+
+            if (diffInOut.length > 0) {
+                outer = pathHelper.getDiffOfPaths(outer, removeFromOuter);
             }
+            outerPaths.push(outer);
+
+            //fit the inner paths into the outer:
+            var innerPath = pathHelper.getInterOfPaths(holesByDepth[_i].keep, outer);
+            innerPaths.push(innerPath);
+
+            //computes the horrizontal Geom:
+            var horrizontalPath = void 0;
+            if (_i === 0 || _i === holesByDepth.length - 1) {
+                horrizontalPath = outer.concat(innerPath);
+            } else {
+                horrizontalPath = pathHelper.getDiffOfPaths(holesByDepth[_i].stop, holesByDepth[_i].keep);
+                //2=> fit it into the deeper outer
+                var deeperOuter = outer;
+                if (stack > 0) {
+                    deeperOuter = outerPaths[stack - 1];
+                }
+                horrizontalPath = pathHelper.getInterOfPaths(horrizontalPath, deeperOuter);
+            }
+            horrizontalPaths.push(horrizontalPath);
+            stack++;
         }
-    },
-    scaleDownTopoByDepth: function scaleDownTopoByDepth(topoByDepth, outerShape) {
+
+        for (var _i2 in outerPaths) {
+            outerPaths[_i2] = pathHelper.simplifyPaths(outerPaths[_i2]);
+            innerPaths[_i2] = pathHelper.simplifyPaths(innerPaths[_i2]);
+            horrizontalPaths[_i2] = pathHelper.simplifyPaths(horrizontalPaths[_i2]);
+            pathHelper.setDirectionPaths(outerPaths[_i2], -1);
+            pathHelper.setDirectionPaths(innerPaths[_i2], -1);
+            pathHelper.setDirectionPaths(horrizontalPaths[_i2], 1);
+            pathHelper.scaleDownPaths(outerPaths[_i2]);
+            pathHelper.scaleDownPaths(innerPaths[_i2]);
+            pathHelper.scaleDownPaths(horrizontalPaths[_i2]);
+        }
         pathHelper.scaleDownPath(outerShape.path);
-        for (var i = 1; i < topoByDepth.length - 1; i++) {
-            pathHelper.scaleDownPaths(topoByDepth[i].pos);
-            pathHelper.scaleDownPaths(topoByDepth[i].neg);
-        }
-    },
-    setDirectionPaths: function setDirectionPaths(pathsByDepth, outerPathsByDepth, topoPathsByDepth) {
-        for (var i in pathsByDepth) {
-            pathHelper.setDirectionPaths(pathsByDepth[i].paths, 1);
-        }
-        for (var _i in topoPathsByDepth) {
-            pathHelper.setDirectionPaths(topoPathsByDepth[_i].pos, 1);
-            pathHelper.setDirectionPaths(topoPathsByDepth[_i].neg, 1);
-        }
-        for (var _i2 in outerPathsByDepth) {
-            pathHelper.setDirectionPaths(outerPathsByDepth[_i2].paths, -1);
-        }
-    },
 
-    getOuterPathsByDepth: function getOuterPathsByDepth(pathsByDepth, outerShape) {
-        var res = [];
-        for (var i in pathsByDepth) {
-            res.push(extruder.getOuterPathsAtDepth(pathsByDepth[i], outerShape));
+        for (var _i3 in holes) {
+            pathHelper.scaleDownPath(holes[_i3].path);
         }
-        return res;
-    },
 
-    getOuterPathsAtDepth: function getOuterPathsAtDepth(pathsAtDepth, outerShape) {
-        var res = {
-            depth: pathsAtDepth.depth,
-            paths: [outerShape.path]
-        };
+        outerPaths = outerPaths.reverse();
+        innerPaths = innerPaths.reverse();
+        horrizontalPaths = horrizontalPaths.reverse();
 
-        for (var i = 0; i < pathsAtDepth.paths.length; i++) {
-            var p = pathsAtDepth.paths[i];
-            if (pathHelper.getDiffOfPaths([p], res.paths).length > 0) {
-                res.paths = pathHelper.getDiffOfPaths(res.paths, [p]);
-                pathHelper.setDirectionPaths(res.paths, 1);
-                res.toScaleDown = true;
-                pathsAtDepth.paths.splice(i);
-                i--;
-            }
+        for (var _i4 in holesByDepth) {
+            outerPaths[_i4] = { paths: outerPaths[_i4], depth: holesByDepth[_i4].depth };
+            innerPaths[_i4] = { paths: innerPaths[_i4], depth: holesByDepth[_i4].depth };
+            horrizontalPaths[_i4] = { paths: horrizontalPaths[_i4], depth: holesByDepth[_i4].depth };
         }
-        return res;
+        return { outerPathsByDepth: outerPaths,
+            innerPathsByDepth: innerPaths,
+            horrizontalPathsByDepth: horrizontalPaths };
     },
 
     /**
@@ -254,24 +213,13 @@ var extruder = {
      *  One depth value/ path.
      *  returns an array of paths at each depth: simplify the geometry for each stage.
      */
-    getPathsByDepth: function getPathsByDepth(holes, outerPath) {
-        //gets all paths into the bounds of outerPath:
-        // pathHelper.fitPathsIntoPath(outerPath.path, holes.map( h=>return h.path));
-        /*for(let i in holes){
-            if(pathHelper.getXorOfPaths([holes[i].path],[outerPath.path])[0])
-            {
-            holes[i].path=pathHelper.getInterOfPaths([holes[i].path],[outerPath.path])[0];
-            }
-        }*/
-        //scales up all holes to prevent from int imprecision
-        pathHelper.scaleUpPath(outerPath.path);
+    getHolesByDepth: function getHolesByDepth(holes, outerShape) {
 
         //sets all depths deeper than outerDepth  or equals to 0 to outerDepth:
         holes.map(function (elt) {
-            elt.depth > outerPath.depth || elt.depth === 0 ? elt.depth = outerPath.depth : elt.depth = elt.depth;
+            elt.depth >= outerShape.depth || elt.depth === 0 ? elt.depth = outerShape.depth + 1 : elt.depth = elt.depth;
         });
 
-        extruder.scaleUpHoles(holes);
         holes.map(function (elt) {
             pathHelper.setDirectionPath(elt.path, 1);
         });
@@ -279,10 +227,10 @@ var extruder = {
         //get all depths:
         var depths = new Set();
         for (var i in holes) {
-            depths.add(holes[i].depth);
+            if (holes[i].depth < outerShape.depth) depths.add(holes[i].depth);
         }
         depths.add(0);
-        depths.add(outerPath.depth);
+        depths.add(outerShape.depth);
         depths = Array.from(depths);
         depths.sort(function (a, b) {
             return a - b;
@@ -291,25 +239,37 @@ var extruder = {
         //get paths by depth:
         var res = [];
 
-        var _loop = function _loop(_i3) {
-            var pathAtDepth = holes.filter(function (s) {
-                return s.depth >= depths[_i3];
+        var _loop = function _loop(_i5) {
+            var deeperHoles = holes.filter(function (s) {
+                return s.depth > depths[_i5];
             });
-            pathAtDepth = pathHelper.simplifyPaths(pathAtDepth.map(function (s) {
-                return s.path;
-            }));
+            var keep = [];
+            deeperHoles.map(function (s) {
+                return keep.push(s.path);
+            });
+
+            var stopHoles = holes.filter(function (s) {
+                return s.depth === depths[_i5];
+            });
+            var stop = [];
+            stopHoles.map(function (s) {
+                return stop.push(s.path);
+            });
+
             //take only the paths of the holes which reach this depth
             res.push({
-                paths: pathAtDepth,
-                depth: depths[_i3]
+                keep: keep,
+                stop: stop,
+                depth: depths[_i5]
             });
         };
 
-        for (var _i3 in depths) {
-            _loop(_i3);
+        for (var _i5 in depths) {
+            _loop(_i5);
         }
         return res;
     }
+
 };
 
 module.exports = extruder;

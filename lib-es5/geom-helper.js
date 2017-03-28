@@ -49,20 +49,22 @@ var geomHelper = {
     /*
      * Returns two triangles representing the larger face we can build from the edge ptDwn->nPtDwn
      */
-    getOneInnerVerticalGeom: function getOneInnerVerticalGeom(idxPtDwn, nIdxPtDwn, indexDepthDwn, pathDwn, pathsByDepth) {
+    getOneVerticalGeom: function getOneVerticalGeom(idxPtDwn, nIdxPtDwn, indexDepthDwn, pathDwn, pathsByDepth) {
         var offset = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 0;
+        var invertNormal = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : false;
 
         var ptDwn = pathDwn[idxPtDwn];
         var nPtDwn = pathDwn[nIdxPtDwn];
         var match = geomHelper.getMatchDepths(ptDwn, nPtDwn, +indexDepthDwn, pathsByDepth);
-        if (!match) {
+        if (match === undefined) {
             return;
         }
-        var res = geomHelper.getPtsNormsIndx2d(ptDwn, nPtDwn, +match.depthUp, +match.depthDwn, +offset);
+        var depthDwn = pathsByDepth[indexDepthDwn].depth;
+        var res = geomHelper.getPtsNormsIndx2d(ptDwn, nPtDwn, match, depthDwn, +offset, invertNormal);
 
         res.uvs = [];
         //add uvs:
-        geomHelper.addUvsToInnerVertGeom(res, +idxPtDwn, match.pathUp, pathDwn, pathsByDepth, indexDepthDwn);
+        geomHelper.addUvsToVertGeom(res, +idxPtDwn, pathDwn, pathsByDepth, indexDepthDwn, indexDepthDwn - 1);
 
         return res;
     },
@@ -73,9 +75,8 @@ var geomHelper = {
      */
     getMatchDepths: function getMatchDepths(ptDwn, nPtDwn, indexDepth, pathsByDepth) {
         //for each depth deeper than pathUp,we look for a corresponding point:
-        var depthUp = pathsByDepth[indexDepth - 1].depth;
-        var depthDwn = pathsByDepth[indexDepth].depth;
-        var pathUpRes = void 0;
+        var res = pathsByDepth[indexDepth - 1].depth;
+        var found = false;
         for (var i = indexDepth - 1; i >= 0; i--) {
             var pathsAtDepth = pathsByDepth[i].paths;
             if (!pathsAtDepth) {
@@ -87,25 +88,24 @@ var geomHelper = {
                 var pathUp = pathsAtDepth[j];
                 var match1 = pathHelper.getPointMatch(pathUp, ptDwn);
                 var match2 = pathHelper.getPointMatch(pathUp, nPtDwn);
-                if (!match1 || !match2) {
+                var perfectMatch = match1 && match2 && match2.index - match1.index === 1;
+
+                if (!match1) {
                     continue;
                 }
-                if (pathUp[match1.index].visited) {
+                if (pathsByDepth[i].paths[j][match1.index]._holesInVisited) {
                     return;
                 }
-                depthUp = pathsByDepth[i].depth;
-                depthDwn = pathsByDepth[indexDepth].depth;
-                pathsByDepth[i].paths[j][match1.index].visited = true;
-                pathUpRes = pathUp;
-                i = -1;
-                break;
+                pathsByDepth[i].paths[j][match1.index]._holesInVisited = true;
+                if (perfectMatch) {
+                    res = pathsByDepth[i].depth;
+                    continue;
+                } else {
+                    return pathsByDepth[i].depth;
+                }
             }
         }
-        return {
-            depthUp: depthUp,
-            pathUp: pathUpRes,
-            depthDwn: depthDwn
-        };
+        return res;
     },
 
     getPtsNormsIndx2d: function getPtsNormsIndx2d(point2d1, point2d2, depthUp, depthDwn, offset) {
@@ -121,7 +121,23 @@ var geomHelper = {
     },
 
     getPtsNormsIndx3d: function getPtsNormsIndx3d(points3d, offset, invertNormal) {
-        var normal = geomHelper.getNormalToPlan(points3d[0], points3d[1], points3d[2], invertNormal);
+
+        var resFaces = void 0;
+        var normal = void 0;
+        if (invertNormal) {
+            resFaces = [0, 1, 2, 0, 2, 3].map(function (elt) {
+                return elt + offset;
+            });
+            normal = geomHelper.getNormalToPlan(points3d[0], points3d[1], points3d[2]);
+        } else {
+            resFaces = [2, 1, 0, 3, 2, 0].map(function (elt) {
+                return elt + offset;
+            });
+
+            // resFaces= ([2, 1, 0, 3, 2, 0]).map(elt => elt + offset);
+            normal = geomHelper.getNormalToPlan(points3d[2], points3d[1], points3d[0]);
+        }
+
         var resNorm = [];
         resNorm.push.apply(resNorm, _toConsumableArray(normal));
         resNorm.push.apply(resNorm, _toConsumableArray(normal));
@@ -132,16 +148,6 @@ var geomHelper = {
         resPoints.push.apply(resPoints, _toConsumableArray(points3d[1]));
         resPoints.push.apply(resPoints, _toConsumableArray(points3d[2]));
         resPoints.push.apply(resPoints, _toConsumableArray(points3d[3]));
-        var resFaces = void 0;
-        if (invertNormal) {
-            resFaces = [0, 1, 2, 0, 2, 3].map(function (elt) {
-                return elt + offset;
-            });
-        } else {
-            resFaces = [0, 2, 1, 0, 3, 2].map(function (elt) {
-                return elt + offset;
-            });
-        }
 
         return {
             points: resPoints,
@@ -151,10 +157,10 @@ var geomHelper = {
         };
     },
 
-    addUvsToInnerVertGeom: function addUvsToInnerVertGeom(geom, indexPtDwn, pathUp, pathDwn, pathsByDepth, indexDepth) {
+    addUvsToVertGeom: function addUvsToVertGeom(geom, indexPtDwn, pathDwn, pathsByDepth, indexDepth, indexDepthUp) {
         var _geom$uvs;
 
-        var vUp = pathsByDepth[indexDepth - 1].V;
+        var vUp = pathsByDepth[indexDepthUp].V;
         var vDwn = pathsByDepth[indexDepth].V;
 
         var nIndexPtDwn = (indexPtDwn + 1) % pathDwn.length;
@@ -168,7 +174,7 @@ var geomHelper = {
         (_geom$uvs = geom.uvs).push.apply(_geom$uvs, uvs);
     },
 
-    getInnerHorizontalGeom: function getInnerHorizontalGeom(trianglesByDepth, options) {
+    getHorrizontalGeom: function getHorrizontalGeom(trianglesByDepth, options) {
         var offset = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
 
         var res = [];
@@ -199,9 +205,11 @@ var geomHelper = {
                 if (options.backMesh) {
                     invertNormal = false;
                 }
-                var currGeom = geomHelper.getGeomFromTriangulation(triangles, +triangles.depth, invertNormal, offset);
-                offset = currGeom.offset;
-                res.push(currGeom);
+                if (triangles.points.length > 0) {
+                    var currGeom = geomHelper.getGeomFromTriangulation(triangles, +triangles.depth, invertNormal, offset);
+                    offset = currGeom.offset;
+                    res.push(currGeom);
+                }
             }
         } catch (err) {
             _didIteratorError = true;
@@ -268,7 +276,13 @@ var geomHelper = {
 
         //get normals:
         var normals = [];
-        var normal = geomHelper.getNormalToPlan(points.slice(0, 3), points.slice(3, 6), points.slice(6, 9), invertNormal);
+        var idxs = triangles.triangles[0].map(function (elt) {
+            return elt * 3;
+        });
+        var pt1 = points.slice(idxs[0], idxs[0] + 3);
+        var pt2 = points.slice(idxs[1], idxs[1] + 3);
+        var pt3 = points.slice(idxs[2], idxs[2] + 3);
+        var normal = geomHelper.getNormalToPlan(pt1, pt2, pt3);
 
         Object.values(triangles.points).forEach(function (point) {
             normals.push.apply(normals, _toConsumableArray(normal));
@@ -282,16 +296,9 @@ var geomHelper = {
     },
 
     getNormalToPlan: function getNormalToPlan(point1, point2, point4) {
-        var invertNormal = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
-
-        var vec1 = void 0;
-        if (invertNormal) {
-            vec1 = geomHelper.pointsToVec(point2, point1);
-        } else {
-            vec1 = geomHelper.pointsToVec(point1, point2);
-        }
+        var vec1 = geomHelper.pointsToVec(point1, point2);
         var vec2 = geomHelper.pointsToVec(point1, point4);
-        return geomHelper.normalizeVec(geomHelper.cross(vec1, vec2));
+        return geomHelper.normalizeVec(geomHelper.cross(vec2, vec1));
     },
 
     pointsToVec: function pointsToVec(point1, point2) {

@@ -158,65 +158,53 @@ var pathHelper = {
     },
 
 
-    getPathBoundary: function getPathBoundary(path) {
-        var minX = path[0].X;
-        var minY = path[0].Y;
-        var maxX = path[0].X;
-        var maxY = path[0].Y;
-        for (var i = 1; i < path.length; i++) {
-            minX = Math.min(minX, path[i].X);
-            maxX = Math.max(maxX, path[i].X);
-            minY = Math.min(minY, path[i].Y);
-            maxY = Math.max(maxY, path[i].Y);
-        }
-        return {
-            X: {
-                min: minX,
-                max: maxX
-            },
-            Y: {
-                min: minY,
-                max: maxY
+    addColinearPointsPaths: function addColinearPointsPaths(paths, toAdd) {
+
+        for (var i in paths) {
+            for (var j in toAdd) {
+                paths[i] = pathHelper.addColinearPointsPath(paths[i], toAdd[j]);
             }
-        };
+        }
     },
 
-    getPathsIncluded: function getPathsIncluded(pathsOut, pathsIn) {
-        var _iteratorNormalCompletion = true;
-        var _didIteratorError = false;
-        var _iteratorError = undefined;
+    addColinearPointsPath: function addColinearPointsPath(path, toAdd) {
 
-        try {
+        var resPath = [];
+        var addedIndexes = [];
+        for (var i = 0; i < path.length; i++) {
+            var pt1 = path[i];
+            var pt2 = path[(i + 1) % path.length];
 
-            for (var _iterator = pathsIn[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                var pathIn = _step.value;
-
-                for (var i in pathOut) {
-                    if (!pathHelper.isIncluded(pathsOut[i], pathIn)) {
-                        continue;
-                    }
+            resPath.push(pt1);
+            for (var j = 0; j <= toAdd.length; j++) {
+                var idx1 = j % toAdd.length;
+                var idx2 = (j + 1) % toAdd.length;
+                var add1 = toAdd[idx1];
+                var add2 = toAdd[idx2];
+                if (!pathHelper.isAligned(pt1, pt2, add1, add2)) {
+                    continue;
                 }
-            }
-        } catch (err) {
-            _didIteratorError = true;
-            _iteratorError = err;
-        } finally {
-            try {
-                if (!_iteratorNormalCompletion && _iterator.return) {
-                    _iterator.return();
+
+                if (!pathHelper.isEqual(pt1, add2) && !pathHelper.isEqual(pt2, add2) && !addedIndexes.includes(idx2) && pathHelper.inOnSegment(pt1, pt2, add2)) {
+                    resPath.push(add2);
+                    addedIndexes.push(idx2);
                 }
-            } finally {
-                if (_didIteratorError) {
-                    throw _iteratorError;
+
+                if (!pathHelper.isEqual(pt1, add1) && !pathHelper.isEqual(pt2, add1) && !addedIndexes.includes(idx1) && pathHelper.inOnSegment(pt1, pt2, add1)) {
+                    resPath.push(add1);
+                    addedIndexes.push(idx1);
                 }
             }
         }
+        return resPath;
     },
 
     getMatchingEdgeIndex: function getMatchingEdgeIndex(path, pathToMatch) {
+        var offset = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+
         var prevAligned = false;
         var res = {};
-        for (var i = path.length - 1; i >= 0; i--) {
+        for (var i = path.length - 1 - offset; i >= 0; i--) {
             for (var j = pathToMatch.length - 1; j >= 0; j--) {
 
                 var p1 = pathToMatch[j];
@@ -226,7 +214,10 @@ var pathHelper = {
                     return res;
                 }
                 if (currAlgigned) {
-                    res = { index: i, pointmatch: p1 };
+                    res = {
+                        index: i,
+                        pointmatch: p1
+                    };
                     prevAligned = currAlgigned;
                     break;
                 }
@@ -252,20 +243,12 @@ var pathHelper = {
         };
     },
 
-    isIncluded: function isIncluded(pathOut, pathsIn) {
-        var union = pathHelper.getUnionOfPaths([pathOut], pathsIn);
-        if (union.length > 1) return false;
-        return pathHelper.isPathEqual(union[0], pathOut);
-    },
-
     /**
      * returns the index of the point in path matching with point
      *
      */
     getPointMatch: function getPointMatch(path, point) {
-        var offsetPath = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
-
-        for (var i = offsetPath; i < path.length; i++) {
+        for (var i = 0; i < path.length; i++) {
             if (pathHelper.isEqual(path[i], point)) {
                 return {
                     index: i
@@ -274,35 +257,12 @@ var pathHelper = {
         }
     },
 
-    fitPathsIntoPath: function fitPathsIntoPath(outerPath, toFitPaths) {
-
-        var paths = toFitPaths.push(outerPath);
-        var union = pathHelper.getUnionOfPaths(paths);
-        var inter = pathHelper.getInterOfPaths(paths);
-        var xor = pathHelper.getXorOfPaths(union, inter);
-
-        return pathHelper.getDiffOfPaths(paths, xor);
-    },
-
-    getTopLeftIndex: function getTopLeftIndex(path) {
-        var minIndex = 0;
-        var min = pathHelper.getNormPoint(path[0]);
-        for (var i = 1; i < path.length; i++) {
-            var norm = pathHelper.getNormPoint(path[i]);
-            if (norm < min) {
-                minIndex = i;
-                min = norm;
-            }
-        }
-        return +minIndex;
-    },
-
-    getNormPoint: function getNormPoint(point) {
+    getNorm: function getNorm(point) {
         return Math.sqrt(point.X * point.X + point.Y * point.Y);
     },
     getDistance: function getDistance(point1, point2) {
         var edge = pathHelper.getEdge(point1, point2);
-        return pathHelper.getNormPoint(edge);
+        return pathHelper.getNorm(edge);
     },
 
     getTotalLength: function getTotalLength(path) {
@@ -326,16 +286,12 @@ var pathHelper = {
         return point1.X === point2.X && point1.Y === point2.Y;
     },
 
-    isPathEqual: function isPathEqual(path1, path2) {
-        if (path1.length !== path2.length) {
-            return false;
-        }
-        for (var i = 0; i < path1.length; i++) {
-            if (!isEqual(path1[i], path2[i])) {
-                return false;
-            }
-        }
-        return true;
+    inOnSegment: function inOnSegment(ptOrigin, ptDest, pt) {
+        return pathHelper.isInRange(ptOrigin, ptDest, pt) || pathHelper.isInRange(ptDest, ptOrigin, pt);
+    },
+
+    isInRange: function isInRange(ptOrigin, ptDest, pt) {
+        return pt.X >= ptOrigin.X && pt.X <= ptDest.X && pt.Y >= ptOrigin.Y && pt.Y <= ptDest.Y;
     }
 
 };

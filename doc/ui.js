@@ -5,6 +5,10 @@
 // holes.push(h4);
 // scalePaths(holes,outerShape);
 
+holes= JSON.parse('[{"path":[{"X":536.8632264172003,"Y":-461.2129629284003},{"X":736.8632264172003,"Y":-461.2129629284003},{"X":736.8632264172003,"Y":-261.2129629284003},{"X":535.2527164172003,"Y":-232.2237829284003}],"depth":100},{"path":[{"X":422.7385581727999,"Y":-164.13585162677055},{"X":671.0538581727997,"Y":-165.74636162677055},{"X":748.3583381727997,"Y":22.980068373229468},{"X":422.7385581727999,"Y":35.864148373229455}],"depth":100}]');
+outerShape= JSON.parse('{"path":[{"X":394.32,"Y":-371.89},{"X":394.32,"Y":128.79},{"X":1019.52,"Y":128.79},{"X":1019.52,"Y":-371.89}],"depth":1}');
+
+
 let colors= ["#c02525","#84c025","#8d4ead"];
 let camera;
 let point0= {X:0,Y:0};
@@ -17,7 +21,7 @@ let mesh;
 let material;
 let texture;
 let options= {inMesh:true, outMesh:true, frontMesh:true, backMesh:true,
-            wireframe:false, backFaceCulling:true,normals:false,
+            wireframe:false, backFaceCulling:false,normals:false,
             animate: false,isoRatioUV:true,swapToBabylon:true,
             };
 
