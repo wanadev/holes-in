@@ -1,27 +1,9 @@
 
-let geom1= [{X:50,Y:50},{X:150,Y:50},{X:150,Y:150},{X:50,Y:150}];
-
-let hole1= [{X:0,Y:70},{X:0,Y:90},{X:110,Y:90},{X:110,Y:70}];
-let hole2= [{X:70,Y:0},{X:90,Y:0},{X:90,Y:110},{X:70,Y:110}];
-
-let hole3= [{X:80,Y:20},{X:120,Y:20},{X:120,Y:60},{X:80,Y:60}];
-
-
-let h1 = {path: hole1, depth: 0};
-let h2 = {path: hole2, depth: 0};
-let h3 = {path: hole3, depth: 50};
-
-
-let outerShape= {path: geom1, depth: 100};
-let baseholes=[h1,h2,h3];
-let holes = JSON.parse(JSON.stringify(baseholes));
-
-let holesStr= kzplanToStr('[{"path":[{"x":385.6915861427306,"y":129.76692123037517},{"x":535.5646081097426,"y":129.76692123037517},{"x":535.5646081097426,"y":329.76692123037503},{"x":377.69158614273067,"y":409.76692123037515}],"depth":50},{"path":[{"x":260.7195529429974,"y":-28.138723316616954},{"x":460.71955294299727,"y":-28.138723316616954},{"x":460.71955294299727,"y":171.86127668338307},{"x":260.7195529429974,"y":171.86127668338307}],"depth":200}]')
-let outStr=  kzplanToStr('{"path":[{"x":-143,"y":-584.34},{"x":-177.72,"y":-584.34},{"x":-231.32,"y":-584.34},{"x":-213.18,"y":201.65},{"x":573.15,"y":201.65},{"x":573.15,"y":-584.34}],"depth":99}');
 
 // outerShape= JSON.parse(outStr);
 // holes= JSON.parse(holesStr);
-// scalePaths(holes,outerShape)
+// holes.push(h4);
+// scalePaths(holes,outerShape);
 
 let colors= ["#c02525","#84c025","#8d4ead"];
 let camera;
@@ -29,16 +11,19 @@ let point0= {X:0,Y:0};
 let angle=0;
 let dirty=true;
 
+let scene;
 let vertexData;
 let mesh;
 let material;
 let texture;
-let options= {inMesh:true, outMesh:true, frontMesh:false, backMesh:false,
-            wireframe:false, backFaceCulling:false,normals:false,
+let options= {inMesh:true, outMesh:true, frontMesh:true, backMesh:true,
+            wireframe:false, backFaceCulling:true,normals:false,
             animate: false,isoRatioUV:true,swapToBabylon:true,
             };
 
 let meshDirty=true;
+let normalDisplay;
+
 
 /*
 function scalePaths(holes,outerShape){
@@ -58,11 +43,7 @@ function scalePaths(holes,outerShape){
     }
 }*/
 
-function kzplanToStr(str1){
-    let upX= str1.replace(/x/g,"X");
-    let upY= upX.replace(/y/g,"Y");
-    return upY
-}
+
 
 function displayPaths(canvas){
     // if(!dirty) return;
@@ -111,7 +92,10 @@ function updateMesh(){
 
 if(!meshDirty){return;}
 
-  let geom= holesIn.getGeometry(outerShape,holes,options,options);
+
+    let cpyOut= JSON.parse(JSON.stringify(outerShape));
+    let cpyIn= JSON.parse(JSON.stringify(holes));
+  let geom= holesIn.getGeometry(cpyOut,cpyIn,options,options);
   let geomMerged= holesIn.mergeMeshes([geom.frontMesh, geom.backMesh, geom.inMesh, geom.outMesh]);
   let nullMesh= false;
   if(!geomMerged){
@@ -137,6 +121,17 @@ if(!meshDirty){return;}
   }
   mesh.material= material;
 
+  // displayNormals(geomMerged);
+
+}
+
+function displayNormals(geom){
+    for(let i=0;i<geom.points.length;i+=3){
+        let origin = new BABYLON.Vector3(geom.points[i],geom.points[i+1],geom.points[i+2]);
+        let norm = new BABYLON.Vector3(geom.normals[i],geom.normals[i+1],geom.normals[i+2]).scale(100);
+        let dst= origin.add(norm);
+        var lineMesh =new BABYLON.Mesh.CreateLines("lines"+i, [origin ,dst],scene);
+    }
 
 }
 
@@ -147,7 +142,6 @@ function movePath(basePath, path,min,max, direction){
     if(direction==="X"){
         for(let i in path){
                 path[i].X=basePath[i].X +offset;
-                // console.log(path[i].X);
         }
     }
     else if(direction==="Y")
@@ -177,7 +171,7 @@ function animateScale(basePath, path, direction,min,max){
 }
 
 
-function createScene(engine,scene,canvas) {
+function createScene(engine,canvas) {
   camera= new BABYLON.ArcRotateCamera("camera1",0, 0, 200,new BABYLON.Vector3(0,0,0), scene);
   camera.radius = 200;
   camera.setTarget(new BABYLON.Vector3(100,-50,-100));
@@ -202,7 +196,7 @@ function createScene(engine,scene,canvas) {
 
   return scene;
 }
-function createMesh(scene){
+function createMesh(){
     mesh= new BABYLON.Mesh("DemoMesh", scene);
     mesh.position = BABYLON.Vector3.Zero();
      vertexData = new BABYLON.VertexData();
@@ -235,8 +229,8 @@ function initBabylon(){
     center= {X: canvas2d.width/2, Y:canvas2d.height/2};
 
       var engine = new BABYLON.Engine(canvas3d, true);
-      var scene = new BABYLON.Scene(engine);
-      createScene(engine,scene,canvas3d);
+      scene = new BABYLON.Scene(engine);
+      createScene(engine,canvas3d);
       createMesh(scene);
        initEvents();
       engine.runRenderLoop(function() {

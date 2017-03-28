@@ -1,5 +1,0 @@
-./node_modules/.bin/enlightme
-rm ./doc.generated/ui.js
-ln -s /home/leo/Documents/holes-in/doc/ui.js /home/leo/Documents/holes-in/doc.generated/ui.js
-rm ./doc.generated/holes-in.js
-ln -s /home/leo/Documents/holes-in/dist/holes-in.js /home/leo/Documents/holes-in/doc.generated/holes-in.js
