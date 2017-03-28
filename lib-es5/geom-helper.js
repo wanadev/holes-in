@@ -234,11 +234,17 @@ var geomHelper = {
         var offset = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
 
         var points = [];
-        Object.values(triangles.points).forEach(function (point) {
-            points.push(point[0]);
-            points.push(point[1]);
+        // Object.values(triangles.points).forEach(point => {
+        //     points.push(point[0]);
+        //     points.push(point[1]);
+        //     points.push(depth);
+        // });
+        for (var i in triangles.points) {
+            points.push(triangles.points[i][0]);
+            points.push(triangles.points[i][1]);
             points.push(depth);
-        });
+        }
+
         if (!invertNormal) {
             var _iteratorNormalCompletion2 = true;
             var _didIteratorError2 = false;
@@ -267,11 +273,14 @@ var geomHelper = {
         }
         //offsets faces
         var faces = [];
-        Object.values(triangles.triangles).forEach(function (triangle) {
-            faces.push.apply(faces, _toConsumableArray(triangle.map(function (index) {
+        for (var _i in triangles.triangles) {
+            faces.push.apply(faces, _toConsumableArray(triangles.triangles[_i].map(function (index) {
                 return index + offset;
             })));
-        });
+        }
+        // Object.values(triangles.triangles).forEach(triangle => {
+        // faces.push(...triangle.map(index => index + offset));
+        // });
         offset += triangles.points.length;
 
         //get normals:
@@ -284,9 +293,12 @@ var geomHelper = {
         var pt3 = points.slice(idxs[2], idxs[2] + 3);
         var normal = geomHelper.getNormalToPlan(pt1, pt2, pt3);
 
-        Object.values(triangles.points).forEach(function (point) {
+        for (var _i2 in triangles.points) {
             normals.push.apply(normals, _toConsumableArray(normal));
-        });
+        }
+        // Object.values(triangles.points).forEach(point => {
+        //     normals.push(...normal);
+        // });
         return {
             points: points,
             faces: faces,

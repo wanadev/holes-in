@@ -13,7 +13,9 @@ var extruder = {
     /**
      * returns a mesh from an outer shape and holes
      */
-    getGeometry: function getGeometry(outerShape, holes, options) {
+    getGeometry: function getGeometry(outerShape, holes) {
+        var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : { inMesh: true, outMesh: true, frontMesh: true, backMesh: true };
+
         //get the topology 2D paths by depth
         var data = extruder.getDataByDepth(outerShape, holes);
         var outerPathsByDepth = data.outerPathsByDepth;
@@ -158,7 +160,7 @@ var extruder = {
             outerPaths.push(outer);
 
             //fit the inner paths into the outer:
-            var innerPath = pathHelper.getInterOfPaths(holesByDepth[_i].keep, outer);
+            var innerPath = pathHelper.getInterOfPaths(holesByDepth[Math.max(_i - 1, 0)].keep, outer);
             innerPath = pathHelper.simplifyPaths(pathHelper.getUnionOfPaths(innerPath));
             innerPaths.push(innerPath);
 

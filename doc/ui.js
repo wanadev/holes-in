@@ -6,16 +6,17 @@
 // scalePaths(holes,outerShape);
 
 // holes= JSON.parse('[{"path":[{"X":536.8632264172003,"Y":-461.2129629284003},{"X":736.8632264172003,"Y":-461.2129629284003},{"X":736.8632264172003,"Y":-261.2129629284003},{"X":535.2527164172003,"Y":-232.2237829284003}],"depth":100},{"path":[{"X":422.7385581727999,"Y":-164.13585162677055},{"X":671.0538581727997,"Y":-165.74636162677055},{"X":748.3583381727997,"Y":22.980068373229468},{"X":422.7385581727999,"Y":35.864148373229455}],"depth":100}]');
-// outerShape= JSON.parse('{"path":[{"X":394.32,"Y":-371.89},{"X":394.32,"Y":128.79},{"X":1019.52,"Y":128.79},{"X":1019.52,"Y":-371.89}],"depth":1}');
+outerShape= JSON.parse('{"path":[{"X":-1612.59,"Y":-155.8},{"X":-1585.46,"Y":1065.19},{"X":62.96,"Y":1028.56},{"X":-2.14,"Y":-191.58}],"depth":100}');
 
-outerShape= { path: [ {X:50,Y:50}, {X:150,Y:50}, {X:150,Y:150}, {X:50,Y:150} ], depth:100};
-
-var inHole1= { path: [{X:70,Y:70},{X:70,Y:90},{X:90,Y:90},{X:90,Y:70}], depth: 50 };
-
-var inHole2= { path: [{X:75,Y:75},{X:75,Y:90},{X:105,Y:90},{X:105,Y:75}], depth: 0 };
-
-var outHole1= { path: [{X:75,Y:60},{X:75,Y:180},{X:100,Y:180},{X:100,Y:60}], depth: 50 };
-holes= [inHole1];
+holes= JSON.parse('[{"path":[{"X":-1049.2808396720457,"Y":729.698597085507},{"X":-388.808787212524,"Y":714.9656378557928},{"X":-836.7275857877936,"Y":1156.6292266055166},{"X":-1036.7275857877933,"Y":1156.6292266055166}],"depth":100},{"path":[{"X":-512.8365366371643,"Y":786.1703991813754},{"X":-312.8365366371643,"Y":810.2260189268427},{"X":-312.8365366371643,"Y":1010.2260189268427},{"X":-512.8365366371643,"Y":1010.2260189268427}],"depth":100}]');
+// outerShape= { path: [ {X:50,Y:50}, {X:150,Y:50}, {X:150,Y:150}, {X:50,Y:150} ], depth:100};
+//
+// var inHole1= { path: [{X:70,Y:70},{X:70,Y:90},{X:90,Y:90},{X:90,Y:70}], depth: 50 };
+//
+// var inHole2= { path: [{X:75,Y:75},{X:75,Y:90},{X:105,Y:90},{X:105,Y:75}], depth: 0 };
+//
+// var outHole1= { path: [{X:75,Y:60},{X:75,Y:180},{X:100,Y:180},{X:100,Y:60}], depth: 50 };
+// holes= [inHole1];
 
 
 
@@ -111,7 +112,7 @@ if(!meshDirty){return;}
     let cpyIn= JSON.parse(JSON.stringify(holes));
   let geom= holesIn.getGeometry(cpyOut,cpyIn,options,options);
   let geomMerged= holesIn.mergeMeshes([geom.frontMesh, geom.backMesh, geom.inMesh, geom.outMesh]);
-  console.log(geom);
+  console.log(geom, geomMerged);
   let nullMesh= false;
   if(!geomMerged){
       geomMerged={};
