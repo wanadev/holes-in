@@ -147,14 +147,20 @@ var pathHelper = {
     },
 
     scaleUpPath: function scaleUpPath(path) {
-        clipperLib.JS.ScaleUpPath(path, 10000);
+        var scale = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 10000;
+
+        clipperLib.JS.ScaleUpPath(path, scale);
     },
 
     scaleDownPath: function scaleDownPath(path) {
-        clipperLib.JS.ScaleDownPath(path, 10000);
+        var scale = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 10000;
+
+        clipperLib.JS.ScaleDownPath(path, scale);
     },
     scaleDownPaths: function scaleDownPaths(paths) {
-        clipperLib.JS.ScaleDownPaths(paths, 10000);
+        var scale = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 10000;
+
+        clipperLib.JS.ScaleDownPaths(paths, scale);
     },
 
 

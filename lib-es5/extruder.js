@@ -154,16 +154,18 @@ var extruder = {
             if (diffInOut.length > 0) {
                 outer = pathHelper.getDiffOfPaths(outer, removeFromOuter);
             }
+            outer = pathHelper.simplifyPaths(pathHelper.getUnionOfPaths(outer));
             outerPaths.push(outer);
 
             //fit the inner paths into the outer:
             var innerPath = pathHelper.getInterOfPaths(holesByDepth[_i].keep, outer);
+            innerPath = pathHelper.simplifyPaths(pathHelper.getUnionOfPaths(innerPath));
             innerPaths.push(innerPath);
 
             //computes the horrizontal Geom:
             var horrizontalPath = void 0;
             if (_i === 0 || _i === holesByDepth.length - 1) {
-                horrizontalPath = outer.concat(innerPath);
+                horrizontalPath = JSON.parse(JSON.stringify(outer.concat(innerPath)));
             } else {
                 horrizontalPath = pathHelper.getDiffOfPaths(holesByDepth[_i].stop, holesByDepth[_i].keep);
                 //2=> fit it into the deeper outer
@@ -172,15 +174,13 @@ var extruder = {
                     deeperOuter = outerPaths[stack - 1];
                 }
                 horrizontalPath = pathHelper.getInterOfPaths(horrizontalPath, deeperOuter);
+                horrizontalPath = pathHelper.simplifyPaths(horrizontalPath);
             }
             horrizontalPaths.push(horrizontalPath);
             stack++;
         }
 
         for (var _i2 in outerPaths) {
-            outerPaths[_i2] = pathHelper.simplifyPaths(outerPaths[_i2]);
-            innerPaths[_i2] = pathHelper.simplifyPaths(innerPaths[_i2]);
-            horrizontalPaths[_i2] = pathHelper.simplifyPaths(horrizontalPaths[_i2]);
             pathHelper.setDirectionPaths(outerPaths[_i2], -1);
             pathHelper.setDirectionPaths(innerPaths[_i2], -1);
             pathHelper.setDirectionPaths(horrizontalPaths[_i2], 1);

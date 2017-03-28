@@ -205,7 +205,7 @@ var geomHelper = {
                 if (options.backMesh) {
                     invertNormal = false;
                 }
-                if (triangles.points.length > 0) {
+                if (triangles.triangles.length > 0) {
                     var currGeom = geomHelper.getGeomFromTriangulation(triangles, +triangles.depth, invertNormal, offset);
                     offset = currGeom.offset;
                     res.push(currGeom);
