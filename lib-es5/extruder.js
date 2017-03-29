@@ -27,22 +27,20 @@ var extruder = {
         var res = {};
 
         if (options.frontMesh) {
-            res.frontMesh = extruder.getHorrizontalGeom(horrizontalPathsByDepth, {
-                frontMesh: true
-            }, 0, false);
+            res.frontMesh = extruder.getHorrizontalGeom(horrizontalPathsByDepth, [0], 0);
             uvHelper.mapHorrizontal(innerPathsByDepth, outerShape, res.frontMesh, options);
         }
         if (options.backMesh) {
-            res.backMesh = extruder.getHorrizontalGeom(horrizontalPathsByDepth, {
-                backMesh: true
-            });
+            res.backMesh = extruder.getHorrizontalGeom(horrizontalPathsByDepth, [horrizontalPathsByDepth.length - 1], 0, false);
             uvHelper.mapHorrizontal(innerPathsByDepth, outerShape, res.backMesh, options);
         }
         if (options.inMesh) {
             uvHelper.mapVertical(innerPathsByDepth, outerShape, options);
-            var inMeshHor = extruder.getHorrizontalGeom(horrizontalPathsByDepth, {
-                inMesh: true
-            });
+            var indexes = [];
+            for (var i = 1; i < horrizontalPathsByDepth.length - 1; i++) {
+                indexes.push(i);
+            }
+            var inMeshHor = extruder.getHorrizontalGeom(horrizontalPathsByDepth, indexes, 0);
 
             var offset = 0;
             if (inMeshHor) {
@@ -117,22 +115,39 @@ var extruder = {
     /**
      * Returns the geometry of the inner horrizontal facess
      */
-    getHorrizontalGeom: function getHorrizontalGeom(horrizontalPathsByDepth, options) {
+    getHorrizontalGeom: function getHorrizontalGeom(horrizontalPathsByDepth, indexes) {
         var offset = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
-        var invertNormal = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+        var invertNormal = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
 
-        //gets all the triangles by depth:
-        var trianglesByDepth = [];
-        var innerHorGeom = [];
-        for (var i in horrizontalPathsByDepth) {
-            var totaltopo = horrizontalPathsByDepth[i].paths;
-            trianglesByDepth.push(cdt2dHelper.computeTriangulation(totaltopo));
-            trianglesByDepth[i].depth = horrizontalPathsByDepth[i].depth;
+
+        var horrGeom = [];
+        for (var i in indexes) {
+            var totaltopo = horrizontalPathsByDepth[indexes[i]].paths;
+            var triangles = cdt2dHelper.computeTriangulation(totaltopo);
+            triangles.depth = horrizontalPathsByDepth[indexes[i]].depth;
+            var horrGeomAtDepth = geomHelper.getHorrizontalGeom(triangles, offset = 0, invertNormal);
+            horrGeom.push(horrGeomAtDepth);
         }
         // get points, normal and faces from it:
-        var horrizontalGeomByDepth = geomHelper.getHorrizontalGeom(trianglesByDepth, options, +offset, invertNormal);
-        return geomHelper.mergeMeshes(horrizontalGeomByDepth, false);
+        return geomHelper.mergeMeshes(horrGeom, false);
     },
+
+    /*
+        getHorrizontalGeom: function(horrizontalPathsByDepth, options, offset = 0,invertNormal=false) {
+            //gets all the triangles by depth:
+            let trianglesByDepth = [];
+            let innerHorGeom = [];
+            for (let i in horrizontalPathsByDepth) {
+                let totaltopo = horrizontalPathsByDepth[i].paths;
+                trianglesByDepth.push(cdt2dHelper.computeTriangulation(totaltopo));
+                trianglesByDepth[i].depth = horrizontalPathsByDepth[i].depth;
+    
+            }
+            // get points, normal and faces from it:
+    
+            let horrizontalGeomByDepth = geomHelper.getHorrizontalGeom(trianglesByDepth, options, +offset,invertNormal);
+            return geomHelper.mergeMeshes(horrizontalGeomByDepth, false);
+        },*/
 
     getDataByDepth: function getDataByDepth(outerShape, holes) {
         var outerPaths = [];
@@ -188,7 +203,6 @@ var extruder = {
             pathHelper.setDirectionPaths(horrizontalPaths[_i2], 1);
             pathHelper.scaleDownPaths(outerPaths[_i2]);
             pathHelper.scaleDownPaths(innerPaths[_i2]);
-            pathHelper.scaleDownPaths(horrizontalPaths[_i2]);
         }
         pathHelper.scaleDownPath(outerShape.path);
 

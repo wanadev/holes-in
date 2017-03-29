@@ -174,59 +174,32 @@ var geomHelper = {
         (_geom$uvs = geom.uvs).push.apply(_geom$uvs, uvs);
     },
 
-    getHorrizontalGeom: function getHorrizontalGeom(trianglesByDepth, options) {
-        var offset = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+    getHorrizontalGeom: function getHorrizontalGeom(triangles) {
+        var offset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+        var invertNormal = arguments[2];
 
-        var res = [];
-        var indexes = [];
 
-        if (options.frontMesh) {
-            indexes.push(0);
+        // let indexes = [];
+        //
+        // if (options.frontMesh) {
+        //     indexes.push(0);
+        // }
+        // if (options.inMesh) {
+        //     indexes.push(...Array.from(new Array(trianglesByDepth.length - 2), (val, index) => index + 1));
+        // }
+        // if (options.backMesh) {
+        //     indexes.push(trianglesByDepth.length - 1);
+        // }
+
+        // let invertNormal = true;
+        // if (options.backMesh) {
+        //   invertNormal = false;
+        // }
+        if (triangles.triangles.length > 0) {
+            var currGeom = geomHelper.getGeomFromTriangulation(triangles, +triangles.depth, invertNormal, offset);
+            offset = currGeom.offset;
+            return currGeom;
         }
-        if (options.inMesh) {
-            indexes.push.apply(indexes, _toConsumableArray(Array.from(new Array(trianglesByDepth.length - 2), function (val, index) {
-                return index + 1;
-            })));
-        }
-        if (options.backMesh) {
-            indexes.push(trianglesByDepth.length - 1);
-        }
-
-        var _iteratorNormalCompletion = true;
-        var _didIteratorError = false;
-        var _iteratorError = undefined;
-
-        try {
-            for (var _iterator = indexes[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                var i = _step.value;
-
-                var triangles = trianglesByDepth[i];
-                var invertNormal = true;
-                if (options.backMesh) {
-                    invertNormal = false;
-                }
-                if (triangles.triangles.length > 0) {
-                    var currGeom = geomHelper.getGeomFromTriangulation(triangles, +triangles.depth, invertNormal, offset);
-                    offset = currGeom.offset;
-                    res.push(currGeom);
-                }
-            }
-        } catch (err) {
-            _didIteratorError = true;
-            _iteratorError = err;
-        } finally {
-            try {
-                if (!_iteratorNormalCompletion && _iterator.return) {
-                    _iterator.return();
-                }
-            } finally {
-                if (_didIteratorError) {
-                    throw _iteratorError;
-                }
-            }
-        }
-
-        return res;
     },
 
     getGeomFromTriangulation: function getGeomFromTriangulation(triangles, depth) {
@@ -240,33 +213,33 @@ var geomHelper = {
         //     points.push(depth);
         // });
         for (var i in triangles.points) {
-            points.push(triangles.points[i][0]);
-            points.push(triangles.points[i][1]);
+            points.push(triangles.points[i][0] / 1000000);
+            points.push(triangles.points[i][1] / 1000000);
             points.push(depth);
         }
 
         if (!invertNormal) {
-            var _iteratorNormalCompletion2 = true;
-            var _didIteratorError2 = false;
-            var _iteratorError2 = undefined;
+            var _iteratorNormalCompletion = true;
+            var _didIteratorError = false;
+            var _iteratorError = undefined;
 
             try {
-                for (var _iterator2 = triangles.triangles[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-                    var t = _step2.value;
+                for (var _iterator = triangles.triangles[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                    var t = _step.value;
 
                     t.reverse();
                 }
             } catch (err) {
-                _didIteratorError2 = true;
-                _iteratorError2 = err;
+                _didIteratorError = true;
+                _iteratorError = err;
             } finally {
                 try {
-                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
-                        _iterator2.return();
+                    if (!_iteratorNormalCompletion && _iterator.return) {
+                        _iterator.return();
                     }
                 } finally {
-                    if (_didIteratorError2) {
-                        throw _iteratorError2;
+                    if (_didIteratorError) {
+                        throw _iteratorError;
                     }
                 }
             }
