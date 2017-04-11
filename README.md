@@ -18,4 +18,4 @@
 
 * **0.1.5:** Added gestion of paths that modifies the outer geometry
 
-* **0.1.7:** Added full gestion of paths that modifies the outer geometry
+* **0.2.3:** Added full gestion of paths that modifies the outer geometry

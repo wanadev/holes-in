@@ -133,8 +133,6 @@ var geomHelper = {
             resFaces = [2, 1, 0, 3, 2, 0].map(function (elt) {
                 return elt + offset;
             });
-
-            // resFaces= ([2, 1, 0, 3, 2, 0]).map(elt => elt + offset);
             normal = geomHelper.getNormalToPlan(points3d[2], points3d[1], points3d[0]);
         }
 
@@ -178,23 +176,6 @@ var geomHelper = {
         var offset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
         var invertNormal = arguments[2];
 
-
-        // let indexes = [];
-        //
-        // if (options.frontMesh) {
-        //     indexes.push(0);
-        // }
-        // if (options.inMesh) {
-        //     indexes.push(...Array.from(new Array(trianglesByDepth.length - 2), (val, index) => index + 1));
-        // }
-        // if (options.backMesh) {
-        //     indexes.push(trianglesByDepth.length - 1);
-        // }
-
-        // let invertNormal = true;
-        // if (options.backMesh) {
-        //   invertNormal = false;
-        // }
         if (triangles.triangles.length > 0) {
             var currGeom = geomHelper.getGeomFromTriangulation(triangles, +triangles.depth, invertNormal, offset);
             offset = currGeom.offset;
@@ -207,14 +188,10 @@ var geomHelper = {
         var offset = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
 
         var points = [];
-        // Object.values(triangles.points).forEach(point => {
-        //     points.push(point[0]);
-        //     points.push(point[1]);
-        //     points.push(depth);
-        // });
+
         for (var i in triangles.points) {
-            points.push(triangles.points[i][0] / 1000000);
-            points.push(triangles.points[i][1] / 1000000);
+            points.push(triangles.points[i][0] / 10000);
+            points.push(triangles.points[i][1] / 10000);
             points.push(depth);
         }
 
@@ -251,9 +228,6 @@ var geomHelper = {
                 return index + offset;
             })));
         }
-        // Object.values(triangles.triangles).forEach(triangle => {
-        // faces.push(...triangle.map(index => index + offset));
-        // });
         offset += triangles.points.length;
 
         //get normals:
@@ -269,9 +243,7 @@ var geomHelper = {
         for (var _i2 in triangles.points) {
             normals.push.apply(normals, _toConsumableArray(normal));
         }
-        // Object.values(triangles.points).forEach(point => {
-        //     normals.push(...normal);
-        // });
+
         return {
             points: points,
             faces: faces,

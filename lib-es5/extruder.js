@@ -132,23 +132,6 @@ var extruder = {
         return geomHelper.mergeMeshes(horrGeom, false);
     },
 
-    /*
-        getHorrizontalGeom: function(horrizontalPathsByDepth, options, offset = 0,invertNormal=false) {
-            //gets all the triangles by depth:
-            let trianglesByDepth = [];
-            let innerHorGeom = [];
-            for (let i in horrizontalPathsByDepth) {
-                let totaltopo = horrizontalPathsByDepth[i].paths;
-                trianglesByDepth.push(cdt2dHelper.computeTriangulation(totaltopo));
-                trianglesByDepth[i].depth = horrizontalPathsByDepth[i].depth;
-    
-            }
-            // get points, normal and faces from it:
-    
-            let horrizontalGeomByDepth = geomHelper.getHorrizontalGeom(trianglesByDepth, options, +offset,invertNormal);
-            return geomHelper.mergeMeshes(horrizontalGeomByDepth, false);
-        },*/
-
     getDataByDepth: function getDataByDepth(outerShape, holes) {
         var outerPaths = [];
         var innerPaths = [];
@@ -158,19 +141,15 @@ var extruder = {
         for (var i in holes) {
             pathHelper.scaleUpPath(holes[i].path);
         }
-
         var holesByDepth = extruder.getHolesByDepth(holes, outerShape);
         var outer = [outerShape.path];
-
         var stack = 0;
         for (var _i = holesByDepth.length - 1; _i >= 0; _i--) {
             //compute the outer path:
             var removeFromOuter = pathHelper.getUnionOfPaths(holesByDepth[_i].keep.concat(holesByDepth[_i].stop));
-            var diffInOut = pathHelper.getDiffOfPaths(removeFromOuter, outer);
+            // let diffInOut=pathHelper.getDiffOfPaths(removeFromOuter, outer);
 
-            if (diffInOut.length > 0) {
-                outer = pathHelper.getDiffOfPaths(outer, removeFromOuter);
-            }
+            outer = pathHelper.getDiffOfPaths(outer, removeFromOuter);
             outer = pathHelper.simplifyPaths(pathHelper.getUnionOfPaths(outer));
             outerPaths.push(outer);
 
@@ -178,20 +157,16 @@ var extruder = {
             var innerPath = pathHelper.getInterOfPaths(holesByDepth[Math.max(_i - 1, 0)].keep, outer);
             innerPath = pathHelper.simplifyPaths(pathHelper.getUnionOfPaths(innerPath));
             innerPaths.push(innerPath);
-
             //computes the horrizontal Geom:
             var horrizontalPath = void 0;
             if (_i === 0 || _i === holesByDepth.length - 1) {
                 horrizontalPath = JSON.parse(JSON.stringify(outer.concat(innerPath)));
             } else {
-                horrizontalPath = pathHelper.getDiffOfPaths(holesByDepth[_i].stop, holesByDepth[_i].keep);
-                //2=> fit it into the deeper outer
-                var deeperOuter = outer;
-                if (stack > 0) {
-                    deeperOuter = outerPaths[stack - 1];
-                }
-                horrizontalPath = pathHelper.getInterOfPaths(horrizontalPath, deeperOuter);
-                horrizontalPath = pathHelper.simplifyPaths(horrizontalPath);
+
+                var horrizontalPathOut = pathHelper.getDiffOfPaths(outerPaths[Math.max(stack - 1, 0)], outerPaths[stack]);
+                var horrizontalPathIn = pathHelper.getUnionOfPaths(holesByDepth[_i].stop);
+                horrizontalPath = pathHelper.getUnionOfPaths(horrizontalPathOut, horrizontalPathIn);
+                horrizontalPath = pathHelper.getDiffOfPaths(horrizontalPath, holesByDepth[_i].keep);
             }
             horrizontalPaths.push(horrizontalPath);
             stack++;
@@ -203,6 +178,7 @@ var extruder = {
             pathHelper.setDirectionPaths(horrizontalPaths[_i2], 1);
             pathHelper.scaleDownPaths(outerPaths[_i2]);
             pathHelper.scaleDownPaths(innerPaths[_i2]);
+            // pathHelper.scaleDownPaths(horrizontalPaths[i]);
         }
         pathHelper.scaleDownPath(outerShape.path);
 
@@ -252,12 +228,17 @@ var extruder = {
             return a - b;
         });
 
+        //fit paths into outer:
+        for (var _i5 in holes) {
+            holes[_i5].path = pathHelper.getInterOfPaths([outerShape.path], [holes[_i5].path])[0];
+        }
+
         //get paths by depth:
         var res = [];
 
-        var _loop = function _loop(_i5) {
+        var _loop = function _loop(_i6) {
             var deeperHoles = holes.filter(function (s) {
-                return s.depth > depths[_i5];
+                return s.depth > depths[_i6];
             });
             var keep = [];
             deeperHoles.map(function (s) {
@@ -265,7 +246,7 @@ var extruder = {
             });
 
             var stopHoles = holes.filter(function (s) {
-                return s.depth === depths[_i5];
+                return s.depth === depths[_i6];
             });
             var stop = [];
             stopHoles.map(function (s) {
@@ -276,12 +257,12 @@ var extruder = {
             res.push({
                 keep: keep,
                 stop: stop,
-                depth: depths[_i5]
+                depth: depths[_i6]
             });
         };
 
-        for (var _i5 in depths) {
-            _loop(_i5);
+        for (var _i6 in depths) {
+            _loop(_i6);
         }
         return res;
     }

@@ -13,12 +13,17 @@ var holesIn = {
     getGeometry: extruder.getGeometry,
     mergeMeshes: geomHelper.mergeMeshes,
 
-    drawPath: drawHelper.drawPath,
-    drawPaths: drawHelper.drawPaths,
-
     scaleDownPath: pathHelper.scaleDownPath,
     scaleDownPaths: pathHelper.scaleDownPaths,
-    getDataByDepth: extruder.getDataByDepth
+    getDataByDepth: extruder.getDataByDepth,
+
+    drawInitialPaths: drawHelper.drawInitialPaths,
+    drawPaths: drawHelper.drawPaths,
+    drawPath: drawHelper.drawPath,
+    drawText: drawHelper.drawText,
+
+    simplifyPaths: pathHelper.simplifyPaths
+
 };
 
 module.exports = holesIn;
