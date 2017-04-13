@@ -22,7 +22,12 @@ var holesIn = {
     drawPath: drawHelper.drawPath,
     drawText: drawHelper.drawText,
 
-    simplifyPaths: pathHelper.simplifyPaths
+    simplifyPaths: pathHelper.simplifyPaths,
+
+    getInterOfPaths: pathHelper.getInterOfPaths,
+    getMatchingEdgeIndex: pathHelper.getMatchingEdgeIndex,
+    setDirectionPath: pathHelper.setDirectionPath,
+    hasAnIncludedSegment: pathHelper.hasAnIncludedSegment
 
 };
 

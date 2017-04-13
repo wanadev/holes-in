@@ -219,6 +219,9 @@ var pathHelper = {
                 if (!currAlgigned && prevAligned) {
                     return res;
                 }
+                if (!currAlgigned && !prevAligned) {
+                    continue;
+                }
                 if (currAlgigned) {
                     res = {
                         index: i,
@@ -229,6 +232,77 @@ var pathHelper = {
                 }
             }
         }
+    },
+
+    displaceColinearEdges: function displaceColinearEdges(path, pathToDisplace) {
+        var indexColinear = pathHelper.getColinearEdge(path, pathToDisplace);
+        if (indexColinear === false) {
+            return;
+        }
+
+        pathHelper.displaceEdge(pathToDisplace, indexColinear);
+
+        return true;
+    },
+    displaceEdge: function displaceEdge(path, index) {
+        var indexPrev = (index + path.length - 1) % path.length;
+        var indexNext = (index + 1) % path.length;
+
+        var previousEdge = pathHelper.getEdge(path[indexPrev], path[index]);
+        var nextEdge = pathHelper.getEdge(path[(index + 2) % path.length], path[indexNext]);
+
+        previousEdge = pathHelper.normalizeVec(previousEdge);
+        nextEdge = pathHelper.normalizeVec(nextEdge);
+
+        path[index].X += nextEdge.X * 1;
+        path[index].Y += nextEdge.Y * 1;
+    },
+
+
+    normalizeVec: function normalizeVec(edge) {
+        var norm = Math.sqrt(edge.X * edge.X + edge.Y * edge.Y);
+        return { X: edge.X / norm, Y: edge.Y / norm };
+    },
+
+    getColinearEdge: function getColinearEdge(path, pathToMatch) {
+        for (var i = 0; i < path.length; i++) {
+            var pt1 = path[i];
+            var pt2 = path[(i + 1) % path.length];
+            var edge = pathHelper.getEdge(pt1, pt2);
+            for (var j = 0; j < pathToMatch.length; j++) {
+                var edge2 = pathHelper.getEdge(pathToMatch[j], pathToMatch[(j + 1) % pathToMatch.length]);
+
+                if (pathHelper.isApproxAligned(pt1, pt2, pathToMatch[j], pathToMatch[(j + 1) % pathToMatch.length])) {
+                    return j;
+                }
+            }
+        }
+        return false;
+    },
+
+    isApproxAligned: function isApproxAligned(e11, e12, e21, e22) {
+        var epsilon = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0.1;
+
+        var edge1 = pathHelper.getEdge(e11, e12);
+        var edge2 = pathHelper.getEdge(e11, e21);
+        var edge3 = pathHelper.getEdge(e11, e22);
+        return pathHelper.isApproxColinear(edge1, edge2, epsilon) && pathHelper.isApproxColinear(edge1, edge3, epsilon);
+    },
+
+    isApproxColinear: function isApproxColinear(edge1, edge2) {
+        var epsilon = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0.1;
+
+        var dot = edge1.X * edge2.X + edge1.Y * edge2.Y;
+        if (dot === 0) {
+            return false;
+        }
+        var ratio = Math.sqrt(edge1.X * edge1.X + edge1.Y * edge1.Y) * Math.sqrt(edge2.X * edge2.X + edge2.Y * edge2.Y) / dot;
+        ratio = Math.abs(ratio);
+
+        if (ratio > 1 - epsilon && ratio < 1 + epsilon) {
+            return true;
+        }
+        return false;
     },
 
     isAligned: function isAligned(e11, e12, e21, e22) {

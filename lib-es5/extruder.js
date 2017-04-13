@@ -147,7 +147,6 @@ var extruder = {
         for (var _i = holesByDepth.length - 1; _i >= 0; _i--) {
             //compute the outer path:
             var removeFromOuter = pathHelper.getUnionOfPaths(holesByDepth[_i].keep.concat(holesByDepth[_i].stop));
-            // let diffInOut=pathHelper.getDiffOfPaths(removeFromOuter, outer);
 
             outer = pathHelper.getDiffOfPaths(outer, removeFromOuter);
             outer = pathHelper.simplifyPaths(pathHelper.getUnionOfPaths(outer));
@@ -230,7 +229,8 @@ var extruder = {
 
         //fit paths into outer:
         for (var _i5 in holes) {
-            holes[_i5].path = pathHelper.getInterOfPaths([outerShape.path], [holes[_i5].path])[0];
+            holes[_i5].path = pathHelper.getInterOfPaths([holes[_i5].path], [outerShape.path])[0];
+            pathHelper.displaceColinearEdges(outerShape.path, holes[_i5].path);
         }
 
         //get paths by depth:

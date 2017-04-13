@@ -55,16 +55,17 @@ var geomHelper = {
 
         var ptDwn = pathDwn[idxPtDwn];
         var nPtDwn = pathDwn[nIdxPtDwn];
-        var match = geomHelper.getMatchDepths(ptDwn, nPtDwn, +indexDepthDwn, pathsByDepth);
-        if (match === undefined) {
+        var indexDepthUp = geomHelper.getMatchDepths(ptDwn, nPtDwn, +indexDepthDwn, pathsByDepth);
+        if (indexDepthUp === undefined || indexDepthUp < 0) {
             return;
         }
+        var depthUp = pathsByDepth[indexDepthUp].depth;
         var depthDwn = pathsByDepth[indexDepthDwn].depth;
-        var res = geomHelper.getPtsNormsIndx2d(ptDwn, nPtDwn, match, depthDwn, +offset, invertNormal);
+        var res = geomHelper.getPtsNormsIndx2d(ptDwn, nPtDwn, depthUp, depthDwn, +offset, invertNormal);
 
         res.uvs = [];
         //add uvs:
-        geomHelper.addUvsToVertGeom(res, +idxPtDwn, pathDwn, pathsByDepth, indexDepthDwn, indexDepthDwn - 1);
+        geomHelper.addUvsToVertGeom(res, +idxPtDwn, pathDwn, pathsByDepth, indexDepthDwn, indexDepthUp);
 
         return res;
     },
@@ -75,7 +76,7 @@ var geomHelper = {
      */
     getMatchDepths: function getMatchDepths(ptDwn, nPtDwn, indexDepth, pathsByDepth) {
         //for each depth deeper than pathUp,we look for a corresponding point:
-        var res = pathsByDepth[indexDepth - 1].depth;
+        var res = indexDepth - 1;
         var found = false;
         for (var i = indexDepth - 1; i >= 0; i--) {
             var pathsAtDepth = pathsByDepth[i].paths;
@@ -88,8 +89,7 @@ var geomHelper = {
                 var pathUp = pathsAtDepth[j];
                 var match1 = pathHelper.getPointMatch(pathUp, ptDwn);
                 var match2 = pathHelper.getPointMatch(pathUp, nPtDwn);
-                var perfectMatch = match1 && match2 && match2.index - match1.index === 1;
-
+                var perfectMatch = match1 && match2 && (match1.index + 1) % pathUp.length === match2.index;
                 if (!match1) {
                     continue;
                 }
@@ -98,10 +98,10 @@ var geomHelper = {
                 }
                 pathsByDepth[i].paths[j][match1.index]._holesInVisited = true;
                 if (perfectMatch) {
-                    res = pathsByDepth[i].depth;
+                    res = i;
                     continue;
                 } else {
-                    return pathsByDepth[i].depth;
+                    return i;
                 }
             }
         }
@@ -158,16 +158,17 @@ var geomHelper = {
     addUvsToVertGeom: function addUvsToVertGeom(geom, indexPtDwn, pathDwn, pathsByDepth, indexDepth, indexDepthUp) {
         var _geom$uvs;
 
-        var vUp = pathsByDepth[indexDepthUp].V;
-        var vDwn = pathsByDepth[indexDepth].V;
+        var vUp = pathsByDepth[indexDepthUp].holesInV;
+        var vDwn = pathsByDepth[indexDepth].holesInV;
 
         var nIndexPtDwn = (indexPtDwn + 1) % pathDwn.length;
-        var u = pathDwn[indexPtDwn].U;
-        var nu = pathDwn[nIndexPtDwn].U;
+        var u = pathDwn[indexPtDwn].holesInU;
+        var nu = pathDwn[nIndexPtDwn].holesInU;
 
-        if (pathDwn[nIndexPtDwn].U2) {
-            nu = pathDwn[nIndexPtDwn].U2;
+        if (pathDwn[nIndexPtDwn].holesInU2) {
+            nu = pathDwn[nIndexPtDwn].holesInU2;
         }
+
         var uvs = [u, vUp, u, vDwn, nu, vDwn, nu, vUp];
         (_geom$uvs = geom.uvs).push.apply(_geom$uvs, uvs);
     },
