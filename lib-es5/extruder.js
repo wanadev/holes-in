@@ -75,37 +75,17 @@ var extruder = {
         for (var indexDepth = innerPathsByDepth.length - 1; indexDepth > 0; indexDepth--) {
             var pathsAtDepth = innerPathsByDepth[indexDepth].paths;
             //for each point at each path at each depth we look for the corresponding point into the upper paths:
-            var _iteratorNormalCompletion = true;
-            var _didIteratorError = false;
-            var _iteratorError = undefined;
-
-            try {
-                for (var _iterator = pathsAtDepth[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                    var path = _step.value;
-
-                    for (var indexPtDwn in path) {
-                        var idxPtDwn = indexPtDwn;
-                        var idxNPtDwn = (+indexPtDwn + 1) % path.length;
-                        var currgeom = geomHelper.getOneVerticalGeom(idxPtDwn, idxNPtDwn, +indexDepth, path, innerPathsByDepth, +offset, invertNormal);
-                        if (!currgeom) {
-                            continue;
-                        }
-                        geom.push(currgeom);
-                        offset = currgeom.offset;
+            for (var i in pathsAtDepth) {
+                var path = pathsAtDepth[i];
+                for (var indexPtDwn in path) {
+                    var idxPtDwn = indexPtDwn;
+                    var idxNPtDwn = (+indexPtDwn + 1) % path.length;
+                    var currgeom = geomHelper.getOneVerticalGeom(idxPtDwn, idxNPtDwn, +indexDepth, path, innerPathsByDepth, +offset, invertNormal);
+                    if (!currgeom) {
+                        continue;
                     }
-                }
-            } catch (err) {
-                _didIteratorError = true;
-                _iteratorError = err;
-            } finally {
-                try {
-                    if (!_iteratorNormalCompletion && _iterator.return) {
-                        _iterator.return();
-                    }
-                } finally {
-                    if (_didIteratorError) {
-                        throw _iteratorError;
-                    }
+                    geom.push(currgeom);
+                    offset = currgeom.offset;
                 }
             }
         }

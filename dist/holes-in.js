@@ -407,37 +407,17 @@ var extruder = {
         for (var indexDepth = innerPathsByDepth.length - 1; indexDepth > 0; indexDepth--) {
             var pathsAtDepth = innerPathsByDepth[indexDepth].paths;
             //for each point at each path at each depth we look for the corresponding point into the upper paths:
-            var _iteratorNormalCompletion = true;
-            var _didIteratorError = false;
-            var _iteratorError = undefined;
-
-            try {
-                for (var _iterator = pathsAtDepth[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                    var path = _step.value;
-
-                    for (var indexPtDwn in path) {
-                        var idxPtDwn = indexPtDwn;
-                        var idxNPtDwn = (+indexPtDwn + 1) % path.length;
-                        var currgeom = geomHelper.getOneVerticalGeom(idxPtDwn, idxNPtDwn, +indexDepth, path, innerPathsByDepth, +offset, invertNormal);
-                        if (!currgeom) {
-                            continue;
-                        }
-                        geom.push(currgeom);
-                        offset = currgeom.offset;
+            for (var i in pathsAtDepth) {
+                var path = pathsAtDepth[i];
+                for (var indexPtDwn in path) {
+                    var idxPtDwn = indexPtDwn;
+                    var idxNPtDwn = (+indexPtDwn + 1) % path.length;
+                    var currgeom = geomHelper.getOneVerticalGeom(idxPtDwn, idxNPtDwn, +indexDepth, path, innerPathsByDepth, +offset, invertNormal);
+                    if (!currgeom) {
+                        continue;
                     }
-                }
-            } catch (err) {
-                _didIteratorError = true;
-                _iteratorError = err;
-            } finally {
-                try {
-                    if (!_iteratorNormalCompletion && _iterator.return) {
-                        _iterator.return();
-                    }
-                } finally {
-                    if (_didIteratorError) {
-                        throw _iteratorError;
-                    }
+                    geom.push(currgeom);
+                    offset = currgeom.offset;
                 }
             }
         }
@@ -803,35 +783,14 @@ var geomHelper = {
         }
 
         if (!invertNormal) {
-            var _iteratorNormalCompletion = true;
-            var _didIteratorError = false;
-            var _iteratorError = undefined;
-
-            try {
-                for (var _iterator = triangles.triangles[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                    var t = _step.value;
-
-                    t.reverse();
-                }
-            } catch (err) {
-                _didIteratorError = true;
-                _iteratorError = err;
-            } finally {
-                try {
-                    if (!_iteratorNormalCompletion && _iterator.return) {
-                        _iterator.return();
-                    }
-                } finally {
-                    if (_didIteratorError) {
-                        throw _iteratorError;
-                    }
-                }
+            for (var _i in triangles.triangles) {
+                triangles.triangles[_i].reverse();
             }
         }
         //offsets faces
         var faces = [];
-        for (var _i in triangles.triangles) {
-            faces.push.apply(faces, _toConsumableArray(triangles.triangles[_i].map(function (index) {
+        for (var _i2 in triangles.triangles) {
+            faces.push.apply(faces, _toConsumableArray(triangles.triangles[_i2].map(function (index) {
                 return index + offset;
             })));
         }
@@ -847,7 +806,7 @@ var geomHelper = {
         var pt3 = points.slice(idxs[2], idxs[2] + 3);
         var normal = geomHelper.getNormalToPlan(pt1, pt2, pt3);
 
-        for (var _i2 in triangles.points) {
+        for (var _i3 in triangles.points) {
             normals.push.apply(normals, _toConsumableArray(normal));
         }
 
