@@ -431,7 +431,6 @@ var extruder = {
         var offset = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
         var invertNormal = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
 
-
         var horrGeom = [];
         for (var i in indexes) {
             var totaltopo = horrizontalPathsByDepth[indexes[i]].paths;
@@ -484,6 +483,7 @@ var extruder = {
         }
 
         for (var _i2 in outerPaths) {
+
             pathHelper.setDirectionPaths(outerPaths[_i2], -1);
             pathHelper.setDirectionPaths(innerPaths[_i2], -1);
             pathHelper.setDirectionPaths(horrizontalPaths[_i2], 1);
@@ -494,6 +494,9 @@ var extruder = {
         pathHelper.scaleDownPath(outerShape.path);
 
         for (var _i3 in holes) {
+            if (!holes[_i3].path) {
+                continue;
+            }
             pathHelper.scaleDownPath(holes[_i3].path);
         }
 
@@ -542,15 +545,21 @@ var extruder = {
         //fit paths into outer:
         for (var _i5 in holes) {
             holes[_i5].path = pathHelper.getInterOfPaths([holes[_i5].path], [outerShape.path])[0];
-            pathHelper.displaceColinearEdges(outerShape.path, holes[_i5].path);
+        }
+        //filter:
+        holes = holes.filter(function (hole) {
+            return hole.path !== undefined;
+        });
+        for (var _i6 in holes) {
+            pathHelper.displaceColinearEdges(outerShape.path, holes[_i6].path);
         }
 
         //get paths by depth:
         var res = [];
 
-        var _loop = function _loop(_i6) {
+        var _loop = function _loop(_i7) {
             var deeperHoles = holes.filter(function (s) {
-                return s.depth > depths[_i6];
+                return s.depth > depths[_i7];
             });
             var keep = [];
             deeperHoles.map(function (s) {
@@ -558,7 +567,7 @@ var extruder = {
             });
 
             var stopHoles = holes.filter(function (s) {
-                return s.depth === depths[_i6];
+                return s.depth === depths[_i7];
             });
             var stop = [];
             stopHoles.map(function (s) {
@@ -569,12 +578,12 @@ var extruder = {
             res.push({
                 keep: keep,
                 stop: stop,
-                depth: depths[_i6]
+                depth: depths[_i7]
             });
         };
 
-        for (var _i6 in depths) {
-            _loop(_i6);
+        for (var _i7 in depths) {
+            _loop(_i7);
         }
         return res;
     }
