@@ -15,13 +15,13 @@ autotoc: false
 </style>
 
 <script src="./holes-in.js"></script>
-<script src="./babylonjs/babylon.js"></script>
-<script src="../dist/holes.js"></script>
+<script src="./babylon.js"></script>
+<script src="./holes.js"></script>
 <script src="./ui.js"></script>
 
 
 <canvas id="babylon" width="512" height="256" ></canvas>
-<canvas id="paths" width="256" height="256"  align=center ></canvas>
+<canvas id="paths" width="512" height="256"  align=center ></canvas>
 
 <div id ="form">
 

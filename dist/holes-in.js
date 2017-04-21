@@ -107,33 +107,6 @@ var pathHelper = require("./path-helper.js");
 
 var drawHelper = {
 
-    // colors= ["#c02525","#84c025","#8d4ead"],
-    //   strokeColors= ["black","black","black"],
-    //
-    //    pointA= {X:0,Y:100},
-    //    pointB= {X:150,Y:100},
-    //    pointC= {X:300,Y:100},
-    //    pointD= {X:450,Y:100},
-    //    pointE= {X:600,Y:100},
-    //    pointF= {X:750,Y:100},
-    //    points=[pointA,pointB,pointC,pointD,pointE,pointF],
-    //
-    //    drawInitialPaths:function(ctx,outerShape, holes){
-    //
-    //      holesIn.drawPath(ctx, outerShape.path,drawHelper.pointA,["yellow"],[]);
-    //      for(let i in holes)
-    //      {
-    //         holesIn.drawPath(ctx, holes[i].path,drawHelper.pointA,colors[i],[]);
-    //      }
-    //  },
-    //
-    //  drawText: function(ctx, text, point){
-    //     ctx.fillStyle= "black";
-    //     ctx.font="20px Georgia";
-    //     ctx.fillText(text,point.X,300 - 30);
-    // },
-
-
     drawPaths: function drawPaths(ctx, paths, position, fillColors, strokeColors, fillModes) {
         if (!fillModes) fillModes = [];
         if (!fillColors) fillColors = drawHelper.colors;
@@ -489,6 +462,8 @@ var extruder = {
             pathHelper.setDirectionPaths(horrizontalPaths[_i2], 1);
             pathHelper.scaleDownPaths(outerPaths[_i2]);
             pathHelper.scaleDownPaths(innerPaths[_i2]);
+
+            outerPaths[_i2] = pathHelper.simplifyPaths(outerPaths[_i2]);
             // pathHelper.scaleDownPaths(horrizontalPaths[i]);
         }
         pathHelper.scaleDownPath(outerShape.path);
