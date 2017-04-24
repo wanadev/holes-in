@@ -159,7 +159,8 @@ var extruder = {
             pathHelper.scaleDownPaths(innerPaths[_i2]);
 
             outerPaths[_i2] = pathHelper.simplifyPaths(outerPaths[_i2]);
-            // pathHelper.scaleDownPaths(horrizontalPaths[i]);
+            innerPaths[_i2] = pathHelper.simplifyPaths(innerPaths[_i2]);
+            horrizontalPaths[_i2] = pathHelper.simplifyPaths(horrizontalPaths[_i2]);
         }
         pathHelper.scaleDownPath(outerShape.path);
 

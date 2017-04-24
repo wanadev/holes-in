@@ -76,13 +76,13 @@ describe('Holes in', function() {
             outHole1.depth=50;
             inHole1.depth=0;
             let geom = holesIn.getGeometry(outerShape, [inHole1, outHole1]);
-            expect(geom.inMesh.faces).to.have.length(45);
+            expect(geom.inMesh.faces).to.have.length(42);
             expect(geom.outMesh.faces).to.have.length(78);
         });
 
         it('returns the right number of triangles FRONT-- (outerShape_colinear) (holes_Colinear)', function() {
             let geom = holesIn.getGeometry(outerShape_colinear, holes_colinear);
-            expect(geom.frontMesh.faces).to.have.length(36);
+            expect(geom.frontMesh.faces).to.have.length(33);
         });
 
         // it('returns the right number of triangles FRONT-- (outerShape_colinear_door) (holes_colinear_door)', function() {
