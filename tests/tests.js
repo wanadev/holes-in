@@ -36,53 +36,76 @@ describe('Holes in', function() {
 
         it('returns the right number of triangles -- (NoHoles )', function() {
             let geom = holesIn.getGeometry(outerShape, []);
-            let geomMerged = holesIn.mergeMeshes([geom.inMesh,geom.outMesh,geom.frontMesh,geom.backMesh]);
-            expect(geomMerged.faces).to.have.length( 36 );
+            // let geomMerged = holesIn.mergeMeshes([geom.inMesh,geom.outMesh,geom.frontMesh,geom.backMesh]);
+            expect(geom.frontMesh.faces).to.have.length( 6 );
+            expect(geom.backMesh.faces).to.have.length( 6 );
+            expect(geom.outMesh.faces).to.have.length( 24 );
+
         });
 
         it('returns the right number of triangles -- (inHole1 0)', function() {
             let geom = holesIn.getGeometry(outerShape, [inHole1]);
-            expect(geom.inMesh.faces).to.have.length( 4 * 3 * 2 );
+            expect(geom.frontMesh.faces).to.have.length(24);
+            expect(geom.backMesh.faces).to.have.length(24);
+            expect(geom.outMesh.faces).to.have.length(24);
+            expect(geom.inMesh.faces).to.have.length(24);
         });
 
         it('returns the right number of triangles -- (inHole1 50)', function() {
             inHole1.depth=50;
             let geom = holesIn.getGeometry(outerShape, [inHole1]);
-            expect(geom.inMesh.faces).to.have.length( 30 );
+            expect(geom.frontMesh.faces).to.have.length(24);
+            expect(geom.backMesh.faces).to.have.length(6);
+            expect(geom.outMesh.faces).to.have.length(24);
+            expect(geom.inMesh.faces).to.have.length(30);
         });
 
         it('returns the right number of triangles -- (outHole1 0)', function() {
             let geom = holesIn.getGeometry(outerShape, [outHole1]);
-            expect(geom.outMesh.faces).to.have.length( 8 * 3 * 2 );
+            expect(geom.frontMesh.faces).to.have.length(18);
+            expect(geom.backMesh.faces).to.have.length(18);
+            expect(geom.outMesh.faces).to.have.length(48);
         });
         it('returns the right number of triangles -- (outHole1 50)', function() {
             outHole1.depth=50;
             let geom = holesIn.getGeometry(outerShape, [outHole1]);
+            expect(geom.frontMesh.faces).to.have.length(18);
+            expect(geom.backMesh.faces).to.have.length(6);
             expect(geom.outMesh.faces).to.have.length(54);
+            expect(geom.inMesh.faces).to.have.length(6);
         });
 
         it('returns the right number of triangles -- (inHole1 0) (outHole1 0)', function() {
             let geom = holesIn.getGeometry(outerShape, [inHole1, outHole1]);
-            expect(geom.outMesh.faces).to.have.length(72 );
+            expect(geom.frontMesh.faces).to.have.length(30);
+            expect(geom.backMesh.faces).to.have.length(30);
+            expect(geom.outMesh.faces).to.have.length(72);
         });
 
         it('returns the right number of triangles -- (inHole1 50) (outHole1 0)', function() {
             inHole1.depth=50;
             let geom = holesIn.getGeometry(outerShape, [inHole1, outHole1]);
+            expect(geom.frontMesh.faces).to.have.length(30);
+            expect(geom.backMesh.faces).to.have.length(18);
             expect(geom.outMesh.faces).to.have.length(78);
+            expect(geom.inMesh.faces).to.have.length(6);
         });
 
         it('returns the right number of triangles -- (inHole1 0) (outHole1 50)', function() {
             outHole1.depth=50;
             inHole1.depth=0;
             let geom = holesIn.getGeometry(outerShape, [inHole1, outHole1]);
-            expect(geom.inMesh.faces).to.have.length(42);
+            expect(geom.frontMesh.faces).to.have.length(30);
+            expect(geom.backMesh.faces).to.have.length(24);
             expect(geom.outMesh.faces).to.have.length(78);
+            expect(geom.inMesh.faces).to.have.length(42);
         });
 
-        it('returns the right number of triangles FRONT-- (outerShape_colinear) (holes_Colinear)', function() {
+        it('returns the right number of triangles -- (outerShape_colinear) (holes_Colinear)', function() {
             let geom = holesIn.getGeometry(outerShape_colinear, holes_colinear);
             expect(geom.frontMesh.faces).to.have.length(33);
+            expect(geom.backMesh.faces).to.have.length(33);
+            expect(geom.outMesh.faces).to.have.length(78);
         });
 
         // it('returns the right number of triangles FRONT-- (outerShape_colinear_door) (holes_colinear_door)', function() {

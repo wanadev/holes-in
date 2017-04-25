@@ -13,7 +13,7 @@ let vertexData;
 let mesh;
 let material;
 let texture;
-let options= {inMesh:false, outMesh:true, frontMesh:false, backMesh:false,
+let options= {inMesh:true, outMesh:true, frontMesh:true, backMesh:true,
             wireframe:false, backFaceCulling:false,normals:false,
             animate: false,isoRatioUV:true,swapToBabylon:true,
             };
@@ -73,7 +73,15 @@ if(!meshDirty){return;}
     let cpyOut= JSON.parse(JSON.stringify(outerShape));
     let cpyIn= JSON.parse(JSON.stringify(holes));
   let geom= holesIn.getGeometry(cpyOut,cpyIn,options,options);
-  console.log("geom: ",JSON.parse(JSON.stringify(geom)));
+  const geomCpy = JSON.parse(JSON.stringify(geom));
+  console.log("geom: ",geomCpy);
+  if(geomCpy.frontMesh) console.log("front: ",geomCpy.frontMesh.faces.length);
+  if(geomCpy.backMesh) console.log("back: ",geomCpy.backMesh.faces.length);
+  if(geomCpy.outMesh) console.log("out: ",geomCpy.outMesh.faces.length);
+  if(geomCpy.inMesh) console.log("in: ",geomCpy.inMesh.faces.length);
+
+
+
   let geomMerged= holesIn.mergeMeshes([geom.frontMesh, geom.backMesh, geom.inMesh, geom.outMesh]);
   // console.log("geomMerged", geomMerged);
   let nullMesh= false;

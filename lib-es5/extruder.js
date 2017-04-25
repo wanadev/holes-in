@@ -139,6 +139,7 @@ var extruder = {
             var horrizontalPath = void 0;
             if (_i === 0 || _i === holesByDepth.length - 1) {
                 horrizontalPath = JSON.parse(JSON.stringify(outer.concat(innerPath)));
+                console.log("horr", horrizontalPath.length, horrizontalPath);
             } else {
 
                 var horrizontalPathOut = pathHelper.getDiffOfPaths(outerPaths[Math.max(stack - 1, 0)], outerPaths[stack]);
@@ -146,7 +147,7 @@ var extruder = {
                 horrizontalPath = pathHelper.getUnionOfPaths(horrizontalPathOut, horrizontalPathIn);
                 horrizontalPath = pathHelper.getDiffOfPaths(horrizontalPath, holesByDepth[_i].keep);
                 //fit in the outer:
-                horrizontalPath = pathHelper.getInterOfPaths(horrizontalPath, [outerShape.path]);
+                horrizontalPath = pathHelper.getInterOfPaths(horrizontalPath, outerPaths[Math.max(stack - 1, 0)]);
             }
             horrizontalPaths.push(horrizontalPath);
             stack++;
@@ -162,7 +163,6 @@ var extruder = {
 
             outerPaths[_i2] = pathHelper.simplifyPaths(outerPaths[_i2]);
             innerPaths[_i2] = pathHelper.simplifyPaths(innerPaths[_i2]);
-            horrizontalPaths[_i2] = pathHelper.simplifyPaths(horrizontalPaths[_i2]);
         }
         pathHelper.scaleDownPath(outerShape.path);
 
