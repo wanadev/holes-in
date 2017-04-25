@@ -192,8 +192,8 @@ var geomHelper = {
         var points = [];
 
         for (var i in triangles.points) {
-            points.push(triangles.points[i][0] / 10000);
-            points.push(triangles.points[i][1] / 10000);
+            points.push(triangles.points[i][0] / 1);
+            points.push(triangles.points[i][1] / 1);
             points.push(depth);
         }
 
