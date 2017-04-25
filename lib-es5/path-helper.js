@@ -68,6 +68,14 @@ var pathHelper = {
         return clipperLib.Clipper.SimplifyPolygons(paths, options.fillType);
     },
 
+    simplifyPath: function simplifyPath(path) {
+        var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {
+            fillType: clipperLib.PolyFillType.pftNonZero
+        };
+
+        return clipperLib.Clipper.SimplifyPolygon(path, options.fillType);
+    },
+
     /**
      * Apply Clipper operation to pathsSubj and pathClip
      * clipType: {ctIntersection,ctUnion,ctDifference,ctXor}

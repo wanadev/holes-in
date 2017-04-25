@@ -145,6 +145,8 @@ var extruder = {
                 var horrizontalPathIn = pathHelper.getUnionOfPaths(holesByDepth[_i].stop);
                 horrizontalPath = pathHelper.getUnionOfPaths(horrizontalPathOut, horrizontalPathIn);
                 horrizontalPath = pathHelper.getDiffOfPaths(horrizontalPath, holesByDepth[_i].keep);
+                //fit in the outer:
+                horrizontalPath = pathHelper.getInterOfPaths(horrizontalPath, [outerShape.path]);
             }
             horrizontalPaths.push(horrizontalPath);
             stack++;
@@ -213,24 +215,20 @@ var extruder = {
             return a - b;
         });
 
-        //fit paths into outer:
-        for (var _i5 in holes) {
-            holes[_i5].path = pathHelper.getInterOfPaths([holes[_i5].path], [outerShape.path])[0];
-        }
         //filter:
         holes = holes.filter(function (hole) {
             return hole.path !== undefined;
         });
-        for (var _i6 in holes) {
-            pathHelper.displaceColinearEdges(outerShape.path, holes[_i6].path);
+        for (var _i5 in holes) {
+            pathHelper.displaceColinearEdges(outerShape.path, holes[_i5].path);
         }
 
         //get paths by depth:
         var res = [];
 
-        var _loop = function _loop(_i7) {
+        var _loop = function _loop(_i6) {
             var deeperHoles = holes.filter(function (s) {
-                return s.depth > depths[_i7];
+                return s.depth > depths[_i6];
             });
             var keep = [];
             deeperHoles.map(function (s) {
@@ -238,7 +236,7 @@ var extruder = {
             });
 
             var stopHoles = holes.filter(function (s) {
-                return s.depth === depths[_i7];
+                return s.depth === depths[_i6];
             });
             var stop = [];
             stopHoles.map(function (s) {
@@ -249,12 +247,12 @@ var extruder = {
             res.push({
                 keep: keep,
                 stop: stop,
-                depth: depths[_i7]
+                depth: depths[_i6]
             });
         };
 
-        for (var _i7 in depths) {
-            _loop(_i7);
+        for (var _i6 in depths) {
+            _loop(_i6);
         }
         return res;
     }

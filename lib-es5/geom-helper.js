@@ -78,6 +78,7 @@ var geomHelper = {
         //for each depth deeper than pathUp,we look for a corresponding point:
         var res = indexDepth - 1;
         var found = false;
+
         for (var i = indexDepth - 1; i >= 0; i--) {
             var pathsAtDepth = pathsByDepth[i].paths;
             if (!pathsAtDepth) {
