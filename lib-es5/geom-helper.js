@@ -78,7 +78,6 @@ var geomHelper = {
         //for each depth deeper than pathUp,we look for a corresponding point:
         var res = indexDepth - 1;
         var found = false;
-
         for (var i = indexDepth - 1; i >= 0; i--) {
             var pathsAtDepth = pathsByDepth[i].paths;
             if (!pathsAtDepth) {
@@ -192,8 +191,8 @@ var geomHelper = {
         var points = [];
 
         for (var i in triangles.points) {
-            points.push(triangles.points[i][0] / 1);
-            points.push(triangles.points[i][1] / 1);
+            points.push(triangles.points[i][0] / holesIn.scaleFactor);
+            points.push(triangles.points[i][1] / holesIn.scaleFactor);
             points.push(depth);
         }
 
@@ -244,7 +243,7 @@ var geomHelper = {
     },
 
     getPoint3: function getPoint3(point2, depth) {
-        return [point2.X, point2.Y, depth];
+        return [point2.X / holesIn.scaleFactor, point2.Y / holesIn.scaleFactor, depth];
     },
 
     cross: function cross(vec1, vec2) {

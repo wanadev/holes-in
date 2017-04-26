@@ -11,7 +11,7 @@
 ## Documentation
 
 ## Changelog
-
+* **0.3.2:** Simplified pre processing for more robustness
 * **0.2.5:** Removed `for ...of` for ES5 transpilation
 * **0.2.3:** Added full gestion of paths that modifies the outer geometry
 * **0.1.5:** Added gestion of paths that modifies the outer geometry

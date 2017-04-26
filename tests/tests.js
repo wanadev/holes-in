@@ -1,9 +1,10 @@
 "use strict";
 
-const holesIn = require("../dist/holes-in.js");
+const holesIn = require("./holes-in.js");
 
 var expect = require("expect.js");
 
+console.log("holes in ", holesIn.scaleFactor);
 
 describe('Holes in', function() {
 
@@ -12,10 +13,9 @@ describe('Holes in', function() {
         var outerShape, inHole1,inHole2,outHole1,outerShape_colinear,
         holes_colinear,holes_colinear_door,outerShape_colinear_door;
 
-
-
-
         beforeEach(function(){
+            console.log("holes in ", holesIn.scaleFactor);
+
             outerShape= { path: [ {X:50,Y:50}, {X:150,Y:50}, {X:150,Y:150}, {X:50,Y:150} ], depth:100};
 
             inHole1= { path: [{X:70,Y:70},{X:70,Y:90},{X:90,Y:90},{X:90,Y:70}], depth: 0 };
@@ -35,8 +35,9 @@ describe('Holes in', function() {
         });
 
         it('returns the right number of triangles -- (NoHoles )', function() {
+            console.log("holes in HJIODMSHIO", holesIn.scaleFactor);
+
             let geom = holesIn.getGeometry(outerShape, []);
-            // let geomMerged = holesIn.mergeMeshes([geom.inMesh,geom.outMesh,geom.frontMesh,geom.backMesh]);
             expect(geom.frontMesh.faces).to.have.length( 6 );
             expect(geom.backMesh.faces).to.have.length( 6 );
             expect(geom.outMesh.faces).to.have.length( 24 );
@@ -108,10 +109,62 @@ describe('Holes in', function() {
             expect(geom.outMesh.faces).to.have.length(78);
         });
 
+
+        it('returns coherent points normals faces uvs -- (outerShape) (inHole1)', function() {
+            let geom = holesIn.getGeometry(outerShape, [inHole1]);
+            let geomMerged = holesIn.mergeMeshes([geom.inMesh,geom.outMesh,geom.frontMesh,geom.backMesh]);
+            let numPoints = new Set(geomMerged.faces).size;
+            expect(geomMerged.points).to.have.length(numPoints*3);
+            expect(geomMerged.normals).to.have.length(numPoints*3);
+            expect(geomMerged.uvs).to.have.length(numPoints*2);
+        });
+        it('returns coherent points normals faces uvs -- (outerShape_colinear) (holes_Colinear)', function() {
+            let geom = holesIn.getGeometry(outerShape, [inHole1]);
+            let geomMerged = holesIn.mergeMeshes([geom.inMesh,geom.outMesh,geom.frontMesh,geom.backMesh]);
+            let numPoints = new Set(geomMerged.faces).size;
+            expect(geomMerged.points).to.have.length(numPoints*3);
+            expect(geomMerged.normals).to.have.length(numPoints*3);
+            expect(geomMerged.uvs).to.have.length(numPoints*2);
+        });
+        it('returns coherent points normals faces uvs -- (outerShape_colinear) (holes_Colinear)', function() {
+            let geom = holesIn.getGeometry(outerShape, [inHole1]);
+            let geomMerged = holesIn.mergeMeshes([geom.inMesh,geom.outMesh,geom.frontMesh,geom.backMesh]);
+            let numPoints = new Set(geomMerged.faces).size;
+            expect(geomMerged.points).to.have.length(numPoints*3);
+            expect(geomMerged.normals).to.have.length(numPoints*3);
+            expect(geomMerged.uvs).to.have.length(numPoints*2);
+        });
+        it('returns coherent points normals faces uvs -- (outerShape_colinear) (holes_Colinear)', function() {
+            let geom = holesIn.getGeometry(outerShape, [inHole1, outHole1]);
+            let geomMerged = holesIn.mergeMeshes([geom.inMesh,geom.outMesh,geom.frontMesh,geom.backMesh]);
+            let numPoints = new Set(geomMerged.faces).size;
+            expect(geomMerged.points).to.have.length(numPoints*3);
+            expect(geomMerged.normals).to.have.length(numPoints*3);
+            expect(geomMerged.uvs).to.have.length(numPoints*2);
+        });
+        it('returns coherent points normals faces uvs -- (outerShape_colinear) (holes_Colinear)', function() {
+            outHole1.depth=50;
+            let geom = holesIn.getGeometry(outerShape, [outHole1]);
+            let geomMerged = holesIn.mergeMeshes([geom.inMesh,geom.outMesh,geom.frontMesh,geom.backMesh]);
+            let numPoints = new Set(geomMerged.faces).size;
+            expect(geomMerged.points).to.have.length(numPoints*3);
+            expect(geomMerged.normals).to.have.length(numPoints*3);
+            expect(geomMerged.uvs).to.have.length(numPoints*2);
+        });
+        it('returns coherent points normals faces uvs -- (outerShape_colinear) (holes_Colinear)', function() {
+            inHole1.depth=50;
+            let geom = holesIn.getGeometry(outerShape, [inHole1, outHole1]);
+            let geomMerged = holesIn.mergeMeshes([geom.inMesh,geom.outMesh,geom.frontMesh,geom.backMesh]);
+            let numPoints = new Set(geomMerged.faces).size;
+            expect(geomMerged.points).to.have.length(numPoints*3);
+            expect(geomMerged.normals).to.have.length(numPoints*3);
+            expect(geomMerged.uvs).to.have.length(numPoints*2);
+        });
+
         // it('returns the right number of triangles FRONT-- (outerShape_colinear_door) (holes_colinear_door)', function() {
         //     let geom = holesIn.getGeometry(outerShape_colinear_door, holes_colinear_door);
         //     expect(geom.frontMesh.faces).to.have.length(18);
-        //     // expect(geom.outMesh.faces).to.have.length(48);
+        //     // expect(geomMerged.faces).to.have.length(48);
         // });
 
     });
