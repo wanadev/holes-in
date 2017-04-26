@@ -4,7 +4,13 @@ const holesIn = require("./holes-in.js");
 
 var expect = require("expect.js");
 
-console.log("holes in ", holesIn.scaleFactor);
+
+function dataFromKaza(string){
+
+    string= string.replace(/x/g, "X");
+    return JSON.parse(string.replace(/y/g, "Y"));
+
+}
 
 describe('Holes in', function() {
 
@@ -14,7 +20,6 @@ describe('Holes in', function() {
         holes_colinear,holes_colinear_door,outerShape_colinear_door;
 
         beforeEach(function(){
-            console.log("holes in ", holesIn.scaleFactor);
 
             outerShape= { path: [ {X:50,Y:50}, {X:150,Y:50}, {X:150,Y:150}, {X:50,Y:150} ], depth:100};
 
@@ -31,11 +36,14 @@ describe('Holes in', function() {
             outerShape_colinear_door= JSON.parse('{"path":[{"X":-101.1,"Y":0},{"X":-101.1,"Y":250},{"X":101.1,"Y":250},{"X":101.1,"Y":0}],"depth":15}');
 
 
+            outerShape_MAXBUG= dataFromKaza('{"path":[{"X":-118.94,"Y":-557.29},{"X":-146.85,"Y":-521.16},{"X":-96.05,"Y":335.21},{"X":-63.98,"Y":369.21}],"depth":250}');
+            outerShape_MAXBUG = dataFromKaza('[{"path":[{"X":-66.59,"Y":-93.2},{"X":-112.66,"Y":212.18},{"X":-879.51,"Y":180.83},{"X":-839.18,"Y":-119.42}],"depth":30},{"path":[{"X":-71.09,"Y":-63.34},{"X":-101.27,"Y":-64.36},{"X":-813.06,"Y":-88.53},{"X":-843.19,"Y":-89.54},{"X":-811.8,"Y":-323.25},{"X":-31.88,"Y":-323.25}],"depth":40}]')
+
+
 
         });
 
         it('returns the right number of triangles -- (NoHoles )', function() {
-            console.log("holes in HJIODMSHIO", holesIn.scaleFactor);
 
             let geom = holesIn.getGeometry(outerShape, []);
             expect(geom.frontMesh.faces).to.have.length( 6 );

@@ -140,12 +140,7 @@ var extruder = {
             if (_i === 0 || _i === holesByDepth.length - 1) {
                 horrizontalPath = JSON.parse(JSON.stringify(outer.concat(innerPath)));
             } else {
-                // let horrizontalPathOut = pathHelper.getXorOfPaths(outerPaths[Math.max(stack-1,0)],outerPaths[stack]);
-                // let horrizontalPathIn = pathHelper.getUnionOfPaths(holesByDepth[i].stop);
-                // horrizontalPath = horrizontalPathOut.concat(horrizontalPathIn) ;
-                // //fit in the outer:
-                // horrizontalPath = pathHelper.getInterOfPaths(horrizontalPath, outerPaths[Math.max(stack-1,0)]);
-                // horrizontalPath = pathHelper.simplifyPaths(horrizontalPath);
+                // fit holes that stops at this depth into the outer:
                 horrizontalPath = pathHelper.getInterOfPaths(holesByDepth[_i].stop, outerPaths[Math.max(stack - 1, 0)]);
                 horrizontalPath = pathHelper.simplifyPaths(horrizontalPath);
             }

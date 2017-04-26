@@ -4,6 +4,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 var pathHelper = require("./path-helper.js");
 var cdt2dHelper = require("./cdt2d-helper.js");
+var constants = require("./constants.js");
 
 var geomHelper = {
 
@@ -191,8 +192,8 @@ var geomHelper = {
         var points = [];
 
         for (var i in triangles.points) {
-            points.push(triangles.points[i][0] / holesIn.scaleFactor);
-            points.push(triangles.points[i][1] / holesIn.scaleFactor);
+            points.push(triangles.points[i][0] / constants.scaleFactor);
+            points.push(triangles.points[i][1] / constants.scaleFactor);
             points.push(depth);
         }
 
@@ -243,7 +244,7 @@ var geomHelper = {
     },
 
     getPoint3: function getPoint3(point2, depth) {
-        return [point2.X / holesIn.scaleFactor, point2.Y / holesIn.scaleFactor, depth];
+        return [point2.X / constants.scaleFactor, point2.Y / constants.scaleFactor, depth];
     },
 
     cross: function cross(vec1, vec2) {

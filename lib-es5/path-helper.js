@@ -1,6 +1,7 @@
 "use strict";
 
 var clipperLib = require("clipper-lib");
+var constants = require("./constants.js");
 
 var pathHelper = {
 
@@ -155,18 +156,18 @@ var pathHelper = {
     },
 
     scaleUpPath: function scaleUpPath(path) {
-        var scale = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : holesIn.scaleFactor;
+        var scale = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : constants.scaleFactor;
 
         clipperLib.JS.ScaleUpPath(path, scale);
     },
 
     scaleDownPath: function scaleDownPath(path) {
-        var scale = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : holesIn.scaleFactor;
+        var scale = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : constants.scaleFactor;
 
         clipperLib.JS.ScaleDownPath(path, scale);
     },
     scaleDownPaths: function scaleDownPaths(paths) {
-        var scale = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : holesIn.scaleFactor;
+        var scale = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : constants.scaleFactor;
 
         clipperLib.JS.ScaleDownPaths(paths, scale);
     },
