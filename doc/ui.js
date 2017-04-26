@@ -16,6 +16,7 @@ let texture;
 let options= {inMesh:true, outMesh:true, frontMesh:true, backMesh:true,
             wireframe:false, backFaceCulling:false,normals:false,
             animate: false,isoRatioUV:true,swapToBabylon:true,
+
             };
 
 let meshDirty=true;
@@ -197,7 +198,7 @@ function createMesh(){
    material.wireframe=options.wireframe;
    material.backFaceCulling = options.backFaceCulling;
 
-   texture= new BABYLON.Texture("./images/damier.jpg", scene);
+   texture= new BABYLON.Texture("./images/damier.png", scene);
    material.diffuseTexture= texture;
    mesh.material= material;
 }

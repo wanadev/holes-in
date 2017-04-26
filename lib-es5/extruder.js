@@ -42,7 +42,6 @@ var extruder = {
                 indexes.push(i);
             }
             var offset = 0;
-            console.log("indexes", indexes, "horrizontalPathsByDepth", JSON.parse(JSON.stringify(horrizontalPathsByDepth)));
             var inMeshHor = extruder.getHorrizontalGeom(horrizontalPathsByDepth, indexes, 0);
             if (inMeshHor) {
                 uvHelper.mapHorrizontal(innerPathsByDepth, outerShape, inMeshHor, options);
