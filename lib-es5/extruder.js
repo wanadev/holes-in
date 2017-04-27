@@ -1,12 +1,11 @@
 "use strict";
 
-var clipperLib = require("clipper-lib");
 var pathHelper = require("./path-helper.js");
 var geomHelper = require("./geom-helper.js");
 var cdt2dHelper = require("./cdt2d-helper.js");
 var uvHelper = require("./uv-helper.js");
-var exportHelper = require("./export-helper.js");
 var babylonHelper = require("./babylon-helper.js");
+var constants = require("./constants.js");
 
 var extruder = {
 
@@ -17,11 +16,17 @@ var extruder = {
         var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : { inMesh: true, outMesh: true, frontMesh: true, backMesh: true };
 
 
-        //get the topology 2D paths by depth
+        // get the topology 2D paths by depth
         var data = extruder.getDataByDepth(outerShape, holes);
         var outerPathsByDepth = data.outerPathsByDepth;
         var innerPathsByDepth = data.innerPathsByDepth;
         var horrizontalPathsByDepth = data.horrizontalPathsByDepth;
+
+        if (options.doNotBuild) {
+            pathHelper.scaleUpPaths(options.doNotBuild);
+            extruder.markAsForbidden(outerPathsByDepth, options.doNotBuild);
+            extruder.markAsForbidden(innerPathsByDepth, options.doNotBuild);
+        }
 
         uvHelper.mapVertical(outerPathsByDepth, outerShape, options);
 
@@ -63,7 +68,6 @@ var extruder = {
         }
         return res;
     },
-
     getVerticalGeom: function getVerticalGeom(innerPathsByDepth, toMarkPaths) {
         var offset = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
         var invertNormal = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
@@ -72,7 +76,7 @@ var extruder = {
 
         for (var indexDepth = innerPathsByDepth.length - 1; indexDepth > 0; indexDepth--) {
             var pathsAtDepth = innerPathsByDepth[indexDepth].paths;
-            //for each point at each path at each depth we look for the corresponding point into the upper paths:
+            // for each point at each path at each depth we look for the corresponding point into the upper paths:
             for (var i in pathsAtDepth) {
                 var path = pathsAtDepth[i];
                 for (var indexPtDwn in path) {
@@ -89,6 +93,7 @@ var extruder = {
         }
         return geomHelper.mergeMeshes(geom, false);
     },
+
 
     /**
      * Returns the geometry of the inner horrizontal facess
@@ -109,7 +114,6 @@ var extruder = {
         // get points, normal and faces from it:
         return geomHelper.mergeMeshes(horrGeom, true);
     },
-
     getDataByDepth: function getDataByDepth(outerShape, holes) {
         var outerPaths = [];
         var innerPaths = [];
@@ -123,18 +127,18 @@ var extruder = {
         var outer = [outerShape.path];
         var stack = 0;
         for (var _i = holesByDepth.length - 1; _i >= 0; _i--) {
-            //compute the outer path:
+            // compute the outer path:
             var removeFromOuter = pathHelper.getUnionOfPaths(holesByDepth[_i].keep.concat(holesByDepth[_i].stop));
 
             outer = pathHelper.getDiffOfPaths(outer, removeFromOuter);
             outer = pathHelper.simplifyPaths(pathHelper.getUnionOfPaths(outer));
             outerPaths.push(outer);
 
-            //fit the inner paths into the outer:
+            // fit the inner paths into the outer:
             var innerPath = pathHelper.getInterOfPaths(holesByDepth[Math.max(_i - 1, 0)].keep, outer);
             innerPath = pathHelper.simplifyPaths(pathHelper.getUnionOfPaths(innerPath));
             innerPaths.push(innerPath);
-            //computes the horrizontal Geom:
+            // computes the horrizontal Geom:
             var horrizontalPath = void 0;
             if (_i === 0 || _i === holesByDepth.length - 1) {
                 horrizontalPath = JSON.parse(JSON.stringify(outer.concat(innerPath)));
@@ -171,6 +175,7 @@ var extruder = {
             holesByDepth: holesByDepth };
     },
 
+
     /**
      *  Takes an array of paths representing holes at different depths.
      *  One depth value/ path.
@@ -178,19 +183,23 @@ var extruder = {
      */
     getHolesByDepth: function getHolesByDepth(holes, outerShape) {
 
-        //sets all depths deeper than outerDepth  or equals to 0 to outerDepth:
+        // sets all depths deeper than outerDepth  or equals to 0 to outerDepth:
         holes.map(function (elt) {
-            elt.depth >= outerShape.depth || elt.depth === 0 ? elt.depth = outerShape.depth + 1 : elt.depth = elt.depth;
+            // eslint-disable-line
+            elt.depth >= outerShape.depth || elt.depth === 0 ? elt.depth = outerShape.depth + 1 : elt.depth = elt.depth; // eslint-disable-line
         });
 
         holes.map(function (elt) {
+            // eslint-disable-line
             pathHelper.setDirectionPath(elt.path, 1);
         });
 
-        //get all depths:
+        // get all depths:
         var depths = new Set();
         for (var i in holes) {
-            if (holes[i].depth < outerShape.depth) depths.add(holes[i].depth);
+            if (holes[i].depth < outerShape.depth) {
+                depths.add(holes[i].depth);
+            }
         }
         depths.add(0);
         depths.add(outerShape.depth);
@@ -199,7 +208,7 @@ var extruder = {
             return a - b;
         });
 
-        //filter:
+        // filter:
         holes = holes.filter(function (hole) {
             return hole.path !== undefined;
         });
@@ -207,7 +216,7 @@ var extruder = {
             pathHelper.displaceColinearEdges(outerShape.path, holes[_i4].path);
         }
 
-        //get paths by depth:
+        // get paths by depth:
         var res = [];
 
         var _loop = function _loop(_i5) {
@@ -227,7 +236,7 @@ var extruder = {
                 return stop.push(s.path);
             });
 
-            //take only the paths of the holes which reach this depth
+            // take only the paths of the holes which reach this depth
             res.push({
                 keep: keep,
                 stop: stop,
@@ -245,8 +254,25 @@ var extruder = {
         }
 
         return res;
-    }
+    },
 
+
+    // mark all points that bbelong to one of the edges as forbidden
+    markAsForbidden: function markAsForbidden(pathsByDepth, edges) {
+        for (var j = 0; j < edges.length; j++) {
+            var edge = edges[j];
+            for (var i = pathsByDepth.length - 1; i >= 0; i--) {
+                var paths = pathsByDepth[i].paths;
+                for (var k in paths) {
+                    var path = paths[k];
+                    var toMark = pathHelper.getPointsOnEdge(path, edge);
+                    toMark.map(function (pt) {
+                        return pt._holesInForbidden = true;
+                    });
+                }
+            }
+        }
+    }
 };
 
 module.exports = extruder;

@@ -1,9 +1,8 @@
 "use strict";
 
-var cdt2d = require('cdt2d');
+var cdt2d = require("cdt2d");
 
 var cdt2dHelper = {
-
     computeTriangulation: function computeTriangulation(points, options) {
         // let points= xor.concat(intersection).concat(pathOuter);
         var cdtPoints = cdt2dHelper.clipperTocdt2d(points);
@@ -20,7 +19,6 @@ var cdt2dHelper = {
             triangles: triangles
         };
     },
-
     pathsToEdges: function pathsToEdges(paths) {
         var res = [];
         var offset = 0;
@@ -30,7 +28,6 @@ var cdt2dHelper = {
         }
         return res;
     },
-
     pathToEdges: function pathToEdges(path, offset) {
         var res = [];
         for (var i = 0; i < path.length - 1; i++) {
@@ -39,7 +36,6 @@ var cdt2dHelper = {
         res.push([offset + path.length - 1, offset]);
         return res;
     },
-
     clipperTocdt2d: function clipperTocdt2d(points) {
         var res = [];
         for (var i in points) {
@@ -49,10 +45,8 @@ var cdt2dHelper = {
         }
         return res;
     },
-
     clipperPointTocdt2dPoint: function clipperPointTocdt2dPoint(point) {
         return [point.X, point.Y];
     }
-
 };
 module.exports = cdt2dHelper;

@@ -3,11 +3,9 @@
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 var pathHelper = require("./path-helper.js");
-var cdt2dHelper = require("./cdt2d-helper.js");
 var constants = require("./constants.js");
 
 var geomHelper = {
-
     mergeMeshes: function mergeMeshes(geoms) {
         var considerOffset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
 
@@ -17,7 +15,6 @@ var geomHelper = {
         }
         return res;
     },
-
     mergeMesh: function mergeMesh(geom1, geom2, considerOffset) {
         var _geom1$points, _geom1$normals;
 
@@ -47,6 +44,7 @@ var geomHelper = {
         return geom1;
     },
 
+
     /*
      * Returns two triangles representing the larger face we can build from the edge ptDwn->nPtDwn
      */
@@ -56,7 +54,9 @@ var geomHelper = {
 
         var ptDwn = pathDwn[idxPtDwn];
         var nPtDwn = pathDwn[nIdxPtDwn];
-        // if(!toMarkPaths && !ptDwn._holesInForbidden){return;}
+        if (ptDwn._holesInForbidden) {
+            return;
+        }
 
         var indexDepthUp = geomHelper.getMatchDepths(ptDwn, nPtDwn, +indexDepthDwn, pathsByDepth);
         if (indexDepthUp === undefined || indexDepthUp < 0) {
@@ -68,20 +68,20 @@ var geomHelper = {
         var res = geomHelper.getPtsNormsIndx2d(ptDwn, nPtDwn, depthUp, depthDwn, +offset, invertNormal);
 
         res.uvs = [];
-        //add uvs:
+        // add uvs:
         geomHelper.addUvsToVertGeom(res, +idxPtDwn, pathDwn, pathsByDepth, indexDepthDwn, indexDepthUp);
 
         return res;
     },
+
 
     /**
      * Returns the depths at which they are two edges with the same 2D coords.
      * If it does not exists such a edge, returns the current depth and the depth above
      */
     getMatchDepths: function getMatchDepths(ptDwn, nPtDwn, indexDepth, pathsByDepth) {
-        //for each depth deeper than pathUp,we look for a corresponding point:
+        // for each depth deeper than pathUp,we look for a corresponding point:
         var res = indexDepth - 1;
-        var found = false;
         for (var i = indexDepth - 1; i >= 0; i--) {
             var pathsAtDepth = pathsByDepth[i].paths;
             if (!pathsAtDepth) {
@@ -89,7 +89,7 @@ var geomHelper = {
             }
 
             for (var j = 0; j < pathsAtDepth.length; j++) {
-                //for each path at each depth:
+                // for each path at each depth:
                 var pathUp = pathsAtDepth[j];
                 var match1 = pathHelper.getPointMatch(pathUp, ptDwn);
                 var match2 = pathHelper.getPointMatch(pathUp, nPtDwn);
@@ -111,7 +111,6 @@ var geomHelper = {
         }
         return res;
     },
-
     markAsVisited: function markAsVisited(pointA, pointB, toMarkPaths, depth) {
         if (!toMarkPaths) {
             return;
@@ -119,18 +118,15 @@ var geomHelper = {
         for (var i = depth; i >= 0; i--) {
             var paths = toMarkPaths[i].paths;
             for (var j in paths) {
-                var match1 = pathHelper.getPointMatch(paths[i], pointA);
-                var match2 = pathHelper.getPointMatch(paths[i], pointB);
+                var match1 = pathHelper.getPointMatch(paths[j], pointA);
+                var match2 = pathHelper.getPointMatch(paths[j], pointB);
                 if (!match1 || !match2) {
                     continue;
                 }
-                paths[i][match1.index]._holesInForbidden = true;
-                console.log("_holesInForbidden", paths[i][match1.index]);
+                paths[j][match1.index]._holesInForbidden = true;
             }
         }
     },
-
-
     getPtsNormsIndx2d: function getPtsNormsIndx2d(point2d1, point2d2, depthUp, depthDwn, offset) {
         var invertNormal = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : false;
 
@@ -142,7 +138,6 @@ var geomHelper = {
 
         return geomHelper.getPtsNormsIndx3d([point1, point2, point3, point4], +offset, invertNormal);
     },
-
     getPtsNormsIndx3d: function getPtsNormsIndx3d(points3d, offset, invertNormal) {
 
         var resFaces = void 0;
@@ -177,7 +172,6 @@ var geomHelper = {
             offset: offset + 4
         };
     },
-
     addUvsToVertGeom: function addUvsToVertGeom(geom, indexPtDwn, pathDwn, pathsByDepth, indexDepth, indexDepthUp) {
         var _geom$uvs;
 
@@ -195,7 +189,6 @@ var geomHelper = {
         var uvs = [u, vUp, u, vDwn, nu, vDwn, nu, vUp];
         (_geom$uvs = geom.uvs).push.apply(_geom$uvs, uvs);
     },
-
     getHorrizontalGeom: function getHorrizontalGeom(triangles) {
         var offset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
         var invertNormal = arguments[2];
@@ -206,7 +199,6 @@ var geomHelper = {
             return currGeom;
         }
     },
-
     getGeomFromTriangulation: function getGeomFromTriangulation(triangles, depth) {
         var invertNormal = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
         var offset = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
@@ -224,16 +216,16 @@ var geomHelper = {
                 triangles.triangles[_i].reverse();
             }
         }
-        //offsets faces
+        // offsets faces
         var faces = [];
         for (var _i2 in triangles.triangles) {
             faces.push.apply(faces, _toConsumableArray(triangles.triangles[_i2].map(function (index) {
                 return index + offset;
-            })));
+            }))); // eslint-disable-line
         }
         offset += triangles.points.length;
 
-        //get normals:
+        // get normals:
         var normals = [];
         var idxs = triangles.triangles[0].map(function (elt) {
             return elt * 3;
@@ -244,6 +236,7 @@ var geomHelper = {
         var normal = geomHelper.getNormalToPlan(pt1, pt2, pt3);
 
         for (var _i3 in triangles.points) {
+            // eslint-disable-line
             normals.push.apply(normals, _toConsumableArray(normal));
         }
 
@@ -254,29 +247,23 @@ var geomHelper = {
             offset: offset
         };
     },
-
     getNormalToPlan: function getNormalToPlan(point1, point2, point4) {
         var vec1 = geomHelper.pointsToVec(point1, point2);
         var vec2 = geomHelper.pointsToVec(point1, point4);
         return geomHelper.normalizeVec(geomHelper.cross(vec2, vec1));
     },
-
     pointsToVec: function pointsToVec(point1, point2) {
         return [point2[0] - point1[0], point2[1] - point1[1], point2[2] - point1[2]];
     },
-
     getPoint3: function getPoint3(point2, depth) {
         return [point2.X / constants.scaleFactor, point2.Y / constants.scaleFactor, depth];
     },
-
     cross: function cross(vec1, vec2) {
         return [vec1[1] * vec2[2] - vec1[2] * vec2[1], vec1[2] * vec2[0] - vec1[0] * vec2[2], vec1[0] * vec2[1] - vec1[1] * vec2[0]];
     },
-
     normalizeVec: function normalizeVec(vec) {
         var norm = Math.sqrt(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2]);
         return [vec[0] / norm, vec[1] / norm, vec[2] / norm];
     }
-
 };
 module.exports = geomHelper;
