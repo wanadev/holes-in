@@ -50,16 +50,19 @@ var geomHelper = {
     /*
      * Returns two triangles representing the larger face we can build from the edge ptDwn->nPtDwn
      */
-    getOneVerticalGeom: function getOneVerticalGeom(idxPtDwn, nIdxPtDwn, indexDepthDwn, pathDwn, pathsByDepth) {
-        var offset = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 0;
-        var invertNormal = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : false;
+    getOneVerticalGeom: function getOneVerticalGeom(idxPtDwn, nIdxPtDwn, indexDepthDwn, pathDwn, pathsByDepth, toMarkPaths) {
+        var offset = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : 0;
+        var invertNormal = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : false;
 
         var ptDwn = pathDwn[idxPtDwn];
         var nPtDwn = pathDwn[nIdxPtDwn];
+        // if(!toMarkPaths && !ptDwn._holesInForbidden){return;}
+
         var indexDepthUp = geomHelper.getMatchDepths(ptDwn, nPtDwn, +indexDepthDwn, pathsByDepth);
         if (indexDepthUp === undefined || indexDepthUp < 0) {
             return;
         }
+        // geomHelper.markAsVisited(ptDwn,nPtDwn, toMarkPaths,indexDepthDwn);
         var depthUp = pathsByDepth[indexDepthUp].depth;
         var depthDwn = pathsByDepth[indexDepthDwn].depth;
         var res = geomHelper.getPtsNormsIndx2d(ptDwn, nPtDwn, depthUp, depthDwn, +offset, invertNormal);
@@ -108,6 +111,25 @@ var geomHelper = {
         }
         return res;
     },
+
+    markAsVisited: function markAsVisited(pointA, pointB, toMarkPaths, depth) {
+        if (!toMarkPaths) {
+            return;
+        }
+        for (var i = depth; i >= 0; i--) {
+            var paths = toMarkPaths[i].paths;
+            for (var j in paths) {
+                var match1 = pathHelper.getPointMatch(paths[i], pointA);
+                var match2 = pathHelper.getPointMatch(paths[i], pointB);
+                if (!match1 || !match2) {
+                    continue;
+                }
+                paths[i][match1.index]._holesInForbidden = true;
+                console.log("_holesInForbidden", paths[i][match1.index]);
+            }
+        }
+    },
+
 
     getPtsNormsIndx2d: function getPtsNormsIndx2d(point2d1, point2d2, depthUp, depthDwn, offset) {
         var invertNormal = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : false;

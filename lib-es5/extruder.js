@@ -47,14 +47,14 @@ var extruder = {
                 uvHelper.mapHorrizontal(innerPathsByDepth, outerShape, inMeshHor, options);
                 offset = inMeshHor.offset;
             }
-            var inMeshVert = extruder.getVerticalGeom(innerPathsByDepth, +offset, true);
+            var inMeshVert = extruder.getVerticalGeom(innerPathsByDepth, outerPathsByDepth, +offset, true);
             if (inMeshVert) {
                 offset = inMeshVert.offset;
             }
             res.inMesh = geomHelper.mergeMeshes([inMeshHor, inMeshVert], false);
         }
         if (options.outMesh) {
-            var outMesh = extruder.getVerticalGeom(outerPathsByDepth, 0, false);
+            var outMesh = extruder.getVerticalGeom(outerPathsByDepth, null, 0, true);
             res.outMesh = outMesh;
         }
 
@@ -64,9 +64,9 @@ var extruder = {
         return res;
     },
 
-    getVerticalGeom: function getVerticalGeom(innerPathsByDepth) {
-        var offset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-        var invertNormal = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+    getVerticalGeom: function getVerticalGeom(innerPathsByDepth, toMarkPaths) {
+        var offset = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+        var invertNormal = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
 
         var geom = [];
 
@@ -78,7 +78,7 @@ var extruder = {
                 for (var indexPtDwn in path) {
                     var idxPtDwn = indexPtDwn;
                     var idxNPtDwn = (+indexPtDwn + 1) % path.length;
-                    var currgeom = geomHelper.getOneVerticalGeom(idxPtDwn, idxNPtDwn, +indexDepth, path, innerPathsByDepth, +offset, invertNormal);
+                    var currgeom = geomHelper.getOneVerticalGeom(idxPtDwn, idxNPtDwn, +indexDepth, path, innerPathsByDepth, toMarkPaths, +offset, invertNormal);
                     if (!currgeom) {
                         continue;
                     }
@@ -147,13 +147,12 @@ var extruder = {
             stack++;
         }
         for (var _i2 in outerPaths) {
+            outerPaths[_i2] = pathHelper.deepSimplifyPaths(outerPaths[_i2]);
+            innerPaths[_i2] = pathHelper.deepSimplifyPaths(innerPaths[_i2]);
 
             pathHelper.setDirectionPaths(outerPaths[_i2], -1);
             pathHelper.setDirectionPaths(innerPaths[_i2], -1);
             pathHelper.setDirectionPaths(horrizontalPaths[_i2], 1);
-
-            outerPaths[_i2] = pathHelper.simplifyPaths(outerPaths[_i2]);
-            innerPaths[_i2] = pathHelper.simplifyPaths(innerPaths[_i2]);
         }
 
         outerPaths = outerPaths.reverse();

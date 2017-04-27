@@ -5,6 +5,7 @@ var geomHelper = require("./geom-helper.js");
 var exportHelper = require("./export-helper.js");
 var drawHelper = require("./draw-helper.js");
 var pathHelper = require("./path-helper.js");
+var constants = require("./constants.js");
 
 var holesIn = {
 
@@ -27,7 +28,9 @@ var holesIn = {
     getInterOfPaths: pathHelper.getInterOfPaths,
     getMatchingEdgeIndex: pathHelper.getMatchingEdgeIndex,
     setDirectionPath: pathHelper.setDirectionPath,
-    hasAnIncludedSegment: pathHelper.hasAnIncludedSegment
+    hasAnIncludedSegment: pathHelper.hasAnIncludedSegment,
+
+    scaleFactor: constants.scaleFactor
 
 };
 

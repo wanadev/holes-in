@@ -381,6 +381,26 @@ var pathHelper = {
 
     isInRange: function isInRange(ptOrigin, ptDest, pt) {
         return pt.X >= ptOrigin.X && pt.X <= ptDest.X && pt.Y >= ptOrigin.Y && pt.Y <= ptDest.Y;
+    },
+
+    deepSimplifyPaths: function deepSimplifyPaths(paths) {
+        paths = pathHelper.simplifyPaths(paths);
+        for (var i in paths) {
+            var path = paths[i];
+            for (var j = 0; j < path.length; j++) {
+                var curr = path[j];
+                var next = path[(j + 1) % path.length];
+
+                if (Math.abs(curr.X - next.X) < 10 && Math.abs(curr.Y - next.Y) < 10) {
+                    paths[i] = path.splice(j, 1);
+                    console.log("removed");
+                }
+            }
+            if (path.length < 3) {
+                paths = paths.splice(i, 1);
+            }
+        }
+        return paths;
     }
 
 };
