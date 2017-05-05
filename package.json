@@ -1,6 +1,6 @@
 {
   "name": "holes-in",
-  "version": "0.3.45",
+  "version": "0.3.46",
   "description": "Generates a 3D mesh from a 2D outer path and 2D inner paths",
   "main": "lib-es5/index.js",
   "scripts": {
