@@ -12,7 +12,7 @@ var extruder = {
      * returns a mesh from an outer shape and holes
      */
     getGeometry: function getGeometry(outerShape, holes) {
-        var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : { inMesh: true, outMesh: true, frontMesh: true, backMesh: true, inMeshHorrizontal: true };
+        var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : { inMesh: true, outMesh: true, frontMesh: true, backMesh: true, horrizontalMesh: true, doNotBuild: [] };
 
 
         // get the topology 2D paths by depth
@@ -41,24 +41,18 @@ var extruder = {
         }
         if (options.inMesh) {
             uvHelper.mapVertical(innerPathsByDepth, outerShape, options);
+            res.inMesh = extruder.getVerticalGeom(innerPathsByDepth, outerPathsByDepth, 0, true);
+        }
+        if (options.horrizontalMesh) {
             var indexes = [];
             for (var i = 1; i < horrizontalPathsByDepth.length - 1; i++) {
                 indexes.push(i);
             }
-            var offset = 0;
-            var inMeshHor = void 0;
-            if (options.inMeshHorrizontal) {
-                inMeshHor = extruder.getHorrizontalGeom(horrizontalPathsByDepth, indexes, 0);
-                if (inMeshHor) {
-                    uvHelper.mapHorrizontal(innerPathsByDepth, outerShape, inMeshHor, options);
-                    offset = inMeshHor.offset;
-                }
+            var meshHor = extruder.getHorrizontalGeom(horrizontalPathsByDepth, indexes, 0);
+            if (meshHor) {
+                uvHelper.mapHorrizontal(innerPathsByDepth, outerShape, meshHor, options);
             }
-            var inMeshVert = extruder.getVerticalGeom(innerPathsByDepth, outerPathsByDepth, +offset, true);
-            if (inMeshVert) {
-                offset = inMeshVert.offset;
-            }
-            res.inMesh = geomHelper.mergeMeshes([inMeshHor, inMeshVert], false);
+            res.horrizontalMesh = meshHor;
         }
         if (options.outMesh) {
             var outMesh = extruder.getVerticalGeom(outerPathsByDepth, null, 0, false);
@@ -153,8 +147,8 @@ var extruder = {
             stack++;
         }
         for (var _i2 in outerPaths) {
-            outerPaths[_i2] = pathHelper.deepSimplifyPaths(outerPaths[_i2]);
-            innerPaths[_i2] = pathHelper.deepSimplifyPaths(innerPaths[_i2]);
+            outerPaths[_i2] = pathHelper.cleanPaths(outerPaths[_i2]);
+            innerPaths[_i2] = pathHelper.cleanPaths(innerPaths[_i2]);
 
             pathHelper.setDirectionPaths(outerPaths[_i2], -1);
             pathHelper.setDirectionPaths(innerPaths[_i2], -1);

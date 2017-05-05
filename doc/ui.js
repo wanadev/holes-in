@@ -13,7 +13,7 @@ let vertexData;
 let mesh;
 let material;
 let texture;
-let options= {inMesh:true, outMesh:true, frontMesh:true, backMesh:true,
+let options= {inMesh:true, outMesh:true, frontMesh:true, backMesh:false, horrizontalMesh:true,
             wireframe:false, backFaceCulling:false,normals:false,
             animate: false,isoRatioUV:true,swapToBabylon:true,
 
@@ -69,10 +69,14 @@ function animatePaths(){
 function updateMesh(){
 
 if(!meshDirty){return;}
-
+    if(!holes){ holes  = JSON.parse(JSON.stringify(baseholes));}
 
     let cpyOut= JSON.parse(JSON.stringify(outerShape));
     let cpyIn= JSON.parse(JSON.stringify(holes));
+
+    options.doNotBuild = JSON.parse(JSON.stringify([cpyOut.path]));
+    doNotBuild(options);
+
   let geom= holesIn.getGeometry(cpyOut,cpyIn,options,options);
   const geomCpy = JSON.parse(JSON.stringify(geom));
   console.log("geom: ",geomCpy);
@@ -80,10 +84,10 @@ if(!meshDirty){return;}
   if(geomCpy.backMesh) console.log("back: ",geomCpy.backMesh.faces.length);
   if(geomCpy.outMesh) console.log("out: ",geomCpy.outMesh.faces.length);
   if(geomCpy.inMesh) console.log("in: ",geomCpy.inMesh.faces.length);
+  if(geomCpy.horrizontalMesh) console.log("horr: ",geomCpy.horrizontalMesh.faces.length);
 
 
-
-  let geomMerged= holesIn.mergeMeshes([geom.frontMesh, geom.backMesh, geom.inMesh, geom.outMesh]);
+  let geomMerged= holesIn.mergeMeshes([geom.frontMesh, geom.backMesh, geom.inMesh, geom.outMesh,geom.horrizontalMesh]);
   // console.log("geomMerged", geomMerged);
   let nullMesh= false;
   if(!geomMerged){
@@ -198,7 +202,7 @@ function createMesh(){
    material.wireframe=options.wireframe;
    material.backFaceCulling = options.backFaceCulling;
 
-   texture= new BABYLON.Texture("./images/damier.png", scene);
+   texture= new BABYLON.Texture("./images/damier.jpg", scene);
    material.diffuseTexture= texture;
    mesh.material= material;
 }
@@ -225,7 +229,7 @@ function initBabylon(){
         scene.render();
 
         animatePaths();
-        displayPaths(canvas2d);
+        // displayPaths(canvas2d);
         updateMesh();
       });
 }
