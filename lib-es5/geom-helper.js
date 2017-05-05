@@ -189,7 +189,7 @@ var geomHelper = {
         var uvs = [u, vUp, u, vDwn, nu, vDwn, nu, vUp];
         (_geom$uvs = geom.uvs).push.apply(_geom$uvs, uvs);
     },
-    getHorrizontalGeom: function getHorrizontalGeom(triangles) {
+    getHorizontalGeom: function getHorizontalGeom(triangles) {
         var offset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
         var invertNormal = arguments[2];
 

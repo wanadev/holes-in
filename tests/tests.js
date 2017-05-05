@@ -25,8 +25,8 @@ describe('Holes in', function() {
                     expect(geom.outMesh.faces).to.have.length(test.outMesh);
                 if (test.inMesh)
                     expect(geom.inMesh.faces).to.have.length(test.inMesh);
-                if (test.horrizontalMesh)
-                    expect(geom.horrizontalMesh.faces).to.have.length(test.horrizontalMesh);
+                if (test.horizontalMesh)
+                    expect(geom.horizontalMesh.faces).to.have.length(test.horizontalMesh);
             });
             i++;
         });
@@ -46,8 +46,8 @@ describe('Holes in', function() {
                     expect(geom.outMesh.faces).to.have.length(test.outMesh);
                 if (test.inMesh)
                     expect(geom.inMesh.faces).to.have.length(test.inMesh);
-                if (test.horrizontalMesh)
-                    expect(geom.horrizontalMesh.faces).to.have.length(test.horrizontalMesh);
+                if (test.horizontalMesh)
+                    expect(geom.horizontalMesh.faces).to.have.length(test.horizontalMesh);
 
             });
             i++;
@@ -58,7 +58,7 @@ describe('Holes in', function() {
             it('returns coherent points normals faces uvs, test index= ' + i, function() {
                 const options = getholes.getDefaultOptions();
                 let geom = holesIn.getGeometry(test.outerShape, test.holes, options);
-                let geomMerged = holesIn.mergeMeshes([geom.inMesh, geom.outMesh, geom.frontMesh, geom.backMesh, geom.horrizontalMesh]);
+                let geomMerged = holesIn.mergeMeshes([geom.inMesh, geom.outMesh, geom.frontMesh, geom.backMesh, geom.horizontalMesh]);
                 let numPoints = new Set(geomMerged.faces).size;
                 expect(geomMerged.points).to.have.length(numPoints * 3);
                 expect(geomMerged.normals).to.have.length(numPoints * 3);
@@ -75,7 +75,8 @@ describe('Holes in', function() {
                 getholes.doNotBuild(options, [test.outerShape.path]);
                 options.backMesh = false;
                 let geom = holesIn.getGeometry(test.outerShape, test.holes, options);
-                let geomMerged = holesIn.mergeMeshes([geom.inMesh, geom.outMesh, geom.frontMesh, geom.backMesh, geom.horrizontalMesh]);
+                let geomMerged = holesIn.mergeMeshes([geom.inMesh, geom.outMesh, geom.frontMesh, geom.backMesh, geom.horizontalMesh]);
+                console.log("geom",geom, "geomMerged",geomMerged );
                 let numPoints = new Set(geomMerged.faces).size;
                 expect(geomMerged.points).to.have.length(numPoints * 3);
                 expect(geomMerged.normals).to.have.length(numPoints * 3);
