@@ -76,7 +76,6 @@ describe('Holes in', function() {
                 options.backMesh = false;
                 let geom = holesIn.getGeometry(test.outerShape, test.holes, options);
                 let geomMerged = holesIn.mergeMeshes([geom.inMesh, geom.outMesh, geom.frontMesh, geom.backMesh, geom.horizontalMesh]);
-                console.log("geom",geom, "geomMerged",geomMerged );
                 let numPoints = new Set(geomMerged.faces).size;
                 expect(geomMerged.points).to.have.length(numPoints * 3);
                 expect(geomMerged.normals).to.have.length(numPoints * 3);
