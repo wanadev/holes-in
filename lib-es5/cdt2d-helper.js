@@ -38,8 +38,8 @@ var cdt2dHelper = {
     },
     clipperTocdt2d: function clipperTocdt2d(points) {
         var res = [];
-        for (var i in points) {
-            for (var j in points[i]) {
+        for (var i = 0; i < points.length; i++) {
+            for (var j = 0; j < points[i].length; j++) {
                 res.push(cdt2dHelper.clipperPointTocdt2dPoint(points[i][j]));
             }
         }

@@ -15,9 +15,7 @@ autotoc: false
 </style>
 
 <script src="./holes-in.js"></script>
-<script src="./babylon.js"></script>
-<script src="./holes.js"></script>
-<script src="./ui.js"></script>
+<script src="./ui-bundle.js"></script>
 
 
 <canvas id="babylon" width="512" height="256" ></canvas>
@@ -34,10 +32,4 @@ autotoc: false
 <div><label>Move Paths <input type="checkbox" data-target="animate" checked="true"></label></div>
 
 
-
-
-
-
 </div>
-
-<script>window.onload=initBabylon</script>

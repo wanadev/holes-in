@@ -118,7 +118,7 @@ var pathHelper = {
      *  sets the direction of an array of path
      */
     setDirectionPaths: function setDirectionPaths(paths, direction) {
-        for (var i in paths) {
+        for (var i = 0; i < paths.length; i++) {
             pathHelper.setDirectionPath(paths[i], direction);
         }
     },
@@ -184,52 +184,6 @@ var pathHelper = {
 
         clipperLib.JS.ScaleDownPaths(paths, scale);
     },
-
-
-    /*
-        addColinearPointsPaths: function(paths, toAdd){
-    
-            for(let i in paths){
-                for(let j in toAdd){
-                    paths[i]= pathHelper.addColinearPointsPath(paths[i], toAdd[j]);
-                }
-            }
-    
-        },
-    
-        addColinearPointsPath: function(path,toAdd ){
-    
-            let resPath=[];
-            let addedIndexes=[];
-            for(let i =0;i< path.length; i++){
-                let pt1= path[i];
-                let pt2= path[(i+1)%path.length];
-    
-                resPath.push(pt1)
-                for(let j =0;j<= toAdd.length; j++){
-                    let idx1= j%toAdd.length;
-                    let idx2= (j+1)%toAdd.length;
-                    let add1= toAdd[idx1];
-                    let add2= toAdd[idx2];
-                    if(!pathHelper.isAligned(pt1, pt2, add1, add2)){continue;}
-    
-                    if(!pathHelper.isEqual(pt1, add2)&& !pathHelper.isEqual(pt2, add2)&&
-                       !addedIndexes.includes(idx2)  && pathHelper.inOnSegment(pt1,pt2,add2) ){
-                        resPath.push(add2);
-                        addedIndexes.push(idx2);
-                    }
-    
-                    if(!pathHelper.isEqual(pt1, add1)&& !pathHelper.isEqual(pt2, add1)&&
-                       !addedIndexes.includes(idx1)  && pathHelper.inOnSegment(pt1,pt2,add1)){
-                        resPath.push(add1);
-                        addedIndexes.push(idx1);
-                    }
-    
-                }
-            }
-            return resPath;
-        },*/
-
     getMatchingEdgeIndex: function getMatchingEdgeIndex(path, pathToMatch) {
         var offset = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
 
@@ -321,20 +275,6 @@ var pathHelper = {
         var ratio = Math.abs(a / b);
         return ratio > 1 - epsilon && ratio < 1 + epsilon;
     },
-
-
-    /*
-        isAligned(e11, e12, e21, e22) {
-            const edge1 = pathHelper.getEdge(e11, e12);
-            const edge2 = pathHelper.getEdge(e11, e21);
-            const edge3 = pathHelper.getEdge(e11, e22);
-            return pathHelper.isColinear(edge1, edge2) && pathHelper.isColinear(edge1, edge3);
-        },
-    
-        isColinear(edge1, edge2) {
-            return edge1.X * edge2.Y === (edge1.Y * edge2.X);
-        },
-    */
     getEdge: function getEdge(point1, point2) {
         return {
             X: point2.X - point1.X,
@@ -403,7 +343,7 @@ var pathHelper = {
         return pt.X >= ptOrigin.X && pt.X <= ptDest.X && pt.Y >= ptOrigin.Y && pt.Y <= ptDest.Y;
     },
     cleanPaths: function cleanPaths(paths) {
-        return clipperLib.Clipper.CleanPolygons(paths, 1.1);
+        return clipperLib.Clipper.CleanPolygons(paths, 1.5);
     }
 };
 module.exports = pathHelper;

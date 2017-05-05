@@ -73,11 +73,10 @@ var extruder = {
         for (var indexDepth = innerPathsByDepth.length - 1; indexDepth > 0; indexDepth--) {
             var pathsAtDepth = innerPathsByDepth[indexDepth].paths;
             // for each point at each path at each depth we look for the corresponding point into the upper paths:
-            for (var i in pathsAtDepth) {
+            for (var i = 0; i < pathsAtDepth.length; i++) {
                 var path = pathsAtDepth[i];
-                for (var indexPtDwn in path) {
-                    var idxPtDwn = indexPtDwn;
-                    var idxNPtDwn = (+indexPtDwn + 1) % path.length;
+                for (var idxPtDwn = 0; idxPtDwn < path.length; idxPtDwn++) {
+                    var idxNPtDwn = (idxPtDwn + 1) % path.length;
                     var currgeom = geomHelper.getOneVerticalGeom(idxPtDwn, idxNPtDwn, +indexDepth, path, innerPathsByDepth, toMarkPaths, +offset, invertNormal);
                     if (!currgeom) {
                         continue;
@@ -99,7 +98,7 @@ var extruder = {
         var invertNormal = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
 
         var horrGeom = [];
-        for (var i in indexes) {
+        for (var i = 0; i < indexes.length; i++) {
             var totaltopo = horrizontalPathsByDepth[indexes[i]].paths;
             var triangles = cdt2dHelper.computeTriangulation(totaltopo);
             triangles.depth = horrizontalPathsByDepth[indexes[i]].depth;
@@ -116,7 +115,7 @@ var extruder = {
         var horrizontalPaths = [];
 
         pathHelper.scaleUpPath(outerShape.path);
-        for (var i in holes) {
+        for (var i = 0; i < holes.length; i++) {
             pathHelper.scaleUpPath(holes[i].path);
         }
         var holesByDepth = extruder.getHolesByDepth(holes, outerShape);
@@ -146,20 +145,21 @@ var extruder = {
             horrizontalPaths.push(horrizontalPath);
             stack++;
         }
-        for (var _i2 in outerPaths) {
+        for (var _i2 = 0; _i2 < outerPaths.length; _i2++) {
             outerPaths[_i2] = pathHelper.cleanPaths(outerPaths[_i2]);
             innerPaths[_i2] = pathHelper.cleanPaths(innerPaths[_i2]);
+            horrizontalPaths[_i2] = pathHelper.cleanPaths(horrizontalPaths[_i2]);
 
             pathHelper.setDirectionPaths(outerPaths[_i2], -1);
             pathHelper.setDirectionPaths(innerPaths[_i2], -1);
-            pathHelper.setDirectionPaths(horrizontalPaths[_i2], 1);
+            pathHelper.setDirectionPaths(horrizontalPaths[_i2], -1);
         }
 
         outerPaths = outerPaths.reverse();
         innerPaths = innerPaths.reverse();
         horrizontalPaths = horrizontalPaths.reverse();
 
-        for (var _i3 in holesByDepth) {
+        for (var _i3 = 0; _i3 < holesByDepth.length; _i3++) {
             outerPaths[_i3] = { paths: outerPaths[_i3], depth: holesByDepth[_i3].depth };
             innerPaths[_i3] = { paths: innerPaths[_i3], depth: holesByDepth[_i3].depth };
             horrizontalPaths[_i3] = { paths: horrizontalPaths[_i3], depth: holesByDepth[_i3].depth };
@@ -192,7 +192,7 @@ var extruder = {
 
         // get all depths:
         var depths = new Set();
-        for (var i in holes) {
+        for (var i = 0; i < holes.length; i++) {
             if (holes[i].depth < outerShape.depth) {
                 depths.add(holes[i].depth);
             }
@@ -208,7 +208,7 @@ var extruder = {
         holes = holes.filter(function (hole) {
             return hole.path !== undefined;
         });
-        for (var _i4 in holes) {
+        for (var _i4 = 0; _i4 < holes.length; _i4++) {
             pathHelper.displaceColinearEdges(outerShape.path, holes[_i4].path);
         }
 
@@ -240,12 +240,12 @@ var extruder = {
             });
         };
 
-        for (var _i5 in depths) {
+        for (var _i5 = 0; _i5 < depths.length; _i5++) {
             _loop(_i5);
         }
 
         // gets the difference between keep and stop:
-        for (var _i6 in depths) {
+        for (var _i6 = 0; _i6 < depths.length; _i6++) {
             res[_i6].stop = pathHelper.getDiffOfPaths(res[_i6].stop, res[_i6].keep);
         }
 
@@ -259,7 +259,7 @@ var extruder = {
             var edge = edges[j];
             for (var i = pathsByDepth.length - 1; i >= 0; i--) {
                 var paths = pathsByDepth[i].paths;
-                for (var k in paths) {
+                for (var k = 0; k < paths.length; k++) {
                     var path = paths[k];
                     var toMark = pathHelper.getPointsOnEdge(path, edge);
                     toMark.map(function (pt) {

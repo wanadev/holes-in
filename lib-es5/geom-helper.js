@@ -117,7 +117,7 @@ var geomHelper = {
         }
         for (var i = depth; i >= 0; i--) {
             var paths = toMarkPaths[i].paths;
-            for (var j in paths) {
+            for (var j = 0; j < paths.length; j++) {
                 var match1 = pathHelper.getPointMatch(paths[j], pointA);
                 var match2 = pathHelper.getPointMatch(paths[j], pointB);
                 if (!match1 || !match2) {
@@ -205,20 +205,20 @@ var geomHelper = {
 
         var points = [];
 
-        for (var i in triangles.points) {
+        for (var i = 0; i < triangles.points.length; i++) {
             points.push(triangles.points[i][0] / constants.scaleFactor);
             points.push(triangles.points[i][1] / constants.scaleFactor);
             points.push(depth);
         }
 
         if (!invertNormal) {
-            for (var _i in triangles.triangles) {
+            for (var _i = 0; _i < triangles.triangles.length; _i++) {
                 triangles.triangles[_i].reverse();
             }
         }
         // offsets faces
         var faces = [];
-        for (var _i2 in triangles.triangles) {
+        for (var _i2 = 0; _i2 < triangles.triangles.length; _i2++) {
             faces.push.apply(faces, _toConsumableArray(triangles.triangles[_i2].map(function (index) {
                 return index + offset;
             }))); // eslint-disable-line
@@ -235,7 +235,7 @@ var geomHelper = {
         var pt3 = points.slice(idxs[2], idxs[2] + 3);
         var normal = geomHelper.getNormalToPlan(pt1, pt2, pt3);
 
-        for (var _i3 in triangles.points) {
+        for (var _i3 = 0; _i3 < triangles.points.length; _i3++) {
             // eslint-disable-line
             normals.push.apply(normals, _toConsumableArray(normal));
         }
