@@ -2,15 +2,15 @@
 const BABYLON  = require("./babylon.js")
 let getholes = require("../holes.js");
 
-let options= {inMesh:true, outMesh:true, frontMesh:true, backMesh:false, horizontalMesh:true,
+let options= {inMesh:false, outMesh:true, frontMesh:false, backMesh:false, horizontalMesh:false,
             wireframe:false, backFaceCulling:false,normals:false,
             animate: false,isoRatioUV:true,swapToBabylon:true,displayNormals:true
             };
 
 let baseholes, holes, outerShape;
-getData("getTestDoNotBuild", 4);
-options.doNotBuild = JSON.parse(JSON.stringify([outerShape.path]));
-getholes.doNotBuild(options);
+getData("getTestsKaza", 0);
+// options.doNotBuild = JSON.parse(JSON.stringify([outerShape.path]));
+// getholes.doNotBuild(options);
 
 
 let colors= ["#c02525","#84c025","#8d4ead"];

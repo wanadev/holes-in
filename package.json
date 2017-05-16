@@ -1,6 +1,6 @@
 {
   "name": "holes-in",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Generates a 3D mesh from a 2D outer path and 2D inner paths",
   "main": "lib-es5/index.js",
   "scripts": {
@@ -11,7 +11,7 @@
     "build-uglify": "uglifyjs dist/holes-in.js -o dist/holes-in.min.js",
     "build-doc": "./node_modules/.bin/enlightme",
     "watchify": "mkdir -p dist && watchify -v --debug -s holes-in lib/index.js -o dist/holes-in.js && npm run build",
-    "watchifyUI": "watchify -v --debug doc/js/index.js -o doc/ui-bundle.js",
+    "watchifyUI": "watchify -v --debug doc/js/index.js -o doc.generated/ui-bundle.js",
     "prepublish": "npm run build-es5"
   },
   "repository": {
