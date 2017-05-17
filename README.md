@@ -1,5 +1,7 @@
 # holes-in
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/wanadev/holes-in.svg)](https://greenkeeper.io/)
+
 [![Build Status](https://travis-ci.org/wanadev/holes-in.svg?branch=master)](https://travis-ci.org/wanadev/holes-in)
 [![NPM Version](http://img.shields.io/npm/v/holes-in.svg?style=flat)](https://www.npmjs.com/package/holes-in)
 [![License](http://img.shields.io/npm/l/holes-in.svg?style=flat)](https://github.com/wanadev/holes-in/blob/master/LICENSE)
