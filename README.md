@@ -5,6 +5,8 @@
 [![License](http://img.shields.io/npm/l/holes-in.svg?style=flat)](https://github.com/wanadev/holes-in/blob/master/LICENSE)
 [![Dependencies](https://img.shields.io/david/wanadev/holes-in.svg?maxAge=2592000)]()
 [![Dev Dependencies](https://img.shields.io/david/dev/wanadev/holes-in.svg?maxAge=2592000)]()
+[![Greenkeeper badge](https://badges.greenkeeper.io/wanadev/holes-in.svg)](https://greenkeeper.io/)
+
 
 > A javascript library to generate 3D mesh from a 2D outer path and 2D inner paths.
 
