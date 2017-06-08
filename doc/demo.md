@@ -7,9 +7,9 @@ autotoc: false
 # Demo
 <style>
 #paths {
-    -ms-transform: rotate(180deg); /* IE 9 */
+/*     -ms-transform: rotate(180deg); /* IE 9 */
     -webkit-transform: rotate(180deg); /* Safari */
-    transform: rotate(180deg); /* Standard syntax */
+    transform: rotate(180deg); Standard syntax */
     margin: auto;
 }
 </style>

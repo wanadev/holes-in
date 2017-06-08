@@ -8,7 +8,7 @@ let options= {inMesh:false, outMesh:true, frontMesh:false, backMesh:false, horiz
             };
 
 let baseholes, holes, outerShape;
-getData("getTestsKaza", 0);
+getData("getTestPaths", 0);
 // options.doNotBuild = JSON.parse(JSON.stringify([outerShape.path]));
 // getholes.doNotBuild(options);
 
@@ -122,10 +122,10 @@ if(!meshDirty){return;}
   }
   mesh.material= material;
 
+/*
   scene.meshes.filter( mesh => mesh.name === "lines"  ).forEach( mesh => mesh.dispose());
   if(options.displayNormals)
-   displayNormals(geomMerged);
-
+   displayNormals(geomMerged);*/
 }
 
 function displayNormals(geom){
@@ -234,7 +234,7 @@ function initBabylon(){
         scene.render();
 
         animatePaths();
-        // displayPaths(canvas2d);
+        displayPaths(canvas2d);
         updateMesh();
       });
 }

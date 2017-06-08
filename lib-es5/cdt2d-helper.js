@@ -29,6 +29,7 @@ var cdt2dHelper = {
         return res;
     },
     pathToEdges: function pathToEdges(path, offset) {
+        if (path.length === 0) return [];
         var res = [];
         for (var i = 0; i < path.length - 1; i++) {
             res.push([offset + i, offset + i + 1]);
