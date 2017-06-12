@@ -6,8 +6,8 @@
   "scripts": {
     "test": "npm run build && mocha tests/tests.js",
     "build": "npm run build-es5 && npm run build-dist && npm run build-uglify",
-    "build-dist": "mkdir -p dist/ && browserify -t [ babelify --presets [ es2015 ] ] -s holesIn lib/index.js -o dist/holes-in.js",
-    "build-es5": "cd lib/ && babel *.js -d ../lib-es5",
+    "build-dist": "mkdir -p dist/ && browserify -t [ env babelify --presets [ es2015 ] ] -s holesIn lib/index.js -o dist/holes-in.js",
+    "build-es5": "cd lib/ && env babel *.js -d ../lib-es5",
     "build-uglify": "uglifyjs dist/holes-in.js -o dist/holes-in.min.js",
     "build-doc": "./node_modules/.bin/enlightme",
     "watchify": "mkdir -p dist && watchify -v --debug -s holes-in lib/index.js -o dist/holes-in.js && npm run build",
@@ -31,7 +31,6 @@
   },
   "homepage": "https://github.com/wanadev/holes-in#readme",
   "devDependencies": {
-    "babel": "^6.23.0",
     "babel-cli": "^6.24.1",
     "babel-preset-es2015": "^6.22.0",
     "babelify": "^7.3.0",
