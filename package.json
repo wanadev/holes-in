@@ -12,6 +12,8 @@
     "build-doc": "./node_modules/.bin/enlightme",
     "watchify": "mkdir -p dist && watchify -v --debug -s holes-in lib/index.js -o dist/holes-in.js && npm run build",
     "watchifyUI": "watchify -v --debug doc/js/index.js -o doc.generated/ui-bundle.js",
+    "watchifyDebug": "watchify -v --debug debug/js/index.js -o debug/dist/debuglib.js",
+    "watchifyAll": "npm run watchify & npm run watchifyUI & npm run watchifyDebug",
     "prepublish": "npm run build-es5"
   },
   "repository": {
@@ -41,10 +43,11 @@
     "jshint": "^2.9.4",
     "mocha": "^3.2.0",
     "uglify-js": "^3.0.16",
-    "watchify": "^3.9.0"
+    "watchify": "^3.9.0",
+    "store": "^2.0.12"
   },
   "dependencies": {
     "cdt2d": "^1.0.0",
-    "clipper-lib": "git+https://github.com/wanadev/clipper-lib.git"
+    "clipper-lib": "git+https://github.com/wanadev/clipper-lib.git",
   }
 }

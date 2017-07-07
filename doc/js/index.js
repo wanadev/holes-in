@@ -2,13 +2,13 @@
 const BABYLON  = require("./babylon.js")
 let getholes = require("../holes.js");
 
-let options= {inMesh:false, outMesh:true, frontMesh:false, backMesh:false, horizontalMesh:false,
+let options= {inMesh:true, outMesh:true, frontMesh:true, backMesh:true, horizontalMesh:true,
             wireframe:false, backFaceCulling:false,normals:false,
             animate: false,isoRatioUV:true,swapToBabylon:true,displayNormals:true
             };
 
 let baseholes, holes, outerShape;
-getData("getTestPaths", 0);
+getData("getTestPaths", 10);
 // options.doNotBuild = JSON.parse(JSON.stringify([outerShape.path]));
 // getholes.doNotBuild(options);
 

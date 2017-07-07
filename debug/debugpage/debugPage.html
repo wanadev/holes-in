@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <title>Debugger Holes in</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script type="text/javascript" src="../../dist/holes-in.js"></script>
+    <script type="text/javascript" src="../dist/debuglib.js"></script>
+
+
+  </head>
+  <body>
+      <div id="input">
+          <div id="data" class = "block">
+              <div>
+                  <label>outerShape
+
+                      <textarea id = "outerShape">{ "path": [ {"X":50,"Y":50}, {"X":150,"Y":50}, {"X":150,"Y":150}, {"X":50,"Y":150} ], "depth":100}
+                      </textarea>
+                  </label>
+              </div>
+              <!--
+              {"path":[{"X":-205.31347,"Y":40.82987},{"X":-349.39021,"Y":29.09185},{"X":-690.76716,"Y":72.94609},{"X":-543.93586,"Y":84.33026}],"depth":250}
+          -->
+
+              <!--  [{"path":[{"X":-366.56312,"Y":337.86501},{"X":-607.5471,"Y":345.39576},{"X":-625.51538,"Y":-229.58911},{"X":-362.9509,"Y":-237.79425}],"depth":0.1},{"path":[{"X":-615.87971,"Y":78.75229},{"X":-690.76716,"Y":72.94609},{"X":-616.35986,"Y":63.38752}],"depth":0.1},{"path":[{"X":-205.31347,"Y":40.82987},{"X":-364.82783,"Y":61.32154},{"X":-364.63788,"Y":31.05061},{"X":-349.39021,"Y":29.09185}],"depth":0.1}]
+              -->
+              <div>
+                  <label>holes
+
+                      <textarea id = "holes">[{ "path": [{"X":70,"Y":70},{"X":70,"Y":90},{"X":90,"Y":90},{"X":90,"Y":70}], "depth": 25 },
+                         { "path": [{"X":75,"Y":75},{"X":75,"Y":90},{"X":105,"Y":90},{"X":105,"Y":75}], "depth": 30 }]
+                    </textarea>
+                </label>
+              </div>
+              <div>
+                  <label>doNotBuild
+                      <textarea id = "doNotBuild">
+
+                      </textarea>
+                </label>
+              </div>
+          </div>
+          <div id="generated-data" class = "block">
+
+          </div>
+
+          <div id ="option" class = "block">
+              <div><label><input type="checkbox" data-target="inMesh" checked="true">Inner Mesh Generation</label></div>
+              <div><label><input type="checkbox" data-target="outMesh" checked="true">Outer Mesh Generation</label></div>
+              <div><label><input type="checkbox" data-target="frontMesh" checked="true">Front Mesh Generation</label></div>
+              <div><label><input type="checkbox" data-target="backMesh" checked="true">Back Mesh Generation</label></div>
+              <div><label><input type="checkbox" data-target="horizontalMesh" checked="true">Horizontal Mesh Generation</label></div>
+              <div><label><input type="checkbox" data-target="doNotBuild" checked="false">Enable doNotBuild Option</label></div>
+
+              <div><label><input type="checkbox" data-target="wireframe">Wire Frame</label></div>
+              <div><label><input type="checkbox" data-target="backFaceCulling">Back Face Culling</label></div>
+              <div><label><input type="checkbox" data-target="displayNormals" checked="false">Display normals</label></div>
+          </div>
+  </div>
+  <div>
+      <input type = "button" id = "submit" value = "runTest" class = ></input>
+  </div>
+
+
+
+
+
+  <canvas id="babylon"></canvas>
+
+  <div id="container"></div>
+
+  </body>
+</html>
