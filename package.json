@@ -44,12 +44,12 @@
     "mocha": "^3.4.2",
     "store": "^2.0.12",
     "uglify-js": "^3.0.16",
-    "watchify": "^3.9.0"
+    "watchify": "^3.9.0",
+    "lru-cache": "^4.1.1",
+    "sigmund": "^1.0.1",
   },
   "dependencies": {
     "cdt2d": "^1.0.0",
-    "clipper-lib": "git+https://github.com/wanadev/clipper-lib.git",
-    "lru-cache": "^4.1.1",
-    "sigmund": "^1.0.1"
+    "clipper-lib": "git+https://github.com/wanadev/clipper-lib.git"
   }
 }
