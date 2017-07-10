@@ -46,7 +46,7 @@
     "uglify-js": "^3.0.16",
     "watchify": "^3.9.0",
     "lru-cache": "^4.1.1",
-    "sigmund": "^1.0.1",
+    "sigmund": "^1.0.1"
   },
   "dependencies": {
     "cdt2d": "^1.0.0",
