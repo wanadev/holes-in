@@ -1,5 +1,7 @@
 "use strict";
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 var pathHelper = require("./path-helper.js");
 var geomHelper = require("./geom-helper.js");
 var cdt2dHelper = require("./cdt2d-helper.js");
@@ -98,13 +100,21 @@ var extruder = {
         var invertNormal = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
 
         var horrGeom = [];
-        for (var i = 0; i < indexes.length; i++) {
-            var totaltopo = horizontalPathsByDepth[indexes[i]].paths;
-            var triangles = cdt2dHelper.computeTriangulation(totaltopo);
-            triangles.depth = horizontalPathsByDepth[indexes[i]].depth;
 
-            var horrGeomAtDepth = geomHelper.getHorizontalGeom(triangles, 0, invertNormal);
-            horrGeom.push(horrGeomAtDepth);
+        var _loop = function _loop(i) {
+
+            var allTriangles = horizontalPathsByDepth[indexes[i]].paths.map(function (path) {
+                return cdt2dHelper.computeTriangulation([path]);
+            });
+            var allGeoms = allTriangles.map(function (triangles) {
+                triangles.depth = horizontalPathsByDepth[indexes[i]].depth;
+                return geomHelper.getHorizontalGeom(triangles, 0, invertNormal);
+            });
+            horrGeom.push.apply(horrGeom, _toConsumableArray(allGeoms));
+        };
+
+        for (var i = 0; i < indexes.length; i++) {
+            _loop(i);
         }
         // get points, normal and faces from it:
         return geomHelper.mergeMeshes(horrGeom, true);
@@ -146,9 +156,9 @@ var extruder = {
             stack++;
         }
         for (var _i2 = 0; _i2 < outerPaths.length; _i2++) {
-            outerPaths[_i2] = pathHelper.cleanPaths(outerPaths[_i2]);
-            innerPaths[_i2] = pathHelper.cleanPaths(innerPaths[_i2]);
-            horizontalPaths[_i2] = pathHelper.cleanPaths(horizontalPaths[_i2]);
+            outerPaths[_i2] = pathHelper.cleanPaths(outerPaths[_i2], 3);
+            innerPaths[_i2] = pathHelper.cleanPaths(innerPaths[_i2], 3);
+            horizontalPaths[_i2] = pathHelper.cleanPaths(horizontalPaths[_i2], 3);
 
             pathHelper.setDirectionPaths(outerPaths[_i2], -1);
             pathHelper.setDirectionPaths(innerPaths[_i2], -1);
@@ -215,7 +225,7 @@ var extruder = {
         // get paths by depth:
         var res = [];
 
-        var _loop = function _loop(_i5) {
+        var _loop2 = function _loop2(_i5) {
             var deeperHoles = holes.filter(function (s) {
                 return s.depth > depths[_i5];
             });
@@ -241,7 +251,7 @@ var extruder = {
         };
 
         for (var _i5 = 0; _i5 < depths.length; _i5++) {
-            _loop(_i5);
+            _loop2(_i5);
         }
 
         // gets the difference between keep and stop:

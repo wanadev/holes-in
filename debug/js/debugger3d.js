@@ -32,26 +32,13 @@ const debugger3d = {
 
 
         if(debugger3d.options.doNotBuild) {
-            cpyOptions.doNotBuild = doNotBuild;
+            cpyOptions.doNotBuild = JSON.parse(document.getElementById("doNotBuild").value);
+            holesIn.scaleUpPath(cpyOptions.doNotBuild);
         }
 
-        console.log("options",cpyOptions);
-        console.log("outerShape",debugger3d.outerShape);
-        console.log("holes",debugger3d.holes);
-
-
         let geom= holesIn.getGeometry(cpyOut,cpyHoles,cpyOptions);
-        const geomCpy = JSON.parse(JSON.stringify(geom));
-        console.log("geom: ",geomCpy);
-        if(geomCpy.frontMesh) console.log("front: ",geomCpy.frontMesh.faces.length);
-        if(geomCpy.backMesh) console.log("back: ",geomCpy.backMesh.faces.length);
-        if(geomCpy.outMesh) console.log("out: ",geomCpy.outMesh.faces.length);
-        if(geomCpy.inMesh) console.log("in: ",geomCpy.inMesh.faces.length);
-        if(geomCpy.horizontalMesh) console.log("horr: ",geomCpy.horizontalMesh.faces.length);
-
 
          let geomMerged= holesIn.mergeMeshes([geom.frontMesh, geom.backMesh, geom.inMesh, geom.outMesh,geom.horizontalMesh]);
-         console.log("geomMerged", geomMerged);
          let nullMesh= false;
          if(!geomMerged){
              geomMerged={};
@@ -154,10 +141,6 @@ const debugger3d = {
 
       let canvas3d= document.getElementById("babylon");
       canvas3d.classList.add(debugger3d.cssclass);
-    //   canvas3d.width = debugger3d.canvasWidth;
-    //   canvas3d.height = debugger3d.canvasHeight;
-
-
         debugger3d.engine = new BABYLON.Engine(canvas3d, true);
         debugger3d.scene = new BABYLON.Scene(debugger3d.engine);
         debugger3d.createScene(debugger3d.engine,canvas3d);

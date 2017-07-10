@@ -8,10 +8,7 @@ let options= {inMesh:true, outMesh:true, frontMesh:true, backMesh:true, horizont
             };
 
 let baseholes, holes, outerShape;
-getData("getTestPaths", 10);
-// options.doNotBuild = JSON.parse(JSON.stringify([outerShape.path]));
-// getholes.doNotBuild(options);
-
+getData("getTestPaths", 0);
 
 let colors= ["#c02525","#84c025","#8d4ead"];
 let camera;
@@ -28,26 +25,24 @@ let meshDirty=true;
 let normalDisplay;
 
 
-function getData(func, index) {
-    const test = getholes[func]()[index];
-    baseholes = JSON.parse(JSON.stringify(test.holes));
-    outerShape = JSON.parse(JSON.stringify(test.outerShape));
+function getData() {
+
+    baseholes = [{ path: [{X:70,Y:70},{X:70,Y:90},{X:90,Y:90},{X:90,Y:70}], depth: 30 },
+                 { path: [{X:75,Y:75},{X:75,Y:90},{X:105,Y:90},{X:105,Y:75}], depth: 20 },
+                 { path: [{X:75,Y:60},{X:75,Y:180},{X:100,Y:180},{X:100,Y:60}], depth: 0 }];
+
+    outerShape = { path: [ {X:50,Y:50}, {X:150,Y:50}, {X:150,Y:150}, {X:50,Y:150} ], depth:100};
 }
 
 
 function displayPaths(canvas){
-    // if(!dirty) return;
     let ctx= canvas.getContext("2d");
-
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
    holesIn.drawPath(ctx, outerShape.path,point0 ,"#00494f");
    for(let i in holes){
        holesIn.drawPath(ctx ,holes[i].path,point0 ,colors[i]);
    }
-
    dirty=false;
-
 }
 
 function animatePaths(){
@@ -58,12 +53,9 @@ function animatePaths(){
         {
             if(i%3==0){
                 movePath(baseholes[i].path,holes[i].path,-10,100, "X");
-                //  animateScale(baseholes[i].path,holes[i].path, "X",1.0,1.5);
             }
             else if (i%3==1){
                 movePath(baseholes[i].path,holes[i].path,-10,100, "Y");
-                // animateScale(baseholes[i].path,holes[i].path, "Y",1.0,1.5);
-
             }
             else{
                 movePath(baseholes[i].path,holes[i].path,20,100, "Y");
@@ -85,19 +77,11 @@ if(!meshDirty){return;}
 
  let cpyOut= JSON.parse(JSON.stringify(outerShape));
  let cpyIn= JSON.parse(JSON.stringify(holes));
- console.log("options",options);
-  let geom= holesIn.getGeometry(cpyOut,cpyIn,options,options);
-  const geomCpy = JSON.parse(JSON.stringify(geom));
-  console.log("geom: ",geomCpy);
-  if(geomCpy.frontMesh) console.log("front: ",geomCpy.frontMesh.faces.length);
-  if(geomCpy.backMesh) console.log("back: ",geomCpy.backMesh.faces.length);
-  if(geomCpy.outMesh) console.log("out: ",geomCpy.outMesh.faces.length);
-  if(geomCpy.inMesh) console.log("in: ",geomCpy.inMesh.faces.length);
-  if(geomCpy.horizontalMesh) console.log("horr: ",geomCpy.horizontalMesh.faces.length);
+ let geom= holesIn.getGeometry(cpyOut,cpyIn,options,options);
+ const geomCpy = JSON.parse(JSON.stringify(geom));
 
+ let geomMerged= holesIn.mergeMeshes([geom.frontMesh, geom.backMesh, geom.inMesh, geom.outMesh,geom.horizontalMesh]);
 
-  let geomMerged= holesIn.mergeMeshes([geom.frontMesh, geom.backMesh, geom.inMesh, geom.outMesh,geom.horizontalMesh]);
-  console.log("geomMerged", geomMerged);
   let nullMesh= false;
   if(!geomMerged){
       geomMerged={};
@@ -121,21 +105,6 @@ if(!meshDirty){return;}
       material.diffuseTexture =texture;
   }
   mesh.material= material;
-
-/*
-  scene.meshes.filter( mesh => mesh.name === "lines"  ).forEach( mesh => mesh.dispose());
-  if(options.displayNormals)
-   displayNormals(geomMerged);*/
-}
-
-function displayNormals(geom){
-    for(let i=0;i<geom.points.length;i+=3){
-        let origin = new BABYLON.Vector3(geom.points[i],geom.points[i+1],geom.points[i+2]);
-        let norm = new BABYLON.Vector3(geom.normals[i],geom.normals[i+1],geom.normals[i+2]).scale(100);
-        let dst= origin.add(norm);
-        var lineMesh =new BABYLON.Mesh.CreateLines("lines"+i, [origin ,dst],scene);
-    }
-
 }
 
 function movePath(basePath, path,min,max, direction){
@@ -162,20 +131,9 @@ function movePath(basePath, path,min,max, direction){
     }
 }
 
-function animateDepth(baseDepth,hole, min,max ){
-        hole.depth=  baseDepth+ Math.cos(angle)*(max-min)+min;
-}
-
-function animateScale(basePath, path, direction,min,max){
-    let scale= Math.cos(angle)* (max-min)+min;
-    for(let i in path){
-        path[i][direction]= basePath[i][direction]*scale;
-    }
-}
-
 
 function createScene(engine,canvas) {
-  camera= new BABYLON.ArcRotateCamera("camera1",0, 0, 200,new BABYLON.Vector3(0,0,0), scene);
+  camera= new BABYLON.ArcRotateCamera("camera1", 1.57090,0.4663, 200,new BABYLON.Vector3(0,0,0), scene);
   camera.radius = 200;
   camera.setTarget(new BABYLON.Vector3(100,-50,-100));
   camera.attachControl(canvas, false);
@@ -190,12 +148,6 @@ function createScene(engine,canvas) {
   light2.specular = new BABYLON.Color3(1, 1, 1);
 
   scene.clearColor = new BABYLON.Color3(0/255,73/255,79/255);
-
-  scene.onPointerDown = function (evt, pickResult) {
-    // if the click hits the ground object, we change the impact position
-    var textureCoordinates = pickResult.getTextureCoordinates();
-    console.log("tex ", textureCoordinates, " point ", pickResult.pickedPoint);
-};
 
   return scene;
 }

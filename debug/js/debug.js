@@ -1,8 +1,11 @@
 "use-strict";
 
+const pathTracer = require("./pathTracer");
 const debugger2d = require("./debugger2d");
 const debugger3d = require("./debugger3d");
 const store = require("store");
+const holesIn = require("../../lib/index.js");
+const cdt2d = require("cdt2d");
 
 const debug = {
     elems: null,
@@ -11,8 +14,10 @@ const debug = {
         debug.elems =  { outerShape: document.getElementById("outerShape"),
                       holes: document.getElementById("holes"),
                       submit: document.getElementById("submit"),
+                      customDraw: document.getElementById("customDraw"),
                       container: document.getElementById("container"),
-                      generated: document.getElementById("generated-data")
+                      generated: document.getElementById("generated-data"),
+                      debugCheckboxes:  [...document.getElementById('logs').getElementsByTagName('input')]
                   };
 
         if(store.get("outerShape")){
@@ -32,7 +37,24 @@ const debug = {
             debug.refresh();
         });
 
+        debug.elems.customDraw.addEventListener("click", () => {
+
+            debug.startNewDraw(holes, outerShape);
+        });
+
+        debug.elems.debugCheckboxes.forEach(el =>
+              {
+                  el.addEventListener("change", e => {
+                     debug.rebuildGeometry();
+                  });
+              }
+          );
+
         debug.elems.submit.dispatchEvent(new Event('click'));
+
+        document.debugLib = this;
+        document.holesIn = holesIn;
+        document.cdt2d = cdt2d;
 
     },
 
@@ -86,26 +108,144 @@ const debug = {
         const holes =  [...checkboxes].map( (checkbox, index ) => {
              if(checkbox.checked){
                  const hole = JSON.parse(checkbox.getAttribute("data-hole"));
-                 hole.depth = numbers[index].value;
+                 hole.depth = +numbers[index].value;
                  return hole;
              }
          }).filter (elt => elt);
-         return holes;
+         const outerShape = JSON.parse(debug.elems.outerShape.value);
+         return {outerShape, holes};
     },
+
+    getDataFromTests(funcName, index) {
+        const test = getholes[funcName]()[index];
+        baseholes = JSON.parse(JSON.stringify(test.holes));
+        outerShape = JSON.parse(JSON.stringify(test.outerShape));
+    }
 
     rebuildGeometry() {
         debug.elems.container.innerHTML = "";
-        const holes = debug.getData();
-        const outerShape = JSON.parse(debug.elems.outerShape.value);
+        const {holes,outerShape} = debug.getData();
         debugger2d.traceAllData(outerShape, holes);
         debugger3d.rebuild(outerShape, holes);
+        debug.logData(outerShape, holes);
     },
 
     refresh() {
         debug.elems.generated.innerHTML = "";
         debug.createCheckboxesPaths(JSON.parse(debug.elems.holes.value));
         debug.rebuildGeometry();
-    }
+    },
+
+    getCheckboxValue(targetName) {
+
+        const checkbox = debug.elems.debugCheckboxes.find(elt => elt.getAttribute("data-target") === targetName);
+        return checkbox.checked;
+    },
+
+    logData(outerShape, holes) {
+
+        console.log("---begin---");
+
+        let cpyHoles = debugger2d._objectClone(holes);
+        let cpyOuterShape = debugger2d._objectClone(outerShape);
+        holesIn.scaleUpPath(cpyOuterShape.path);
+        for (let i = 0; i < cpyHoles.length; i++) {
+            holesIn.scaleUpPath(cpyHoles[i].path);
+        }
+        if(debug.getCheckboxValue("debugHolesByDepth")) {
+            debugger;
+        }
+        let holesByDepth = holesIn.getHolesByDepth(cpyHoles, cpyOuterShape);
+
+        if(debug.getCheckboxValue("logHolesByDepth")) {
+            console.log("holesByDepth", holesByDepth);
+        }
+        cpyHoles = debugger2d._objectClone(holes);
+        cpyOuterShape = debugger2d._objectClone(outerShape);
+        if(debug.getCheckboxValue("debugDataByDepth")) {
+            debugger;
+        }
+        let dataByDepth = holesIn.getDataByDepth(cpyOuterShape, cpyHoles);
+        if(debug.getCheckboxValue("logDataByDepth")) {
+            console.log("dataByDepth", dataByDepth);
+        }
+
+        if(debug.getCheckboxValue("debugTriangulation")) {
+            debugger;
+        }
+        dataByDepth.horizontalPathsByDepth.forEach((dataAtDepth, index) => {
+            const triangles = holesIn.computeTriangulation(dataAtDepth.paths);
+            if(debug.getCheckboxValue("logTriangulation")) {
+                console.log("triangles at depth ", index," : ", triangles);
+            }
+        });
+
+
+
+        if(debug.getCheckboxValue("debugGeometry")) {
+            debugger;
+        }
+
+        let cpyOptions = JSON.parse(JSON.stringify(debugger3d.options));
+        let cpyOut= JSON.parse(JSON.stringify(outerShape));
+        cpyHoles= JSON.parse(JSON.stringify(holes));
+        let cpyDoNotBuild= JSON.parse(JSON.stringify(holes));
+
+
+        if(debugger3d.options.doNotBuild) {
+            cpyOptions.doNotBuild = doNotBuild;
+        }
+        if(debug.getCheckboxValue("debugGeometry")) {
+            debugger;
+        }
+        let geom= holesIn.getGeometry(cpyOut,cpyHoles,cpyOptions);
+
+        if(debug.getCheckboxValue("logGeometry")) {
+            if(geom.frontMesh) console.log("front: ",geom.frontMesh.faces.length);
+            if(geom.backMesh) console.log("back: ",geom.backMesh.faces.length);
+            if(geom.outMesh) console.log("out: ",geom.outMesh.faces.length);
+            if(geom.inMesh) console.log("in: ",geom.inMesh.faces.length);
+            if(geom.horizontalMesh) console.log("horr: ",geom.horizontalMesh.faces.length);
+        }
+
+        console.log("---end---");
+    },
+
+
+    startNewDraw(holes, outerShape){
+        let cpyHoles = debugger2d._objectClone(holes);
+        let cpyOuterShape = debugger2d._objectClone(outerShape);
+        holesIn.scaleUpPath(cpyOuterShape.path);
+        for (let i = 0; i < cpyHoles.length; i++) {
+            holesIn.scaleUpPath(cpyHoles[i].path);
+        }
+        let holesByDepth = holesIn.getHolesByDepth(cpyHoles, cpyOuterShape);
+        const transform = debugger2d.getTransform(cpyOuterShape, cpyHoles, holesByDepth.length);
+
+        cpyHoles = debugger2d._objectClone(holes);
+        cpyOuterShape = debugger2d._objectClone(outerShape);
+        let dataByDepth = holesIn.getDataByDepth(cpyOuterShape, cpyHoles);
+
+        const parent = document.getElementById("container");
+        const canvas = debugger2d.createCanvas("newCanvas", parent, debugger2d.cssclass);
+        const ctx = canvas.getContext("2d");
+        debug.scrollDown();
+        debugger;
+
+        pathTracer.tracePath(ctx);
+        /* drawinbg functions :
+            pathTracer.tracePath(ctx, path,  transform)
+            pathTracer.traceTriangulation(ctx, triangulation, transform)
+            pathTracer.tracePathsInRow(canvas, paths,transform)
+        */
+
+    },
+
+    scrollDown(){
+        window.scrollTo(0,Math.max( document.body.scrollHeight, document.body.offsetHeight,
+                       document.documentElement.clientHeight, document.documentElement.scrollHeight, document.documentElement.offsetHeight ))
+    },
+
 
 
 };

@@ -14,7 +14,7 @@
     background-color: #eee;
 }
 
-#submit {
+.buttons {
     background-color: #8DE969;
     width: 100%;
     height: 50px;
@@ -34,5 +34,5 @@ textarea {
 
 
 #babylon{
-    width: 100%;
+    width: 75%;
 }

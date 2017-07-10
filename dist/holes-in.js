@@ -303,6 +303,8 @@ module.exports = exportHelper;
 },{}],6:[function(require,module,exports){
 "use strict";
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 var pathHelper = require("./path-helper.js");
 var geomHelper = require("./geom-helper.js");
 var cdt2dHelper = require("./cdt2d-helper.js");
@@ -401,13 +403,21 @@ var extruder = {
         var invertNormal = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
 
         var horrGeom = [];
-        for (var i = 0; i < indexes.length; i++) {
-            var totaltopo = horizontalPathsByDepth[indexes[i]].paths;
-            var triangles = cdt2dHelper.computeTriangulation(totaltopo);
-            triangles.depth = horizontalPathsByDepth[indexes[i]].depth;
 
-            var horrGeomAtDepth = geomHelper.getHorizontalGeom(triangles, 0, invertNormal);
-            horrGeom.push(horrGeomAtDepth);
+        var _loop = function _loop(i) {
+
+            var allTriangles = horizontalPathsByDepth[indexes[i]].paths.map(function (path) {
+                return cdt2dHelper.computeTriangulation([path]);
+            });
+            var allGeoms = allTriangles.map(function (triangles) {
+                triangles.depth = horizontalPathsByDepth[indexes[i]].depth;
+                return geomHelper.getHorizontalGeom(triangles, 0, invertNormal);
+            });
+            horrGeom.push.apply(horrGeom, _toConsumableArray(allGeoms));
+        };
+
+        for (var i = 0; i < indexes.length; i++) {
+            _loop(i);
         }
         // get points, normal and faces from it:
         return geomHelper.mergeMeshes(horrGeom, true);
@@ -449,9 +459,9 @@ var extruder = {
             stack++;
         }
         for (var _i2 = 0; _i2 < outerPaths.length; _i2++) {
-            outerPaths[_i2] = pathHelper.cleanPaths(outerPaths[_i2]);
-            innerPaths[_i2] = pathHelper.cleanPaths(innerPaths[_i2]);
-            horizontalPaths[_i2] = pathHelper.cleanPaths(horizontalPaths[_i2]);
+            outerPaths[_i2] = pathHelper.cleanPaths(outerPaths[_i2], 3);
+            innerPaths[_i2] = pathHelper.cleanPaths(innerPaths[_i2], 3);
+            horizontalPaths[_i2] = pathHelper.cleanPaths(horizontalPaths[_i2], 3);
 
             pathHelper.setDirectionPaths(outerPaths[_i2], -1);
             pathHelper.setDirectionPaths(innerPaths[_i2], -1);
@@ -518,7 +528,7 @@ var extruder = {
         // get paths by depth:
         var res = [];
 
-        var _loop = function _loop(_i5) {
+        var _loop2 = function _loop2(_i5) {
             var deeperHoles = holes.filter(function (s) {
                 return s.depth > depths[_i5];
             });
@@ -544,7 +554,7 @@ var extruder = {
         };
 
         for (var _i5 = 0; _i5 < depths.length; _i5++) {
-            _loop(_i5);
+            _loop2(_i5);
         }
 
         // gets the difference between keep and stop:
@@ -855,6 +865,7 @@ var geomHelper = require("./geom-helper.js");
 var exportHelper = require("./export-helper.js");
 var drawHelper = require("./draw-helper.js");
 var pathHelper = require("./path-helper.js");
+var cdt2dHelper = require("./cdt2d-helper.js");
 var constants = require("./constants.js");
 
 var holesIn = {
@@ -862,11 +873,15 @@ var holesIn = {
     meshesToObj: exportHelper.meshesToObj,
     meshToObj: exportHelper.meshToObj,
     getGeometry: extruder.getGeometry,
+    getHolesByDepth: extruder.getHolesByDepth,
+
     mergeMeshes: geomHelper.mergeMeshes,
 
+    scaleUpPath: pathHelper.scaleUpPath,
     scaleDownPath: pathHelper.scaleDownPath,
     scaleDownPaths: pathHelper.scaleDownPaths,
     getDataByDepth: extruder.getDataByDepth,
+    computeTriangulation: cdt2dHelper.computeTriangulation,
 
     drawInitialPaths: drawHelper.drawInitialPaths,
     drawPaths: drawHelper.drawPaths,
@@ -880,13 +895,16 @@ var holesIn = {
     setDirectionPath: pathHelper.setDirectionPath,
     hasAnIncludedSegment: pathHelper.hasAnIncludedSegment,
 
-    scaleFactor: constants.scaleFactor
+    scaleFactor: constants.scaleFactor,
+
+    pathHelper: pathHelper,
+    extruder: extruder
 
 };
 
 module.exports = holesIn;
 
-},{"./constants.js":3,"./draw-helper.js":4,"./export-helper.js":5,"./extruder.js":6,"./geom-helper.js":7,"./path-helper.js":9}],9:[function(require,module,exports){
+},{"./cdt2d-helper.js":2,"./constants.js":3,"./draw-helper.js":4,"./export-helper.js":5,"./extruder.js":6,"./geom-helper.js":7,"./path-helper.js":9}],9:[function(require,module,exports){
 "use strict";
 
 var clipperLib = require("clipper-lib");
@@ -967,6 +985,56 @@ var pathHelper = {
         };
 
         return clipperLib.Clipper.SimplifyPolygon(path, options.fillType);
+    },
+    deepSimplifyPaths: function deepSimplifyPaths(paths) {
+
+        paths = pathHelper.simplifyPaths(paths);
+
+        for (var i = 0; i < paths.length - 1; i++) {
+            for (var j = i + 1; j < paths.length; j++) {
+                var path1 = paths[i];
+                var path2 = paths[j];
+                var res = pathHelper.deepSimplifyTwoPaths(path1, path2);
+                if (res.length > 1) continue;
+                paths.splice(j, 1);
+                paths.splice(i, 1);
+                paths.push(res[0]);
+                if (paths.length > 1 && i > 0) i--;
+            }
+        }
+        return paths;
+    },
+    deepSimplifyTwoPaths: function deepSimplifyTwoPaths(path1, path2) {
+        var found = {};
+        var epsilon = 10000500;
+        for (var i = 0; i < path1.length; i++) {
+            for (var j = 0; j < path2.length; j++) {
+                var pt1 = path1[i];
+                var pt2 = path2[j];
+                if (Math.abs(pt1.X - pt2.X) > epsilon || Math.abs(pt1.Y - pt2.Y) > epsilon) continue;
+                var npt1 = path1[(i + 1) % path1.length];
+                var npt2 = path2[(j + 1) % path2.length];
+                if (Math.abs(npt1.X - npt2.X) > epsilon || Math.abs(npt1.Y - npt2.Y) > epsilon) continue;
+
+                // if(npt1.X != npt2.X || npt1.Y != npt2.Y) continue;
+                console.log("FOUND");
+                found.i = i;
+                found.j = j;
+                i = path1.length;
+                break;
+            }
+        }
+        if (found.i === undefined) return [path1, path2];
+
+        var res = path1.slice(0, found.i);
+
+        var path2R = Array.from(path2).reverse();
+        for (var _i = 0; _i < path2.length; _i++) {
+            var index = (path2.length - 1 - found.j + _i) % path2.length;
+            res.push(path2R[index]);
+        }
+        res = res.concat(path1.slice(found.i + 2, path1.length));
+        return [res];
     },
 
 
@@ -1232,7 +1300,9 @@ var pathHelper = {
         return pt.X >= ptOrigin.X && pt.X <= ptDest.X && pt.Y >= ptOrigin.Y && pt.Y <= ptDest.Y;
     },
     cleanPaths: function cleanPaths(paths) {
-        return clipperLib.Clipper.CleanPolygons(paths, 1.5);
+        var threshold = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1.5;
+
+        return clipperLib.Clipper.CleanPolygons(paths, threshold);
     }
 };
 module.exports = pathHelper;

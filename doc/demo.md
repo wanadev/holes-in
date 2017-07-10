@@ -27,6 +27,7 @@ autotoc: false
 <div><label>Outer Mesh Generation<input type="checkbox" data-target="outMesh" checked="true"></label></div>
 <div><label>Front Mesh Generation<input type="checkbox" data-target="frontMesh" checked="true"></label></div>
 <div><label>Back Mesh Generation<input type="checkbox" data-target="backMesh" checked="true"></label></div>
+<div><label>Horizontal Mesh Generation<input type="checkbox" data-target="horizontalkMesh" checked="true"></label></div>
 <div><label>Wire Frame<input type="checkbox" data-target="wireframe"></label></div>
 <div><label>Back Face Culling<input type="checkbox" data-target="backFaceCulling"></label></div>
 <div><label>Move Paths <input type="checkbox" data-target="animate" checked="true"></label></div>

@@ -11,7 +11,7 @@
     "build-uglify": "uglifyjs dist/holes-in.js -o dist/holes-in.min.js",
     "build-doc": "./node_modules/.bin/enlightme",
     "watchify": "mkdir -p dist && watchify -v --debug -s holes-in lib/index.js -o dist/holes-in.js && npm run build",
-    "watchifyUI": "watchify -v --debug doc/js/index.js -o doc.generated/ui-bundle.js",
+    "watchifyUI": "rm -f `pwd`/doc.generated/ui-bundle.js && ln -s `pwd`/doc/ui-bundle.js `pwd`/doc.generated/ui-bundle.js && watchify -v --debug doc/js/index.js -o doc.generated/ui-bundle.js",
     "watchifyDebug": "watchify -v --debug debug/js/index.js -o debug/dist/debuglib.js",
     "watchifyAll": "npm run watchify & npm run watchifyUI & npm run watchifyDebug",
     "prepublish": "npm run build-es5"
@@ -40,14 +40,16 @@
     "browserify": "^14.1.0",
     "enlightme": "^0.1.1",
     "expect.js": "^0.3.1",
-    "jshint": "^2.9.4",
-    "mocha": "^3.2.0",
+    "jshint": "^2.9.5",
+    "mocha": "^3.4.2",
+    "store": "^2.0.12",
     "uglify-js": "^3.0.16",
-    "watchify": "^3.9.0",
-    "store": "^2.0.12"
+    "watchify": "^3.9.0"
   },
   "dependencies": {
     "cdt2d": "^1.0.0",
-    "clipper-lib": "git+https://github.com/wanadev/clipper-lib.git"
+    "clipper-lib": "git+https://github.com/wanadev/clipper-lib.git",
+    "lru-cache": "^4.1.1",
+    "sigmund": "^1.0.1"
   }
 }

@@ -1,5 +1,5 @@
 ---
-title: Home
+title: Basics
 menuOrder: 0
 autotoc: false
 ---
@@ -29,7 +29,7 @@ let hole1= {path: [{X:50,Y:50},{X:50,Y:100},{X:100,Y:100},{X:100,Y:50}],depth:0}
 ### 2 Choose your options
 You can choose to build all the mesh or only a part of it. Please check-out the DEMO for more details.
  ```javascript
-let options= {inMesh:true, outMesh:true, frontMesh:true, backMesh:true};
+let options= {inMesh:true, outMesh:true, frontMesh:true, backMesh:true, horizontalMesh: true};
 ```
 
 ### 3 Generate your mesh
@@ -49,13 +49,13 @@ let mergedMesh= holesIn.mergeMeshes([geom.frontMesh, geom.backMesh, geom.inMesh,
 let obj = holesIn.meshesToObj(geom);
   ```
 
-### 4 Display it in BABYLON js
+### 5 Display it in BABYLON js
 
  ```javascript
 let mesh= new BABYLON.Mesh("DemoMesh", scene);
 let vertexData = new BABYLON.VertexData();
 let geom= holesIn.getGeometry(outerShape,holes,options);
-let mergedGeometry= holesIn.mergeMeshes([geom.frontMesh, geom.backMesh, geom.inMesh, geom.outMesh]);
+let mergedGeometry= holesIn.mergeMeshes([geom.frontMesh, geom.backMesh, geom.inMesh, geom.outMesh, geom.horizontalMesh]);
 vertexData.positions = mergedGeometry.points;
 vertexData.indices = mergedGeometry.faces;
 vertexData.normals = mergedGeometry.normals;
