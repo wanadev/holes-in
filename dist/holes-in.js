@@ -303,8 +303,6 @@ module.exports = exportHelper;
 },{}],6:[function(require,module,exports){
 "use strict";
 
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
 var pathHelper = require("./path-helper.js");
 var geomHelper = require("./geom-helper.js");
 var cdt2dHelper = require("./cdt2d-helper.js");
@@ -337,23 +335,23 @@ var extruder = {
         var res = {};
 
         if (options.frontMesh) {
-            res.frontMesh = extruder.getHorizontalGeom(horizontalPathsByDepth, [0], 0);
+            res.frontMesh = extruder.getHorizontalGeom(horizontalPathsByDepth, innerPathsByDepth, [0], 0, true);
             uvHelper.mapHorizontal(innerPathsByDepth, outerShape, res.frontMesh, options);
         }
         if (options.backMesh) {
-            res.backMesh = extruder.getHorizontalGeom(horizontalPathsByDepth, [horizontalPathsByDepth.length - 1], 0, false);
+            res.backMesh = extruder.getHorizontalGeom(horizontalPathsByDepth, innerPathsByDepth, [horizontalPathsByDepth.length - 1], 0, false);
             uvHelper.mapHorizontal(innerPathsByDepth, outerShape, res.backMesh, options);
         }
         if (options.inMesh) {
             uvHelper.mapVertical(innerPathsByDepth, outerShape, options);
-            res.inMesh = extruder.getVerticalGeom(innerPathsByDepth, outerPathsByDepth, 0, true);
+            res.inMesh = extruder.getVerticalGeom(innerPathsByDepth, 0, true);
         }
         if (options.horizontalMesh) {
             var indexes = [];
             for (var i = 1; i < horizontalPathsByDepth.length - 1; i++) {
                 indexes.push(i);
             }
-            var meshHor = extruder.getHorizontalGeom(horizontalPathsByDepth, indexes, 0);
+            var meshHor = extruder.getHorizontalGeom(horizontalPathsByDepth, innerPathsByDepth, indexes, 0);
             if (meshHor) {
                 uvHelper.mapHorizontal(innerPathsByDepth, outerShape, meshHor, options);
             }
@@ -369,9 +367,9 @@ var extruder = {
         }
         return res;
     },
-    getVerticalGeom: function getVerticalGeom(innerPathsByDepth, toMarkPaths) {
-        var offset = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
-        var invertNormal = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+    getVerticalGeom: function getVerticalGeom(innerPathsByDepth) {
+        var offset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+        var invertNormal = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
 
         var geom = [];
 
@@ -382,7 +380,9 @@ var extruder = {
                 var path = pathsAtDepth[i];
                 for (var idxPtDwn = 0; idxPtDwn < path.length; idxPtDwn++) {
                     var idxNPtDwn = (idxPtDwn + 1) % path.length;
-                    var currgeom = geomHelper.getOneVerticalGeom(idxPtDwn, idxNPtDwn, +indexDepth, path, innerPathsByDepth, toMarkPaths, +offset, invertNormal);
+                    if (path[idxPtDwn]._holesInForbidden) continue;
+
+                    var currgeom = geomHelper.getOneVerticalGeom(idxPtDwn, idxNPtDwn, +indexDepth, path, innerPathsByDepth, +offset, invertNormal);
                     if (!currgeom) {
                         continue;
                     }
@@ -398,26 +398,17 @@ var extruder = {
     /**
      * Returns the geometry of the inner horizontal facess
      */
-    getHorizontalGeom: function getHorizontalGeom(horizontalPathsByDepth, indexes) {
-        var offset = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
-        var invertNormal = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
+    getHorizontalGeom: function getHorizontalGeom(horizontalPathsByDepth, innerPathsByDepth, indexes) {
+        var offset = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
+        var invertNormal = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : true;
 
         var horrGeom = [];
-
-        var _loop = function _loop(i) {
-
-            var allTriangles = horizontalPathsByDepth[indexes[i]].paths.map(function (path) {
-                return cdt2dHelper.computeTriangulation([path]);
-            });
-            var allGeoms = allTriangles.map(function (triangles) {
-                triangles.depth = horizontalPathsByDepth[indexes[i]].depth;
-                return geomHelper.getHorizontalGeom(triangles, 0, invertNormal);
-            });
-            horrGeom.push.apply(horrGeom, _toConsumableArray(allGeoms));
-        };
-
         for (var i = 0; i < indexes.length; i++) {
-            _loop(i);
+            var innerPaths = innerPathsByDepth[indexes[i]].paths;
+            var paths = horizontalPathsByDepth[indexes[i]].paths;
+            var triangles = cdt2dHelper.computeTriangulation(paths);
+            triangles.depth = horizontalPathsByDepth[indexes[i]].depth;
+            horrGeom.push(geomHelper.getHorizontalGeom(triangles, 0, invertNormal));
         }
         // get points, normal and faces from it:
         return geomHelper.mergeMeshes(horrGeom, true);
@@ -431,33 +422,39 @@ var extruder = {
         for (var i = 0; i < holes.length; i++) {
             pathHelper.scaleUpPath(holes[i].path);
         }
-        var holesByDepth = extruder.getHolesByDepth(holes, outerShape);
-        var outer = [outerShape.path];
-        var stack = 0;
-        for (var _i = holesByDepth.length - 1; _i >= 0; _i--) {
-            // compute the outer path:
-            var removeFromOuter = pathHelper.getUnionOfPaths(holesByDepth[_i].keep.concat(holesByDepth[_i].stop));
+        holes = holes.map(function (hole) {
+            return { path: pathHelper.offsetPath(hole.path), depth: hole.depth };
+        });
 
+        var holesByDepth = extruder.getHolesByDepth(holes, outerShape);
+        var stack = 0;
+
+        for (var _i = 0; _i < holesByDepth.length; _i++) {
+
+            var outer = JSON.parse(JSON.stringify([outerShape.path]));
+
+            var removeFromOuter = pathHelper.getUnionOfPaths(holesByDepth[_i].keep.concat(holesByDepth[_i].stop));
             outer = pathHelper.getDiffOfPaths(outer, removeFromOuter);
-            outer = pathHelper.simplifyPaths(pathHelper.getUnionOfPaths(outer));
+            outer = pathHelper.getUnionOfPaths(outer);
+            outer = pathHelper.cleanPaths(outer, 20);
             outerPaths.push(outer);
 
             // fit the inner paths into the outer:
             var innerPath = pathHelper.getInterOfPaths(holesByDepth[Math.max(_i - 1, 0)].keep, outer);
-            innerPath = pathHelper.simplifyPaths(pathHelper.getUnionOfPaths(innerPath));
+            innerPath = pathHelper.getUnionOfPaths(innerPath);
             innerPaths.push(innerPath);
-            // computes the horizontal Geom:
-            var horizontalPath = void 0;
-            if (_i === 0 || _i === holesByDepth.length - 1) {
-                horizontalPath = JSON.parse(JSON.stringify(outer.concat(innerPath)));
-            } else {
-                // fit holes that stops at this depth into the outer:
-                horizontalPath = pathHelper.getInterOfPaths(holesByDepth[_i].stop, outerPaths[Math.max(stack - 1, 0)]);
-                horizontalPath = pathHelper.simplifyPaths(horizontalPath);
+
+            //finds the horizontatl path:
+            var horr = JSON.parse(JSON.stringify([outerShape.path]));
+            if (holesByDepth[_i].stop.length > 0) {
+                horr = pathHelper.getInterOfPaths(horr, holesByDepth[_i].stop);
             }
-            horizontalPaths.push(horizontalPath);
-            stack++;
+            // let inneAtThisDepth = pathHelper.getInterOfPaths(horr, holesByDepth[i].keep);
+            horr = pathHelper.getDiffOfPaths(horr, holesByDepth[_i].keep);
+            horr = pathHelper.cleanPaths(horr, 20);
+            horizontalPaths.push(horr);
         }
+
         for (var _i2 = 0; _i2 < outerPaths.length; _i2++) {
             outerPaths[_i2] = pathHelper.cleanPaths(outerPaths[_i2], 3);
             innerPaths[_i2] = pathHelper.cleanPaths(innerPaths[_i2], 3);
@@ -467,10 +464,6 @@ var extruder = {
             pathHelper.setDirectionPaths(innerPaths[_i2], -1);
             pathHelper.setDirectionPaths(horizontalPaths[_i2], -1);
         }
-
-        outerPaths = outerPaths.reverse();
-        innerPaths = innerPaths.reverse();
-        horizontalPaths = horizontalPaths.reverse();
 
         for (var _i3 = 0; _i3 < holesByDepth.length; _i3++) {
             outerPaths[_i3] = { paths: outerPaths[_i3], depth: holesByDepth[_i3].depth };
@@ -493,13 +486,12 @@ var extruder = {
     getHolesByDepth: function getHolesByDepth(holes, outerShape) {
 
         // sets all depths deeper than outerDepth  or equals to 0 to outerDepth:
-        holes.map(function (elt) {
-            // eslint-disable-line
+        holes.forEach(function (elt) {
             elt.depth >= outerShape.depth || elt.depth === 0 ? elt.depth = outerShape.depth + 1 : elt.depth = elt.depth; // eslint-disable-line
         });
 
-        holes.map(function (elt) {
-            // eslint-disable-line
+        holes.forEach(function (elt) {
+            if (!elt.path) return;
             pathHelper.setDirectionPath(elt.path, 1);
         });
 
@@ -521,19 +513,19 @@ var extruder = {
         holes = holes.filter(function (hole) {
             return hole.path !== undefined;
         });
-        for (var _i4 = 0; _i4 < holes.length; _i4++) {
-            pathHelper.displaceColinearEdges(outerShape.path, holes[_i4].path);
-        }
+        for (var _i4 = 0; _i4 < holes.length; _i4++) {}
+        // pathHelper.displaceColinearEdges(outerShape.path, holes[i].path);
+
 
         // get paths by depth:
         var res = [];
 
-        var _loop2 = function _loop2(_i5) {
+        var _loop = function _loop(_i5) {
             var deeperHoles = holes.filter(function (s) {
                 return s.depth > depths[_i5];
             });
             var keep = [];
-            deeperHoles.map(function (s) {
+            deeperHoles.forEach(function (s) {
                 return keep.push(s.path);
             });
 
@@ -541,7 +533,7 @@ var extruder = {
                 return s.depth === depths[_i5];
             });
             var stop = [];
-            stopHoles.map(function (s) {
+            stopHoles.forEach(function (s) {
                 return stop.push(s.path);
             });
 
@@ -554,12 +546,17 @@ var extruder = {
         };
 
         for (var _i5 = 0; _i5 < depths.length; _i5++) {
-            _loop2(_i5);
+            _loop(_i5);
         }
 
         // gets the difference between keep and stop:
         for (var _i6 = 0; _i6 < depths.length; _i6++) {
             res[_i6].stop = pathHelper.getDiffOfPaths(res[_i6].stop, res[_i6].keep);
+        }
+
+        for (var _i7 = 0; _i7 < depths.length; _i7++) {
+            res[_i7].stop = pathHelper.getUnionOfPaths(res[_i7].stop);
+            res[_i7].keep = pathHelper.getUnionOfPaths(res[_i7].keep);
         }
 
         return res;
@@ -637,9 +634,9 @@ var geomHelper = {
     /*
      * Returns two triangles representing the larger face we can build from the edge ptDwn->nPtDwn
      */
-    getOneVerticalGeom: function getOneVerticalGeom(idxPtDwn, nIdxPtDwn, indexDepthDwn, pathDwn, pathsByDepth, toMarkPaths) {
-        var offset = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : 0;
-        var invertNormal = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : false;
+    getOneVerticalGeom: function getOneVerticalGeom(idxPtDwn, nIdxPtDwn, indexDepthDwn, pathDwn, pathsByDepth) {
+        var offset = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 0;
+        var invertNormal = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : false;
 
         var ptDwn = pathDwn[idxPtDwn];
         var nPtDwn = pathDwn[nIdxPtDwn];
@@ -651,7 +648,6 @@ var geomHelper = {
         if (indexDepthUp === undefined || indexDepthUp < 0) {
             return;
         }
-        // geomHelper.markAsVisited(ptDwn,nPtDwn, toMarkPaths,indexDepthDwn);
         var depthUp = pathsByDepth[indexDepthUp].depth;
         var depthDwn = pathsByDepth[indexDepthDwn].depth;
         var res = geomHelper.getPtsNormsIndx2d(ptDwn, nPtDwn, depthUp, depthDwn, +offset, invertNormal);
@@ -986,56 +982,6 @@ var pathHelper = {
 
         return clipperLib.Clipper.SimplifyPolygon(path, options.fillType);
     },
-    deepSimplifyPaths: function deepSimplifyPaths(paths) {
-
-        paths = pathHelper.simplifyPaths(paths);
-
-        for (var i = 0; i < paths.length - 1; i++) {
-            for (var j = i + 1; j < paths.length; j++) {
-                var path1 = paths[i];
-                var path2 = paths[j];
-                var res = pathHelper.deepSimplifyTwoPaths(path1, path2);
-                if (res.length > 1) continue;
-                paths.splice(j, 1);
-                paths.splice(i, 1);
-                paths.push(res[0]);
-                if (paths.length > 1 && i > 0) i--;
-            }
-        }
-        return paths;
-    },
-    deepSimplifyTwoPaths: function deepSimplifyTwoPaths(path1, path2) {
-        var found = {};
-        var epsilon = 10000500;
-        for (var i = 0; i < path1.length; i++) {
-            for (var j = 0; j < path2.length; j++) {
-                var pt1 = path1[i];
-                var pt2 = path2[j];
-                if (Math.abs(pt1.X - pt2.X) > epsilon || Math.abs(pt1.Y - pt2.Y) > epsilon) continue;
-                var npt1 = path1[(i + 1) % path1.length];
-                var npt2 = path2[(j + 1) % path2.length];
-                if (Math.abs(npt1.X - npt2.X) > epsilon || Math.abs(npt1.Y - npt2.Y) > epsilon) continue;
-
-                // if(npt1.X != npt2.X || npt1.Y != npt2.Y) continue;
-                console.log("FOUND");
-                found.i = i;
-                found.j = j;
-                i = path1.length;
-                break;
-            }
-        }
-        if (found.i === undefined) return [path1, path2];
-
-        var res = path1.slice(0, found.i);
-
-        var path2R = Array.from(path2).reverse();
-        for (var _i = 0; _i < path2.length; _i++) {
-            var index = (path2.length - 1 - found.j + _i) % path2.length;
-            res.push(path2R[index]);
-        }
-        res = res.concat(path1.slice(found.i + 2, path1.length));
-        return [res];
-    },
 
 
     /**
@@ -1062,12 +1008,32 @@ var pathHelper = {
         // settup and execute clipper
         var cpr = new clipperLib.Clipper();
         cpr.AddPaths(pathsSubj, clipperLib.PolyType.ptSubject, true);
+        // pathsSubj.forEach(path => cpr.AddPath(path, clipperLib.PolyType.ptSubject, true));
+
         if (pathsClip) {
+            // pathsClip.forEach(path => cpr.AddPath(path, clipperLib.PolyType.ptClip, true));
             cpr.AddPaths(pathsClip, clipperLib.PolyType.ptClip, true);
         }
         var res = new clipperLib.Paths();
         cpr.Execute(options.clipType, res, options.subjectFill, options.clipFill);
         return res;
+    },
+    offsetPaths: function offsetPaths(paths) {
+        var offset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 100;
+
+        var co = new clipperLib.ClipperOffset();
+        var res = new clipperLib.Paths();
+
+        co.AddPaths(paths, clipperLib.JoinType.jtMiter, clipperLib.EndType.etClosedPolygon);
+        co.MiterLimit = 2;
+        co.ArcTolerance = 0.25;
+        co.Execute(res, offset);
+        return res;
+    },
+    offsetPath: function offsetPath(path) {
+        var offset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 100;
+
+        return pathHelper.offsetPaths([path], offset)[0];
     },
 
 

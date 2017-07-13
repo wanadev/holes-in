@@ -75,9 +75,9 @@ const debugger2d = {
         debugger2d.createLegend("legend", parent,"data by depth");
         const canvas = debugger2d.createCanvas("dataByDepth", parent, debugger2d.cssclass);
         for(let index = 0; index< dataByDepth.holesByDepth.length; index++) {
-            pathTracer.tracePathsInRow(canvas, dataByDepth.horizontalPathsByDepth[index].paths, transform,"red", "red");
+            pathTracer.tracePathsInRow(canvas, dataByDepth.horizontalPathsByDepth[index].paths, transform,"red", "");
             pathTracer.tracePathsInRow(canvas, dataByDepth.innerPathsByDepth[index].paths, transform, "green", "white");
-            pathTracer.tracePathsInRow(canvas, dataByDepth.outerPathsByDepth[index].paths,transform,  "black","");
+            // pathTracer.tracePathsInRow(canvas, dataByDepth.outerPathsByDepth[index].paths,transform,  "black","");
             debugger2d.translateRight(transform);
             debugger2d.traceDelimiter(canvas, index * debugger2d.canvasWidth / dataByDepth.holesByDepth.length);
         }
@@ -89,7 +89,7 @@ const debugger2d = {
         const canvas = debugger2d.createCanvas("holesByDepth", parent, debugger2d.cssclass);
 
         holesByDepth.forEach((holesAtDepth, index) => {
-            pathTracer.tracePathsInRow(canvas, holesAtDepth.keep, transform, "green","green");
+            pathTracer.tracePathsInRow(canvas, holesAtDepth.keep, transform, "green","");
             pathTracer.tracePathsInRow(canvas, holesAtDepth.stop, transform, "red","");
             debugger2d.translateRight(transform);
             debugger2d.traceDelimiter(canvas, index * debugger2d.canvasWidth / holesByDepth.length);
@@ -102,14 +102,19 @@ const debugger2d = {
         debugger2d.createLegend("legend", parent,"triangles by depth");
         const canvas = debugger2d.createCanvas("triangulationByDepth", parent, debugger2d.cssclass);
         const ctx = canvas.getContext("2d");
-        dataByDepth.horizontalPathsByDepth.forEach((dataAtDepth, index) => {
-            dataAtDepth.paths.forEach(path => {
-                const triangles = holesIn.computeTriangulation([path]);
-                pathTracer.traceTriangulation(ctx, triangles,transform, "black", "");
-            });
+
+        for (let i = 0; i < dataByDepth.horizontalPathsByDepth.length; i++) {
+            const innerPaths = dataByDepth.innerPathsByDepth[i].paths;
+            const horizontalPathsByDepth = dataByDepth.horizontalPathsByDepth;
+            const outerPathsByDepth = dataByDepth.outerPathsByDepth;
+
+
+            const triangles = holesIn.computeTriangulation(horizontalPathsByDepth[i].paths);
+            triangles.depth = horizontalPathsByDepth[i].depth;
+            pathTracer.traceTriangulation(ctx, triangles,transform, "black", "");
             debugger2d.translateRight(transform);
-            debugger2d.traceDelimiter(canvas, index * debugger2d.canvasWidth / dataByDepth.horizontalPathsByDepth.length);
-        });
+            debugger2d.traceDelimiter(canvas, i * debugger2d.canvasWidth / dataByDepth.horizontalPathsByDepth.length);
+        }
 
     },
 

@@ -79,56 +79,6 @@ var pathHelper = {
 
         return clipperLib.Clipper.SimplifyPolygon(path, options.fillType);
     },
-    deepSimplifyPaths: function deepSimplifyPaths(paths) {
-
-        paths = pathHelper.simplifyPaths(paths);
-
-        for (var i = 0; i < paths.length - 1; i++) {
-            for (var j = i + 1; j < paths.length; j++) {
-                var path1 = paths[i];
-                var path2 = paths[j];
-                var res = pathHelper.deepSimplifyTwoPaths(path1, path2);
-                if (res.length > 1) continue;
-                paths.splice(j, 1);
-                paths.splice(i, 1);
-                paths.push(res[0]);
-                if (paths.length > 1 && i > 0) i--;
-            }
-        }
-        return paths;
-    },
-    deepSimplifyTwoPaths: function deepSimplifyTwoPaths(path1, path2) {
-        var found = {};
-        var epsilon = 10000500;
-        for (var i = 0; i < path1.length; i++) {
-            for (var j = 0; j < path2.length; j++) {
-                var pt1 = path1[i];
-                var pt2 = path2[j];
-                if (Math.abs(pt1.X - pt2.X) > epsilon || Math.abs(pt1.Y - pt2.Y) > epsilon) continue;
-                var npt1 = path1[(i + 1) % path1.length];
-                var npt2 = path2[(j + 1) % path2.length];
-                if (Math.abs(npt1.X - npt2.X) > epsilon || Math.abs(npt1.Y - npt2.Y) > epsilon) continue;
-
-                // if(npt1.X != npt2.X || npt1.Y != npt2.Y) continue;
-                console.log("FOUND");
-                found.i = i;
-                found.j = j;
-                i = path1.length;
-                break;
-            }
-        }
-        if (found.i === undefined) return [path1, path2];
-
-        var res = path1.slice(0, found.i);
-
-        var path2R = Array.from(path2).reverse();
-        for (var _i = 0; _i < path2.length; _i++) {
-            var index = (path2.length - 1 - found.j + _i) % path2.length;
-            res.push(path2R[index]);
-        }
-        res = res.concat(path1.slice(found.i + 2, path1.length));
-        return [res];
-    },
 
 
     /**
@@ -155,12 +105,32 @@ var pathHelper = {
         // settup and execute clipper
         var cpr = new clipperLib.Clipper();
         cpr.AddPaths(pathsSubj, clipperLib.PolyType.ptSubject, true);
+        // pathsSubj.forEach(path => cpr.AddPath(path, clipperLib.PolyType.ptSubject, true));
+
         if (pathsClip) {
+            // pathsClip.forEach(path => cpr.AddPath(path, clipperLib.PolyType.ptClip, true));
             cpr.AddPaths(pathsClip, clipperLib.PolyType.ptClip, true);
         }
         var res = new clipperLib.Paths();
         cpr.Execute(options.clipType, res, options.subjectFill, options.clipFill);
         return res;
+    },
+    offsetPaths: function offsetPaths(paths) {
+        var offset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 100;
+
+        var co = new clipperLib.ClipperOffset();
+        var res = new clipperLib.Paths();
+
+        co.AddPaths(paths, clipperLib.JoinType.jtMiter, clipperLib.EndType.etClosedPolygon);
+        co.MiterLimit = 2;
+        co.ArcTolerance = 0.25;
+        co.Execute(res, offset);
+        return res;
+    },
+    offsetPath: function offsetPath(path) {
+        var offset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 100;
+
+        return pathHelper.offsetPaths([path], offset)[0];
     },
 
 

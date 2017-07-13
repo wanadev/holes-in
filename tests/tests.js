@@ -12,49 +12,48 @@ describe('Holes in', function() {
 
         });
 
-        let i = 0;
-        getholes.getTestPaths().forEach((test) => {
+
+        getholes.getTestPaths().forEach((test, i) => {
             it('returns the right number of triangles, test index= ' + i, function() {
                 const options = getholes.getDefaultOptions();
                 let geom = holesIn.getGeometry(test.outerShape, test.holes, options);
-                if (test.frontMesh)
-                    expect(geom.frontMesh.faces).to.have.length(test.frontMesh);
-                if (test.backMesh)
-                    expect(geom.backMesh.faces).to.have.length(test.backMesh);
-                if (test.outMesh)
-                    expect(geom.outMesh.faces).to.have.length(test.outMesh);
-                if (test.inMesh)
-                    expect(geom.inMesh.faces).to.have.length(test.inMesh);
-                if (test.horizontalMesh)
-                    expect(geom.horizontalMesh.faces).to.have.length(test.horizontalMesh);
+                const result = test.result;
+
+                if (result.frontMesh)
+                    expect(geom.frontMesh.faces).to.have.length(result.frontMesh);
+                if (result.backMesh)
+                    expect(geom.backMesh.faces).to.have.length(result.backMesh);
+                if (result.outMesh)
+                    expect(geom.outMesh.faces).to.have.length(result.outMesh);
+                if (result.inMesh)
+                    expect(geom.inMesh.faces).to.have.length(result.inMesh);
+                if (result.horizontalMesh)
+                    expect(geom.horizontalMesh.faces).to.have.length(result.horizontalMesh);
             });
-            i++;
         });
 
-        i = 0;
-        getholes.getTestDoNotBuild().forEach((test) => {
+        getholes.getTestDoNotBuild().forEach((test, i) => {
             it('DO NOT BUILD returns the right number of triangles, test index= ' + i, function() {
                 const options = getholes.getDefaultOptions();
                 getholes.doNotBuild(options, [test.outerShape.path]);
                 options.backMesh = false;
+                const result = test.result;
                 let geom = holesIn.getGeometry(test.outerShape, test.holes, options);
-                if (test.frontMesh)
-                    expect(geom.frontMesh.faces).to.have.length(test.frontMesh);
-                if (test.backMesh)
-                    expect(geom.backMesh.faces).to.have.length(test.backMesh);
-                if (test.outMesh)
-                    expect(geom.outMesh.faces).to.have.length(test.outMesh);
-                if (test.inMesh)
-                    expect(geom.inMesh.faces).to.have.length(test.inMesh);
-                if (test.horizontalMesh)
-                    expect(geom.horizontalMesh.faces).to.have.length(test.horizontalMesh);
+                if (result.frontMesh)
+                    expect(geom.frontMesh.faces).to.have.length(result.frontMesh);
+                if (result.backMesh)
+                    expect(geom.backMesh.faces).to.have.length(result.backMesh);
+                if (result.outMesh)
+                    expect(geom.outMesh.faces).to.have.length(result.outMesh);
+                if (result.inMesh)
+                    expect(geom.inMesh.faces).to.have.length(result.inMesh);
+                if (result.horizontalMesh)
+                    expect(geom.horizontalMesh.faces).to.have.length(result.horizontalMesh);
 
             });
-            i++;
         });
 
-        i = 0;
-        getholes.getTestPaths().forEach((test) => {
+        getholes.getTestPaths().forEach((test, i) => {
             it('returns coherent points normals faces uvs, test index= ' + i, function() {
                 const options = getholes.getDefaultOptions();
                 let geom = holesIn.getGeometry(test.outerShape, test.holes, options);
@@ -65,11 +64,9 @@ describe('Holes in', function() {
                 expect(geomMerged.uvs).to.have.length(numPoints * 2);
 
             });
-            i++;
         });
 
-        i = 0;
-        getholes.getTestDoNotBuild().forEach((test) => {
+        getholes.getTestDoNotBuild().forEach((test, i) => {
             it('DO NOT BUILD returns coherent points normals faces uvs, test index= ' + i, function() {
                 const options = getholes.getDefaultOptions();
                 getholes.doNotBuild(options, [test.outerShape.path]);
@@ -82,7 +79,6 @@ describe('Holes in', function() {
                 expect(geomMerged.uvs).to.have.length(numPoints * 2);
 
             });
-            i++;
         });
     });
 });

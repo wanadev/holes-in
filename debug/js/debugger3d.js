@@ -21,7 +21,6 @@ const debugger3d = {
     updateMesh(){
         const outerShape = debugger3d.outerShape;
         const holes = debugger3d.holes;
-        const doNotBuild = debugger3d.doNotBuild;
         if(!debugger3d.meshDirty){return;}
         if(!holes || !outerShape || !outerShape.path || !holes[0] || !holes[0].path){return;}
 
@@ -32,7 +31,9 @@ const debugger3d = {
 
 
         if(debugger3d.options.doNotBuild) {
-            cpyOptions.doNotBuild = JSON.parse(document.getElementById("doNotBuild").value);
+            const val = debugger3d.toClipperString(document.getElementById("doNotBuild").value);
+            debugger3d.pathToEdge(JSON.parse(val));
+            cpyOptions.doNotBuild = JSON.parse(JSON.stringify(debugger3d.doNotBuild));
             holesIn.scaleUpPath(cpyOptions.doNotBuild);
         }
 
@@ -163,10 +164,31 @@ const debugger3d = {
       );
   },
 
+  pathToEdge (paths) {
+      if (!paths || !paths.length ) return;
+      if(!paths[0].length) paths = [paths];
+      const doNotBuild = paths;
+      const edges = [];
+
+      for (let i = 0; i < doNotBuild.length; i++) {
+          const path = doNotBuild[i];
+          for (let j = 0; j < path.length; j++) {
+              const ptA = path[j];
+              const ptB = path[(j + 1) % path.length];
+              edges.push([{X:ptA.X,Y:ptA.Y},{X:ptB.X,Y:ptB.Y}]);
+          }
+      }
+      debugger3d.doNotBuild = edges;
+  },
+
   rebuild(outerShape, holes){
-      debugger3d.outerShape = outerShape;
-      debugger3d.holes = holes;
+      debugger3d.outerShape = JSON.parse(JSON.stringify(outerShape));
+      debugger3d.holes = JSON.parse(JSON.stringify(holes));
       debugger3d.meshDirty = true;
+  },
+
+  toClipperString(string) {
+      return string.replace(/x/g,"X").replace(/y/g, "Y");
   }
 
 

@@ -12,6 +12,8 @@
 
 ## Documentation
 
+[Please visit the Documentation page](https://wanadev.github.io/holes-in/)
+
 ## Changelog
 * **0.3.4:** Added option doNotBuild to a thinner control of the final mesh
 * **0.3.2:** Simplified pre processing for more robustness

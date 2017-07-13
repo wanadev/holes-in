@@ -48,9 +48,9 @@ var geomHelper = {
     /*
      * Returns two triangles representing the larger face we can build from the edge ptDwn->nPtDwn
      */
-    getOneVerticalGeom: function getOneVerticalGeom(idxPtDwn, nIdxPtDwn, indexDepthDwn, pathDwn, pathsByDepth, toMarkPaths) {
-        var offset = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : 0;
-        var invertNormal = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : false;
+    getOneVerticalGeom: function getOneVerticalGeom(idxPtDwn, nIdxPtDwn, indexDepthDwn, pathDwn, pathsByDepth) {
+        var offset = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 0;
+        var invertNormal = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : false;
 
         var ptDwn = pathDwn[idxPtDwn];
         var nPtDwn = pathDwn[nIdxPtDwn];
@@ -62,7 +62,6 @@ var geomHelper = {
         if (indexDepthUp === undefined || indexDepthUp < 0) {
             return;
         }
-        // geomHelper.markAsVisited(ptDwn,nPtDwn, toMarkPaths,indexDepthDwn);
         var depthUp = pathsByDepth[indexDepthUp].depth;
         var depthDwn = pathsByDepth[indexDepthDwn].depth;
         var res = geomHelper.getPtsNormsIndx2d(ptDwn, nPtDwn, depthUp, depthDwn, +offset, invertNormal);

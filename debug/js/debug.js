@@ -13,6 +13,7 @@ const debug = {
     init() {
         debug.elems =  { outerShape: document.getElementById("outerShape"),
                       holes: document.getElementById("holes"),
+                      doNotBuild: document.getElementById("doNotBuild"),
                       submit: document.getElementById("submit"),
                       customDraw: document.getElementById("customDraw"),
                       container: document.getElementById("container"),
@@ -26,6 +27,9 @@ const debug = {
         if(store.get("holes")){
             debug.elems.holes.value = store.get("holes");
         }
+        if(store.get("doNotBuild")){
+            debug.elems.doNotBuild.value = store.get("doNotBuild");
+        }
 
         debugger2d.elems = debug.elems;
         debugger3d.elems = debug.elems;
@@ -34,6 +38,7 @@ const debug = {
         debug.elems.submit.addEventListener("click", () => {
             store.set('outerShape', debug.elems.outerShape.value);
             store.set('holes', debug.elems.holes.value);
+            store.set('doNotBuild', debug.elems.doNotBuild.value);
             debug.refresh();
         });
 
@@ -107,20 +112,23 @@ const debug = {
 
         const holes =  [...checkboxes].map( (checkbox, index ) => {
              if(checkbox.checked){
-                 const hole = JSON.parse(checkbox.getAttribute("data-hole"));
+                 const val = debugger3d.toClipperString(checkbox.getAttribute("data-hole"));
+                 const hole = JSON.parse(val);
                  hole.depth = +numbers[index].value;
                  return hole;
              }
          }).filter (elt => elt);
-         const outerShape = JSON.parse(debug.elems.outerShape.value);
-         return {outerShape, holes};
+         const val = debugger3d.toClipperString(debug.elems.outerShape.value);
+         const outerShape = JSON.parse(val);
+         const options = {};
+         return {outerShape, holes, options};
     },
 
     getDataFromTests(funcName, index) {
         const test = getholes[funcName]()[index];
         baseholes = JSON.parse(JSON.stringify(test.holes));
         outerShape = JSON.parse(JSON.stringify(test.outerShape));
-    }
+    },
 
     rebuildGeometry() {
         debug.elems.container.innerHTML = "";
@@ -192,8 +200,8 @@ const debug = {
         let cpyDoNotBuild= JSON.parse(JSON.stringify(holes));
 
 
-        if(debugger3d.options.doNotBuild) {
-            cpyOptions.doNotBuild = doNotBuild;
+        if(debugger3d.doNotBuild) {
+            cpyOptions.doNotBuild = JSON.parse(JSON.stringify(debugger3d.doNotBuild));
         }
         if(debug.getCheckboxValue("debugGeometry")) {
             debugger;
@@ -206,6 +214,7 @@ const debug = {
             if(geom.outMesh) console.log("out: ",geom.outMesh.faces.length);
             if(geom.inMesh) console.log("in: ",geom.inMesh.faces.length);
             if(geom.horizontalMesh) console.log("horr: ",geom.horizontalMesh.faces.length);
+            console.log("geom: ",geom);
         }
 
         console.log("---end---");
@@ -245,6 +254,7 @@ const debug = {
         window.scrollTo(0,Math.max( document.body.scrollHeight, document.body.offsetHeight,
                        document.documentElement.clientHeight, document.documentElement.scrollHeight, document.documentElement.offsetHeight ))
     },
+
 
 
 

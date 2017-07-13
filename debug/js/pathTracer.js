@@ -73,9 +73,6 @@ const pathTracer = {
         });
     },
 
-
-
-
     getFitTransformation(path, width, height) {
         const minMax = path.reduce( (res, pt) => {
             pt.X > res.max.X ? res.max.X = pt.X : res.max.X = res.max.X;
@@ -120,7 +117,6 @@ const pathTracer = {
             pathTracer.tracePath(ctx, path,  transform, color, fillStyle);
         });
     },
-
 
     traceArrow(ctx, begin, end) {
 
