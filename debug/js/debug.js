@@ -43,8 +43,7 @@ const debug = {
         });
 
         debug.elems.customDraw.addEventListener("click", () => {
-
-            debug.startNewDraw(holes, outerShape);
+            debug.startNewDraw();
         });
 
         debug.elems.debugCheckboxes.forEach(el =>
@@ -221,9 +220,11 @@ const debug = {
     },
 
 
-    startNewDraw(holes, outerShape){
-        let cpyHoles = debugger2d._objectClone(holes);
-        let cpyOuterShape = debugger2d._objectClone(outerShape);
+    startNewDraw(){
+        const data = debug.getData();
+
+        let cpyHoles = debugger2d._objectClone(data.holes);
+        let cpyOuterShape = debugger2d._objectClone(data.outerShape);
         holesIn.scaleUpPath(cpyOuterShape.path);
         for (let i = 0; i < cpyHoles.length; i++) {
             holesIn.scaleUpPath(cpyHoles[i].path);
@@ -231,8 +232,8 @@ const debug = {
         let holesByDepth = holesIn.getHolesByDepth(cpyHoles, cpyOuterShape);
         const transform = debugger2d.getTransform(cpyOuterShape, cpyHoles, holesByDepth.length);
 
-        cpyHoles = debugger2d._objectClone(holes);
-        cpyOuterShape = debugger2d._objectClone(outerShape);
+        cpyHoles = debugger2d._objectClone(data.holes);
+        cpyOuterShape = debugger2d._objectClone(data.outerShape);
         let dataByDepth = holesIn.getDataByDepth(cpyOuterShape, cpyHoles);
 
         const parent = document.getElementById("container");
@@ -241,11 +242,13 @@ const debug = {
         debug.scrollDown();
         debugger;
 
-        pathTracer.tracePath(ctx);
+        pathTracer.tracePath(ctx, [], transform);
         /* drawinbg functions :
             pathTracer.tracePath(ctx, path,  transform)
             pathTracer.traceTriangulation(ctx, triangulation, transform)
             pathTracer.tracePathsInRow(canvas, paths,transform)
+            debugger2d.translateRight(transform)
+            debugger2d.traceDelimiter(canvas, x)
         */
 
     },

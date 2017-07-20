@@ -61,6 +61,12 @@ const debugger3d = {
          const material = debugger3d.mesh.material;
          material.wireframe=debugger3d.options.wireframe;
          material.backFaceCulling=debugger3d.options.backFaceCulling;
+         if(debugger3d.options.enableTexture) {
+           material.ambientTexture = new BABYLON.Texture("damier.jpg", debugger3d.scene);;
+         } else {
+           material.ambientTexture = null;
+         }
+
 
          debugger3d.scene.meshes.filter( mesh => mesh.name === "lines"  ).forEach( mesh => mesh.dispose());
          if(debugger3d.options.displayNormals){

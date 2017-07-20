@@ -85,10 +85,16 @@ const pathTracer = {
         const widthPath = minMax.max.X - minMax.min.X;
         const heightPath = minMax.max.Y - minMax.min.Y;
 
+        width = 0.90 * width;
+        height = 0.90 * height;
         const scale = Math.min(width / widthPath, height / heightPath);
-        const translation = {X: -minMax.min.X * scale, Y : -minMax.min.Y * scale};
+        const translation = {X: -minMax.min.X * scale +20, Y : -minMax.min.Y * scale + 20};
+        const baseTranslation = {X: -minMax.min.X * scale +20, Y : -minMax.min.Y * scale };
 
-        return {scale, translation, width, height};
+
+
+
+        return {scale, translation, width, height, baseTranslation};
     },
 
     getMaxFitTransform(paths, width, height) {
@@ -101,8 +107,6 @@ const pathTracer = {
     tracePathsInRow(canvas, paths, transform, strokeStyle = "black", fillStyle = "white") {
         if(paths.length === 0) return;
         if(!transform){
-            const width = 0.90 * canvas.width / paths.length;
-            const height = 0.90 * canvas.height;
             transform = pathTracer.getMaxFitTransform([paths[0]], width, height);
         }
 

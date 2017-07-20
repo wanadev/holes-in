@@ -146,7 +146,7 @@ var extruder = {
             if (holesByDepth[_i].stop.length > 0) {
                 horr = pathHelper.getInterOfPaths(horr, holesByDepth[_i].stop);
             }
-            // let inneAtThisDepth = pathHelper.getInterOfPaths(horr, holesByDepth[i].keep);
+
             horr = pathHelper.getDiffOfPaths(horr, holesByDepth[_i].keep);
             horr = pathHelper.cleanPaths(horr, 20);
             horizontalPaths.push(horr);
@@ -210,16 +210,13 @@ var extruder = {
         holes = holes.filter(function (hole) {
             return hole.path !== undefined;
         });
-        for (var _i4 = 0; _i4 < holes.length; _i4++) {}
-        // pathHelper.displaceColinearEdges(outerShape.path, holes[i].path);
-
 
         // get paths by depth:
         var res = [];
 
-        var _loop = function _loop(_i5) {
+        var _loop = function _loop(_i4) {
             var deeperHoles = holes.filter(function (s) {
-                return s.depth > depths[_i5];
+                return s.depth > depths[_i4];
             });
             var keep = [];
             deeperHoles.forEach(function (s) {
@@ -227,7 +224,7 @@ var extruder = {
             });
 
             var stopHoles = holes.filter(function (s) {
-                return s.depth === depths[_i5];
+                return s.depth === depths[_i4];
             });
             var stop = [];
             stopHoles.forEach(function (s) {
@@ -238,22 +235,22 @@ var extruder = {
             res.push({
                 keep: keep,
                 stop: stop,
-                depth: depths[_i5]
+                depth: depths[_i4]
             });
         };
 
-        for (var _i5 = 0; _i5 < depths.length; _i5++) {
-            _loop(_i5);
+        for (var _i4 = 0; _i4 < depths.length; _i4++) {
+            _loop(_i4);
         }
 
         // gets the difference between keep and stop:
-        for (var _i6 = 0; _i6 < depths.length; _i6++) {
-            res[_i6].stop = pathHelper.getDiffOfPaths(res[_i6].stop, res[_i6].keep);
+        for (var _i5 = 0; _i5 < depths.length; _i5++) {
+            res[_i5].stop = pathHelper.getDiffOfPaths(res[_i5].stop, res[_i5].keep);
         }
 
-        for (var _i7 = 0; _i7 < depths.length; _i7++) {
-            res[_i7].stop = pathHelper.getUnionOfPaths(res[_i7].stop);
-            res[_i7].keep = pathHelper.getUnionOfPaths(res[_i7].keep);
+        for (var _i6 = 0; _i6 < depths.length; _i6++) {
+            res[_i6].stop = pathHelper.getUnionOfPaths(res[_i6].stop);
+            res[_i6].keep = pathHelper.getUnionOfPaths(res[_i6].keep);
         }
 
         return res;
