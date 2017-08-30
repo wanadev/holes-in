@@ -8,6 +8,19 @@
     border: 1px solid black;
 }
 
+.canvas512 {
+    border: 1px solid black;
+    width: 512px;
+    height: 512px;
+}
+.right {
+    float: right;
+    width: 50%;
+}
+.right input {
+    margin-top: 30px;
+}
+
 .block {
     margin-bottom: 20px;
     padding: 10px;

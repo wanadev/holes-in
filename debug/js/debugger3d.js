@@ -22,7 +22,7 @@ const debugger3d = {
         const outerShape = debugger3d.outerShape;
         const holes = debugger3d.holes;
         if(!debugger3d.meshDirty){return;}
-        if(!holes || !outerShape || !outerShape.path || !holes[0] || !holes[0].path){return;}
+        if(!holes || !outerShape || !outerShape.path){return;}
 
         let cpyOptions = JSON.parse(JSON.stringify(debugger3d.options));
         let cpyOut= JSON.parse(JSON.stringify(outerShape));

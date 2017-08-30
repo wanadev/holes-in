@@ -102,7 +102,7 @@ var extruder = {
         var horrGeom = [];
         for (var i = 0; i < indexes.length; i++) {
             var innerPaths = innerPathsByDepth[indexes[i]].paths;
-            var paths = horizontalPathsByDepth[indexes[i]].paths;
+            var paths = horizontalPathsByDepth[indexes[i]].paths; //.concat(innerPaths);
             var triangles = cdt2dHelper.computeTriangulation(paths);
             triangles.depth = horizontalPathsByDepth[indexes[i]].depth;
             horrGeom.push(geomHelper.getHorizontalGeom(triangles, 0, invertNormal));
@@ -149,7 +149,15 @@ var extruder = {
 
             horr = pathHelper.getDiffOfPaths(horr, holesByDepth[_i].keep);
             horr = pathHelper.cleanPaths(horr, 20);
-            horizontalPaths.push(horr);
+
+            // let horrFromHoles = pathHelper.getUnionOfPaths(holesByDepth[i].keep, holesByDepth[i].stop);
+            // horrFromHoles = pathHelper.getDiffOfPaths(horrFromHoles, holesByDepth[i].keep.concat(holesByDepth[i].stop));
+            // horrFromHoles = pathHelper.cleanPaths(horrFromHoles, 20);
+
+            //  horizontalPaths.push(pathHelper.getUnionOfPaths(horr,horrFromHoles));
+            horizontalPaths.push(horr
+            // horizontalPaths.push(horr.concat(horrFromHoles));
+            );
         }
 
         for (var _i2 = 0; _i2 < outerPaths.length; _i2++) {

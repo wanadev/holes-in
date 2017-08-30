@@ -11,14 +11,20 @@ const pathTracer = {
         const transformed = path.map(pt => ({X: (pt.X * scale) + translation.X,
              Y: (pt.Y * scale) + translation.Y }) );
 
+
         let lineWidth = 1;
         if(strokeStyle === "") {
             lineWidth = 0;
         }
+        ctx.lineWidth = lineWidth;
+
+        ctx.fillStyle = fillStyle;
+        if(fillStyle == "hatch"){
+            const pattern = ctx.createPattern(pathTracer.getHatchPattern(strokeStyle),"repeat");
+            ctx.fillStyle = pattern;
+        }
 
         ctx.strokeStyle = strokeStyle;
-        ctx.fillStyle = fillStyle;
-        ctx.lineWidth = lineWidth;
 
         if(arrow) {
             for(let i = 0 ; i < transformed.length; i++) {
@@ -72,6 +78,7 @@ const pathTracer = {
             }
         });
     },
+
 
     getFitTransformation(path, width, height) {
         const minMax = path.reduce( (res, pt) => {
@@ -161,8 +168,22 @@ const pathTracer = {
         ctx.stroke();
 
         ctx.restore();
-    }
+    },
 
+
+    getHatchPattern(color = "black") {
+        const canvasPattern = document.createElement("canvas");
+        canvasPattern.width = 10;
+        canvasPattern.height = 10;
+        const contextPattern = canvasPattern.getContext("2d");
+
+        contextPattern.strokeStyle = color;
+        contextPattern.beginPath();
+            contextPattern.moveTo(0,0);
+            contextPattern.lineTo(10,10);
+        contextPattern.stroke();
+        return canvasPattern;
+    }
 };
 
 module.exports = pathTracer;

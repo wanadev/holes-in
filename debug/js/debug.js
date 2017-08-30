@@ -6,18 +6,28 @@ const debugger3d = require("./debugger3d");
 const store = require("store");
 const holesIn = require("../../lib/index.js");
 const cdt2d = require("cdt2d");
+const shapeEditor = require("./shape-editor.js");
+const getHoles = require("../../tests/holes.js");
+
 
 const debug = {
     elems: null,
 
     init() {
-        debug.elems =  { outerShape: document.getElementById("outerShape"),
+        debug.elems =  {
+                      outerShape: document.getElementById("outerShape"),
                       holes: document.getElementById("holes"),
                       doNotBuild: document.getElementById("doNotBuild"),
                       submit: document.getElementById("submit"),
                       customDraw: document.getElementById("customDraw"),
                       container: document.getElementById("container"),
                       generated: document.getElementById("generated-data"),
+                      interactiveCanvas: document.getElementById("interactive-canvas"),
+                      shapeEditorOutButton: document.getElementById("shapeEditorOut"),
+                      shapeEditorHoleButton: document.getElementById("shapeEditorHole"),
+                      shapeEditorDefaultButton: document.getElementById("shapeEditorDefault"),
+                      shapeEditorSubmitButton: document.getElementById("shapeEditorSubmit"),
+                      testSelect: document.getElementById("testSelect"),
                       debugCheckboxes:  [...document.getElementById('logs').getElementsByTagName('input')]
                   };
 
@@ -59,6 +69,33 @@ const debug = {
         document.debugLib = this;
         document.holesIn = holesIn;
         document.cdt2d = cdt2d;
+
+        shapeEditor.initIntoCanvas(debug.elems.interactiveCanvas, debug.elems.shapeEditorOutButton,
+                            debug.elems.shapeEditorHoleButton, debug.elems.shapeEditorDefaultButton);
+
+
+        // init unitary tests select :
+        getHoles.getTestPaths().forEach((test, index) => {
+            const option = document.createElement('option');
+            option.value = index;
+            option.innerHTML = index;
+            debug.elems.testSelect.appendChild(option);
+        });
+
+        debug.elems.testSelect.addEventListener('change', function() {
+            console.log('Selection changed!', debug.elems.testSelect.selectedIndex);
+            const unitaryTest = getHoles.getTestPaths()[debug.elems.testSelect.selectedIndex];
+            const options = getHoles.getDefaultOptions();
+            const jsonOuterSape = JSON.stringify(unitaryTest.outerShape);
+            const jsonHoles = JSON.stringify(unitaryTest.holes);
+
+            debug.elems.holes.value = jsonHoles;
+            debug.elems.outerShape.value = jsonOuterSape;
+
+            debug.refresh();
+
+         }, false);
+
 
     },
 
@@ -106,14 +143,14 @@ const debug = {
     },
 
     getData() {
-        const checkboxes = document.getElementById('generated-data').querySelectorAll("input[type='checkbox']");
-        const numbers = document.getElementById('generated-data').querySelectorAll("input[type='number']");
+        holesCheckboxes = document.getElementById('generated-data').querySelectorAll("input[type='checkbox']");
+        holesDepths = document.getElementById('generated-data').querySelectorAll("input[type='number']");
 
-        const holes =  [...checkboxes].map( (checkbox, index ) => {
+        const holes =  [...holesCheckboxes].map( (checkbox, index ) => {
              if(checkbox.checked){
                  const val = debugger3d.toClipperString(checkbox.getAttribute("data-hole"));
                  const hole = JSON.parse(val);
-                 hole.depth = +numbers[index].value;
+                 hole.depth = +holesDepths[index].value;
                  return hole;
              }
          }).filter (elt => elt);

@@ -35,7 +35,15 @@
                       </textarea>
                 </label>
               </div>
+              <canvas id = "interactive-canvas" class = "canvas512"></canvas>
+              <div class = "right">
+               <label><input type = "radio" id = "shapeEditorOut" value = "outMode" name="shapeEditorMode" class ="smallbuttons"></input> outMode</label><br>
+               <label><input type = "radio" id = "shapeEditorHole" value = "holeMode" name="shapeEditorMode" class ="smallbuttons"></input> holeMode</label><br>
+               <label><input type = "radio" id = "shapeEditorDefault" value = "defaultMode" name="shapeEditorMode" class ="smallbuttons"></input> defaultMode</label><br>
+               <input type = "button" id = "shapeEditorSubmit" value = "submitEditor" class ="buttons"></input>
+              </div>
           </div>
+
           <div id="generated-data" class = "block">
 
           </div>
@@ -67,6 +75,11 @@
               <div><label><input type="checkbox" data-target="debugGeometry" checked="true">debug Geometry</label></div>
 
          </div>
+          <div id ="tests" class = "block">
+              <select id="testSelect">
+
+              </select>
+          </div>
   </div>
   <div>
       <input type = "button" id = "submit" value = "runTest" class ="buttons"></input>
