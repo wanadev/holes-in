@@ -7,7 +7,7 @@ const debugger3d = {
 
     cssclass: "canvas3d",
     options: {inMesh:true, outMesh:true, frontMesh:true, backMesh:true, horizontalMesh:true,
-                wireframe:false, backFaceCulling:false,normals:false,swapToBabylon:true, displayNormals:false},
+                wireframe:false, backFaceCulling:false,normals:false,swapToBabylon:true, displayNormals:false, lengthU: 100, lengthV: 100, enableTexture: "../assets/cat.png" },
 
     engine: null,
     scene: null,
@@ -62,7 +62,8 @@ const debugger3d = {
          material.wireframe=debugger3d.options.wireframe;
          material.backFaceCulling=debugger3d.options.backFaceCulling;
          if(debugger3d.options.enableTexture) {
-           material.ambientTexture = new BABYLON.Texture("damier.jpg", debugger3d.scene);;
+           material.ambientTexture = new BABYLON.Texture(debugger3d.options.enableTexture, debugger3d.scene);
+
          } else {
            material.ambientTexture = null;
          }
@@ -162,12 +163,25 @@ const debugger3d = {
       [...document.getElementById('option').getElementsByTagName('input')].forEach(el =>
           {
               el.addEventListener("change", e => {
-                  debugger3d.options[el.getAttribute("data-target")] = (e.target.checked);
-                  debugger3d.meshDirty=true;
+                  let value = (e.target.checked);
+                  if (el.getAttribute("data-target") == "enableTexture") {
+                      value = "../assets/" + document.getElementById("textureSelect").value;
+                  }
+                  debugger3d.options[el.getAttribute("data-target")] = value;
+                  debugger3d.meshDirty = true;
               });
               el.checked = debugger3d.options[el.getAttribute("data-target")];
           }
       );
+
+      document.getElementById("textureSelect").addEventListener("change", e => {
+
+          const  value = "../assets/" + document.getElementById("textureSelect").value;
+          debugger3d.options["enableTexture"] = value;
+          debugger3d.meshDirty = true;
+      });
+
+
   },
 
   pathToEdge (paths) {

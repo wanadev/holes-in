@@ -10,7 +10,7 @@
     "build-es5": "cd lib/ && env babel *.js -d ../lib-es5",
     "build-uglify": "uglifyjs dist/holes-in.js -o dist/holes-in.min.js",
     "build-doc": "./node_modules/.bin/enlightme",
-    "watchify": "mkdir -p dist && watchify -v --debug -s holes-in lib/index.js -o dist/holes-in.js && npm run build",
+    "watchify": "mkdir -p dist && watchify -v --debug -s holes-in lib/index.js -o dist/holes-in.js",
     "watchifyUI": "rm -f `pwd`/doc.generated/ui-bundle.js && ln -s `pwd`/doc/ui-bundle.js `pwd`/doc.generated/ui-bundle.js && watchify -v --debug doc/js/index.js -o doc.generated/ui-bundle.js",
     "watchifyDebug": "watchify -v --debug debug/js/index.js -o debug/dist/debuglib.js",
     "watchifyAll": "npm run watchify & npm run watchifyUI & npm run watchifyDebug",

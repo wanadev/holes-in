@@ -28,6 +28,7 @@ const debug = {
                       shapeEditorDefaultButton: document.getElementById("shapeEditorDefault"),
                       shapeEditorSubmitButton: document.getElementById("shapeEditorSubmit"),
                       testSelect: document.getElementById("testSelect"),
+                      textureSelect: document.getElementById("textureSelect"),
                       debugCheckboxes:  [...document.getElementById('logs').getElementsByTagName('input')]
                   };
 
@@ -72,7 +73,6 @@ const debug = {
 
         shapeEditor.initIntoCanvas(debug.elems.interactiveCanvas, debug.elems.shapeEditorOutButton,
                             debug.elems.shapeEditorHoleButton, debug.elems.shapeEditorDefaultButton);
-
 
         // init unitary tests select :
         getHoles.getTestPaths().forEach((test, index) => {
