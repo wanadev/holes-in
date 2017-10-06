@@ -1,8 +1,8 @@
-const paper = require("paper");
+// const paper = require("paper");
 
 
 const shapeEditor= {
-
+/*
     outPath: null,
     holesPaths: [],
     mode: "default",
@@ -165,7 +165,7 @@ const shapeEditor= {
      	}
     },
 
-
+*/
 
 
 };

@@ -289,10 +289,10 @@ var pathHelper = {
             return true;
         }
         if (a === 0 || b === 0) {
-            var diff = Math.abs(a - b);
-            return diff > -epsilon && diff < epsilon;
+            return false;
         }
-        var ratio = Math.abs(a / b);
+        // a - b === 0 ? a / b === 1 => true même si a / b = -1
+        var ratio = a / b;
         return ratio > 1 - epsilon && ratio < 1 + epsilon;
     },
     getEdge: function getEdge(point1, point2) {

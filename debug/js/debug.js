@@ -6,7 +6,7 @@ const debugger3d = require("./debugger3d");
 const store = require("store");
 const holesIn = require("../../lib/index.js");
 const cdt2d = require("cdt2d");
-const shapeEditor = require("./shape-editor.js");
+// const shapeEditor = require("./shape-editor.js");
 const getHoles = require("../../tests/holes.js");
 
 
@@ -71,8 +71,8 @@ const debug = {
         document.holesIn = holesIn;
         document.cdt2d = cdt2d;
 
-        shapeEditor.initIntoCanvas(debug.elems.interactiveCanvas, debug.elems.shapeEditorOutButton,
-                            debug.elems.shapeEditorHoleButton, debug.elems.shapeEditorDefaultButton);
+        // shapeEditor.initIntoCanvas(debug.elems.interactiveCanvas, debug.elems.shapeEditorOutButton,
+        //                     debug.elems.shapeEditorHoleButton, debug.elems.shapeEditorDefaultButton);
 
         // init unitary tests select :
         getHoles.getTestPaths().forEach((test, index) => {

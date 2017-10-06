@@ -155,9 +155,8 @@ var extruder = {
             // horrFromHoles = pathHelper.cleanPaths(horrFromHoles, 20);
 
             //  horizontalPaths.push(pathHelper.getUnionOfPaths(horr,horrFromHoles));
-            horizontalPaths.push(horr
+            horizontalPaths.push(horr);
             // horizontalPaths.push(horr.concat(horrFromHoles));
-            );
         }
 
         for (var _i2 = 0; _i2 < outerPaths.length; _i2++) {
