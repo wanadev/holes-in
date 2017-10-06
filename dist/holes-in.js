@@ -891,7 +891,6 @@ var holesIn = {
     simplifyPaths: pathHelper.simplifyPaths,
 
     getInterOfPaths: pathHelper.getInterOfPaths,
-    getMatchingEdgeIndex: pathHelper.getMatchingEdgeIndex,
     setDirectionPath: pathHelper.setDirectionPath,
     hasAnIncludedSegment: pathHelper.hasAnIncludedSegment,
 
@@ -1139,68 +1138,20 @@ var pathHelper = {
             }
         }
     },
-    displaceColinearEdges: function displaceColinearEdges(path, pathToDisplace) {
-        var indexColinear = pathHelper.getColinearEdge(path, pathToDisplace);
-        if (indexColinear === false) {
-            return;
-        }
-
-        pathHelper.displaceEdge(pathToDisplace, indexColinear);
-
-        return true;
-    },
-    displaceEdge: function displaceEdge(path, index) {
-        var indexPrev = (index + path.length - 1) % path.length;
-        var indexNext = (index + 1) % path.length;
-
-        var previousEdge = pathHelper.getEdge(path[indexPrev], path[index]); // eslint-disable-line
-        var nextEdge = pathHelper.getEdge(path[(index + 2) % path.length], path[indexNext]);
-
-        previousEdge = pathHelper.normalizeVec(previousEdge);
-        nextEdge = pathHelper.normalizeVec(nextEdge);
-
-        path[index].X += nextEdge.X * 1;
-        path[index].Y += nextEdge.Y * 1;
-    },
     normalizeVec: function normalizeVec(edge) {
         var norm = Math.sqrt(edge.X * edge.X + edge.Y * edge.Y);
         return { X: edge.X / norm, Y: edge.Y / norm };
     },
-    getColinearEdge: function getColinearEdge(path, pathToMatch) {
-        for (var i = 0; i < path.length; i++) {
-            var pt1 = path[i];
-            var pt2 = path[(i + 1) % path.length];
-            for (var j = 0; j < pathToMatch.length; j++) {
-                if (pathHelper.isApproxAligned(pt1, pt2, pathToMatch[j], pathToMatch[(j + 1) % pathToMatch.length])) {
-                    return j;
-                }
-            }
-        }
-        return false;
-    },
     isApproxAligned: function isApproxAligned(e11, e12, e21, e22) {
         var epsilon = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0.1;
 
-        var edge1 = pathHelper.getEdge(e11, e12);
-        var edge2 = pathHelper.getEdge(e11, e21);
-        var edge3 = pathHelper.getEdge(e12, e22);
-        return pathHelper.isApproxColinear(edge1, edge2, epsilon) && pathHelper.isApproxColinear(edge1, edge3, epsilon);
-    },
-    isApproxColinear: function isApproxColinear(edge1, edge2) {
-        var epsilon = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0.1;
+        // checks the area of the triangles:
+        //           [ Ax   * (By    -  Cy)   +  Bx   * (Cy    -  Ay)   + Cx    * (Ay    -  By) ] / 2
+        var area1 = e11.X * (e12.Y - e21.Y) + e12.X * (e21.Y - e11.Y) + e21.X * (e11.Y - e12.Y);
+        //           [ Ax   * (By    -  Cy)   +  Bx   * (Cy    -  Ay)   + Cx    * (Ay    -  By) ] / 2
+        var area2 = e11.X * (e12.Y - e22.Y) + e12.X * (e22.Y - e11.Y) + e22.X * (e11.Y - e12.Y);
 
-
-        var a = edge1.X * edge2.Y;
-        var b = edge1.Y * edge2.X;
-        if (a === b) {
-            return true;
-        }
-        if (a === 0 || b === 0) {
-            return false;
-        }
-        // a - b === 0 ? a / b === 1 => true même si a / b = -1
-        var ratio = a / b;
-        return ratio > 1 - epsilon && ratio < 1 + epsilon;
+        return (Math.abs(area1) + Math.abs(area2)) / (constants.scaleFactor * constants.scaleFactor) < epsilon;
     },
     getEdge: function getEdge(point1, point2) {
         return {
@@ -1262,12 +1213,6 @@ var pathHelper = {
      */
     isEqual: function isEqual(point1, point2) {
         return point1.X === point2.X && point1.Y === point2.Y;
-    },
-    inOnSegment: function inOnSegment(ptOrigin, ptDest, pt) {
-        return pathHelper.isInRange(ptOrigin, ptDest, pt) || pathHelper.isInRange(ptDest, ptOrigin, pt);
-    },
-    isInRange: function isInRange(ptOrigin, ptDest, pt) {
-        return pt.X >= ptOrigin.X && pt.X <= ptDest.X && pt.Y >= ptOrigin.Y && pt.Y <= ptDest.Y;
     },
     cleanPaths: function cleanPaths(paths) {
         var threshold = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1.5;

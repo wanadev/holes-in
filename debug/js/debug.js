@@ -14,6 +14,7 @@ const debug = {
     elems: null,
 
     init() {
+        window.getHoles = getHoles;
         debug.elems =  {
                       outerShape: document.getElementById("outerShape"),
                       holes: document.getElementById("holes"),
@@ -88,9 +89,13 @@ const debug = {
             const options = getHoles.getDefaultOptions();
             const jsonOuterSape = JSON.stringify(unitaryTest.outerShape);
             const jsonHoles = JSON.stringify(unitaryTest.holes);
-
             debug.elems.holes.value = jsonHoles;
             debug.elems.outerShape.value = jsonOuterSape;
+
+            if(unitaryTest.doNotBuild) {
+                const jsonDoNotBuild = JSON.stringify( getHoles.doNotBuild(unitaryTest.doNotBuild));
+                debug.elems.doNotBuild.value = jsonDoNotBuild;
+            }
 
             debug.refresh();
 
@@ -154,10 +159,8 @@ const debug = {
                  return hole;
              }
          }).filter (elt => elt);
-         const val = debugger3d.toClipperString(debug.elems.outerShape.value);
-         const outerShape = JSON.parse(val);
-         const options = {};
-         return {outerShape, holes, options};
+         const outerShape = JSON.parse(debug.elems.outerShape.value);
+         return {outerShape, holes, doNotBuild: debugger3d.doNotBuild};
     },
 
     getDataFromTests(funcName, index) {
@@ -168,8 +171,8 @@ const debug = {
 
     rebuildGeometry() {
         debug.elems.container.innerHTML = "";
-        const {holes,outerShape} = debug.getData();
-        debugger2d.traceAllData(outerShape, holes);
+        const {holes,outerShape, doNotBuild} = debug.getData();
+        debugger2d.traceAllData(outerShape, holes, doNotBuild);
         debugger3d.rebuild(outerShape, holes);
         debug.logData(outerShape, holes);
     },
@@ -224,17 +227,9 @@ const debug = {
             }
         });
 
-
-
-        if(debug.getCheckboxValue("debugGeometry")) {
-            debugger;
-        }
-
         let cpyOptions = JSON.parse(JSON.stringify(debugger3d.options));
         let cpyOut= JSON.parse(JSON.stringify(outerShape));
         cpyHoles= JSON.parse(JSON.stringify(holes));
-        let cpyDoNotBuild= JSON.parse(JSON.stringify(holes));
-
 
         if(debugger3d.doNotBuild) {
             cpyOptions.doNotBuild = JSON.parse(JSON.stringify(debugger3d.doNotBuild));

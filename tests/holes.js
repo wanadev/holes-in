@@ -8,6 +8,7 @@ getPaths: function(){
         inHole1: { path: [{X:70,Y:70},{X:70,Y:90},{X:90,Y:90},{X:90,Y:70}], depth: 0 },
         inHole2: { path: [{X:75,Y:75},{X:75,Y:90},{X:105,Y:90},{X:105,Y:75}], depth: 0 },
         outHole1: { path: [{X:75,Y:60},{X:75,Y:180},{X:100,Y:180},{X:100,Y:60}], depth: 0 },
+        outHole2: { path: [{X:10,Y:130},{X:200,Y:130},{X:200,Y:200},{X:10,Y:200}], depth: 0 },
         outerShape_colinear: JSON.parse('{"path":[{"X":-1612.59,"Y":-155.8},{"X":-1585.46,"Y":1065.19},{"X":62.96,"Y":1028.56},{"X":-2.14,"Y":-191.58}],"depth":100}'),
         holes_colinear: JSON.parse('[{"path":[{"X":-1049.2808396720457,"Y":729.698597085507},{"X":-388.808787212524,"Y":714.9656378557928},{"X":-836.7275857877936,"Y":1156.6292266055166},{"X":-1036.7275857877933,"Y":1156.6292266055166}],"depth":100},{"path":[{"X":-512.8365366371643,"Y":786.1703991813754},{"X":-312.8365366371643,"Y":810.2260189268427},{"X":-312.8365366371643,"Y":1010.2260189268427},{"X":-512.8365366371643,"Y":1010.2260189268427}],"depth":100}]'),
         outerShape1: JSON.parse('{"path":[{"X":-665.5954564165801,"Y":-96.69725238943857},{"X":-674.1839483073007,"Y":-67.95289977813377},{"X":-349.39021,"Y":29.09185},{"X":-205.31347,"Y":40.82987}],"depth":250}'),
@@ -129,6 +130,25 @@ getTestPaths: function () {
            backMesh:6,
            outMesh:24,
            horizontalMesh:6}
+      },
+      {
+          outerShape:input.outerShape,
+          holes: [input.outHole1, input.outHole2],
+          doNotBuild: [input.outHole1.path],
+          result:{
+           backMesh:18,
+           frontMesh:18,
+           outMesh: 30,
+          }
+      },
+      {
+          outerShape:input.outerShape,
+          holes: [input.outHole1, input.outHole2],
+          doNotBuild: [input.outerShape.path, input.outHole2.path, input.outHole1.path],
+          result:{
+           frontMesh:18,
+           backMesh:18,
+          }
       }
   ];
       return JSON.parse(JSON.stringify(res));
@@ -158,9 +178,8 @@ getTestDoNotBuild: function () {
        },{
        outerShape:JSON.parse('{"path":[{"X":-429.7812903652827,"Y":-415.32309063262903},{"X":-459.4919031423315,"Y":-419.479951035898},{"X":-587.0123427512073,"Y":491.9556120633298},{"X":-557.3017299741585,"Y":496.1124724665988}],"depth":278}'),
        holes:JSON.parse('[{"path":[{"X":-212.94,"Y":-297},{"X":180.54,"Y":-261.96},{"X":127.89,"Y":329.4},{"X":-358.83,"Y":298.65},{"X":-352.94,"Y":267.99},{"X":-249.76,"Y":-269.1},{"X":-243.98,"Y":-299.24}],"depth":0.1},{"path":[{"X":-517.75,"Y":-324.12},{"X":-251.56,"Y":-300.43},{"X":-212.85,"Y":-296.98},{"X":-327.63,"Y":300.62},{"X":-572.69,"Y":285.15}],"depth":28},{"path":[{"X":-528.17876,"Y":287.959879},{"X":-557.301729,"Y":496.112472},{"X":-587.012342,"Y":491.955612},{"X":-558.205759,"Y":286.064352}],"depth":28},{"path":[{"X":-429.78129,"Y":-415.32309},{"X":-443.466615,"Y":-317.509033},{"X":-473.386272,"Y":-320.17178},{"X":-459.491903,"Y":-419.479951}],"depth":28}]'),
-       result:{horizontalMesh:6}
-   }
-   ];
+       result:{horizontalMesh:6},
+      }];
 },
 
 getTestsKaza: function() {
@@ -193,7 +212,7 @@ scaleDown: function (scale=1, scaleout =false){
     }
 },
 
-doNotBuild: function (options, paths) {
+doNotBuild: function (paths) {
     if (!paths) return;
     const doNotBuild = paths;
     const edges = [];
@@ -206,7 +225,7 @@ doNotBuild: function (options, paths) {
             edges.push([{X:ptA.X,Y:ptA.Y},{X:ptB.X,Y:ptB.Y}]);
         }
     }
-    options.doNotBuild = edges;
+    return edges;
 },
 
 getDefaultOptions: function(){

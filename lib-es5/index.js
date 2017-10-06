@@ -31,7 +31,6 @@ var holesIn = {
     simplifyPaths: pathHelper.simplifyPaths,
 
     getInterOfPaths: pathHelper.getInterOfPaths,
-    getMatchingEdgeIndex: pathHelper.getMatchingEdgeIndex,
     setDirectionPath: pathHelper.setDirectionPath,
     hasAnIncludedSegment: pathHelper.hasAnIncludedSegment,
 

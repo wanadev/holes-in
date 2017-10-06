@@ -33,7 +33,7 @@ const debugger2d = {
         return paragraph;
     },
 
-    traceAllData(outerShape, holes) {
+    traceAllData(outerShape, holes, doNotBuild) {
         let cpyHoles = debugger2d._objectClone(holes);
         let cpyOuterShape = debugger2d._objectClone(outerShape);
 
@@ -50,9 +50,36 @@ const debugger2d = {
 
         const parent = document.getElementById("container");
         debugger2d.traceInputHoles(cpyHoles, cpyOuterShape, parent, transform);
+
+        if (doNotBuild && doNotBuild.length) {
+            // cpyHoles = debugger2d._objectClone(holes);
+            // cpyOuterShape = debugger2d._objectClone(outerShape);
+            let cpyDoNotBuild = debugger2d._objectClone(doNotBuild);
+            cpyDoNotBuild.forEach(path => holesIn.scaleUpPath(path));
+            debugger2d.traceDoNotBuild(cpyOuterShape, cpyHoles, cpyDoNotBuild, parent, transform);
+        }
         debugger2d.traceHolesByDepth(holesByDepth, parent, transform, cpyOuterShape);
         debugger2d.traceDataByDepth(dataByDepth, parent, transform);
         debugger2d.traceTriangulationByDepth(dataByDepth, parent, transform);
+
+
+    },
+    traceDoNotBuild(outerShape, holes, doNotBuild, parent, transform) {
+        transform = debugger2d._objectClone(transform);
+        debugger2d.createLegend("inputLegend", parent,"Input and Do Not Build");
+        const canvas = debugger2d.createCanvas("inputData", parent, debugger2d.cssclass);
+        const inputPaths = holes.map(hole => hole.path).concat([outerShape.path]);
+        pathTracer.tracePathsInRow(canvas, inputPaths, transform, "black","");
+
+        const num = holes.length+1;
+        debugger2d.translateRight(transform, 0, num);
+        debugger2d.traceDelimiter(canvas, 0, num);
+        pathTracer.tracePathsInRow(canvas, doNotBuild, transform, "red","");
+        debugger2d.translateRight(transform, 1, num);
+        debugger2d.traceDelimiter(canvas, 1, num);
+        pathTracer.tracePathsInRow(canvas, inputPaths, transform, "black","");
+        pathTracer.tracePathsInRow(canvas, doNotBuild, transform, "red","");
+
 
 
     },
@@ -63,12 +90,12 @@ const debugger2d = {
         const canvas = debugger2d.createCanvas("inputData", parent, debugger2d.cssclass);
         pathTracer.tracePathsInRow(canvas, [outerShape.path], transform, "black","white");
 
-        const num = holes.length;
+        const num = holes.length +1 ;
         holes.forEach((hole,index) => {
           pathTracer.tracePathsInRow(canvas, [holes[index].path], transform, "red", "");
           pathTracer.tracePathsInRow(canvas, [outerShape.path], transform, "black", "");
-          debugger2d.translateRight(transform, index, num +1);
-          debugger2d.traceDelimiter(canvas, index, num+1 );
+          debugger2d.translateRight(transform, index, num);
+          debugger2d.traceDelimiter(canvas, index, num);
         });
 
         const allHolesPaths = holes.map( hole => hole.path);
@@ -158,9 +185,9 @@ const debugger2d = {
 
     getTransform(outerShape, holes, numDepths) {
         const width = debugger2d.canvasWidth / numDepths;
-        const allPaths = holes.concat(outerShape).map(elem => elem.path);
+        const allPaths = holes.concat([outerShape]).map(elem => elem.path);
         const transform = pathTracer.getMaxFitTransform(allPaths, width, debugger2d.canvasHeight);
-        return transform
+        return transform;
     }
 
 };

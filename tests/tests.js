@@ -16,6 +16,9 @@ describe('Holes in', function() {
         getholes.getTestPaths().forEach((test, i) => {
             it('returns the right number of triangles, test index= ' + i, function() {
                 const options = getholes.getDefaultOptions();
+                if(test.doNotBuild) {
+                    options.doNotBuild = getholes.doNotBuild(test.doNotBuild);
+                }
                 let geom = holesIn.getGeometry(test.outerShape, test.holes, options);
                 const result = test.result;
 
@@ -35,7 +38,7 @@ describe('Holes in', function() {
         getholes.getTestDoNotBuild().forEach((test, i) => {
             it('DO NOT BUILD returns the right number of triangles, test index= ' + i, function() {
                 const options = getholes.getDefaultOptions();
-                getholes.doNotBuild(options, [test.outerShape.path]);
+                options.doNotBuild = getholes.doNotBuild([test.outerShape.path]);
                 options.backMesh = false;
                 const result = test.result;
                 let geom = holesIn.getGeometry(test.outerShape, test.holes, options);
@@ -69,7 +72,7 @@ describe('Holes in', function() {
         getholes.getTestDoNotBuild().forEach((test, i) => {
             it('DO NOT BUILD returns coherent points normals faces uvs, test index= ' + i, function() {
                 const options = getholes.getDefaultOptions();
-                getholes.doNotBuild(options, [test.outerShape.path]);
+                options.doNotBuild = getholes.doNotBuild([test.outerShape.path]);
                 options.backMesh = false;
                 let geom = holesIn.getGeometry(test.outerShape, test.holes, options);
                 let geomMerged = holesIn.mergeMeshes([geom.inMesh, geom.outMesh, geom.frontMesh, geom.backMesh, geom.horizontalMesh]);
