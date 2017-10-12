@@ -4,7 +4,11 @@
 var babylonHelper = {
     swapAllToBabylon: function swapAllToBabylon(geoms) {
         Object.values(geoms).forEach(function (g) {
-            return babylonHelper.swapToBabylon(g);
+            if (Array.isArray(g)) {
+                babylonHelper.swapAllToBabylon(g);
+                return;
+            }
+            babylonHelper.swapToBabylon(g);
         });
     },
     swapToBabylon: function swapToBabylon(geom) {
@@ -315,8 +319,10 @@ var extruder = {
      * returns a mesh from an outer shape and holes
      */
     getGeometry: function getGeometry(outerShape, holes) {
-        var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : { inMesh: true, outMesh: true, frontMesh: true, backMesh: true, horizontalMesh: true, doNotBuild: [] };
+        var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
+
+        options = Object.assign(extruder.getDefaultOptions(), options);
 
         // get the topology 2D paths by depth
         var data = extruder.getDataByDepth(outerShape, holes);
@@ -344,7 +350,7 @@ var extruder = {
         }
         if (options.inMesh) {
             uvHelper.mapVertical(innerPathsByDepth, outerShape, options);
-            res.inMesh = extruder.getVerticalGeom(innerPathsByDepth, 0, true);
+            res.inMesh = extruder.getVerticalGeom(innerPathsByDepth, 0, true, options.mergeVerticalGeometries);
         }
         if (options.horizontalMesh) {
             var indexes = [];
@@ -358,7 +364,7 @@ var extruder = {
             res.horizontalMesh = meshHor;
         }
         if (options.outMesh) {
-            var outMesh = extruder.getVerticalGeom(outerPathsByDepth, null, 0, false);
+            var outMesh = extruder.getVerticalGeom(outerPathsByDepth, 0, false, options.mergeVerticalGeometries);
             res.outMesh = outMesh;
         }
 
@@ -370,6 +376,7 @@ var extruder = {
     getVerticalGeom: function getVerticalGeom(innerPathsByDepth) {
         var offset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
         var invertNormal = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+        var mergeMeshes = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
 
         var geom = [];
 
@@ -382,16 +389,19 @@ var extruder = {
                     var idxNPtDwn = (idxPtDwn + 1) % path.length;
                     if (path[idxPtDwn]._holesInForbidden) continue;
 
-                    var currgeom = geomHelper.getOneVerticalGeom(idxPtDwn, idxNPtDwn, +indexDepth, path, innerPathsByDepth, +offset, invertNormal);
+                    var currgeom = geomHelper.getOneVerticalGeom(idxPtDwn, idxNPtDwn, +indexDepth, path, innerPathsByDepth, 0, invertNormal);
                     if (!currgeom) {
                         continue;
                     }
                     geom.push(currgeom);
-                    offset = currgeom.offset;
+                    // offset = currgeom.offset;
                 }
             }
         }
-        return geomHelper.mergeMeshes(geom, false);
+        if (mergeMeshes) {
+            return geomHelper.mergeMeshes(geom);
+        }
+        return geom;
     },
 
 
@@ -411,7 +421,7 @@ var extruder = {
             horrGeom.push(geomHelper.getHorizontalGeom(triangles, 0, invertNormal));
         }
         // get points, normal and faces from it:
-        return geomHelper.mergeMeshes(horrGeom, true);
+        return geomHelper.mergeMeshes(horrGeom);
     },
     getDataByDepth: function getDataByDepth(outerShape, holes) {
         var outerPaths = [];
@@ -582,6 +592,17 @@ var extruder = {
                 }
             }
         }
+    },
+    getDefaultOptions: function getDefaultOptions() {
+        return {
+            inMesh: true,
+            outMesh: true,
+            frontMesh: true,
+            backMesh: true,
+            horizontalMesh: true,
+            mergeVerticalGeometries: true,
+            doNotBuild: []
+        };
     }
 };
 
@@ -597,36 +618,29 @@ var constants = require("./constants.js");
 
 var geomHelper = {
     mergeMeshes: function mergeMeshes(geoms) {
-        var considerOffset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
-
-        var res = geoms[0];
-        for (var i = 1; i < geoms.length; i++) {
-            res = geomHelper.mergeMesh(res, geoms[i], considerOffset);
+        var res = geomHelper.getEmptyGeom();
+        for (var i = 0; i < geoms.length; i++) {
+            if (Array.isArray(geoms[i])) {
+                res = geomHelper.mergeMesh(res, geomHelper.mergeMeshes(geoms[i]));
+                continue;
+            }
+            res = geomHelper.mergeMesh(res, geoms[i]);
         }
         return res;
     },
-    mergeMesh: function mergeMesh(geom1, geom2, considerOffset) {
-        var _geom1$points, _geom1$normals;
+    mergeMesh: function mergeMesh(geom1, geom2) {
+        var _geom1$faces, _geom1$points, _geom1$normals;
 
         if (!geom2) return geom1;
         if (!geom1) return geom2;
 
-        if (considerOffset) {
-            var _geom1$faces;
-
-            (_geom1$faces = geom1.faces).push.apply(_geom1$faces, _toConsumableArray(geom2.faces.map(function (f) {
-                return f + +geom1.offset;
-            })));
-            geom1.offset = +geom1.offset + +geom2.offset;
-        } else {
-            var _geom1$faces2;
-
-            (_geom1$faces2 = geom1.faces).push.apply(_geom1$faces2, _toConsumableArray(geom2.faces));
-            geom1.offset = Math.max(geom1.offset, geom2.offset);
-        }
+        var offset = geom1.points.length / 3;
+        (_geom1$faces = geom1.faces).push.apply(_geom1$faces, _toConsumableArray(geom2.faces.map(function (f) {
+            return f + offset;
+        })));
         (_geom1$points = geom1.points).push.apply(_geom1$points, _toConsumableArray(geom2.points));
         (_geom1$normals = geom1.normals).push.apply(_geom1$normals, _toConsumableArray(geom2.normals));
-        if (geom1.uvs && geom2.uvs) {
+        if (geom2.uvs) {
             var _geom1$uvs;
 
             (_geom1$uvs = geom1.uvs).push.apply(_geom1$uvs, _toConsumableArray(geom2.uvs));
@@ -660,7 +674,7 @@ var geomHelper = {
         // add uvs:
         geomHelper.addUvsToVertGeom(res, +idxPtDwn, pathDwn, pathsByDepth, indexDepthDwn, indexDepthUp);
 
-        return res;
+        return Object.assign(geomHelper.getEmptyGeom(), res);
     },
 
 
@@ -790,7 +804,6 @@ var geomHelper = {
     },
     getGeomFromTriangulation: function getGeomFromTriangulation(triangles, depth) {
         var invertNormal = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-        var offset = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
 
         var points = [];
 
@@ -809,10 +822,10 @@ var geomHelper = {
         var faces = [];
         for (var _i2 = 0; _i2 < triangles.triangles.length; _i2++) {
             faces.push.apply(faces, _toConsumableArray(triangles.triangles[_i2].map(function (index) {
-                return index + offset;
+                return index;
             }))); // eslint-disable-line
         }
-        offset += triangles.points.length;
+        // offset += triangles.points.length;
 
         // get normals:
         var normals = [];
@@ -829,12 +842,11 @@ var geomHelper = {
             normals.push.apply(normals, _toConsumableArray(normal));
         }
 
-        return {
+        return Object.assign(geomHelper.getEmptyGeom(), {
             points: points,
             faces: faces,
-            normals: normals,
-            offset: offset
-        };
+            normals: normals
+        });
     },
     getNormalToPlan: function getNormalToPlan(point1, point2, point4) {
         var vec1 = geomHelper.pointsToVec(point1, point2);
@@ -853,6 +865,15 @@ var geomHelper = {
     normalizeVec: function normalizeVec(vec) {
         var norm = Math.sqrt(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2]);
         return [vec[0] / norm, vec[1] / norm, vec[2] / norm];
+    },
+    getEmptyGeom: function getEmptyGeom() {
+        return {
+            points: [],
+            faces: [],
+            normals: [],
+            uvs: [],
+            offset: 0
+        };
     }
 };
 module.exports = geomHelper;
@@ -1143,7 +1164,7 @@ var pathHelper = {
         return { X: edge.X / norm, Y: edge.Y / norm };
     },
     isApproxAligned: function isApproxAligned(e11, e12, e21, e22) {
-        var epsilon = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0.1;
+        var epsilon = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0.0001;
 
         // checks the area of the triangles:
         //           [ Ax   * (By    -  Cy)   +  Bx   * (Cy    -  Ay)   + Cx    * (Ay    -  By) ] / 2
@@ -1151,7 +1172,11 @@ var pathHelper = {
         //           [ Ax   * (By    -  Cy)   +  Bx   * (Cy    -  Ay)   + Cx    * (Ay    -  By) ] / 2
         var area2 = e11.X * (e12.Y - e22.Y) + e12.X * (e22.Y - e11.Y) + e22.X * (e11.Y - e12.Y);
 
-        return (Math.abs(area1) + Math.abs(area2)) / (constants.scaleFactor * constants.scaleFactor) < epsilon;
+        var lengthAB = (e11.X - e12.X) * (e11.X - e12.X) + (e11.Y - e12.Y) * (e11.Y - e12.Y);
+        var lengthAC1 = (e11.X - e21.X) * (e11.X - e21.X) + (e11.Y - e21.Y) * (e11.Y - e21.Y);
+        var lengthAC2 = (e11.X - e22.X) * (e11.X - e22.X) + (e11.Y - e22.Y) * (e11.Y - e22.Y);
+
+        return Math.abs(area1) / (lengthAB + lengthAC1) + Math.abs(area2) / (lengthAB + lengthAC2) < epsilon;
     },
     getEdge: function getEdge(point1, point2) {
         return {
@@ -1342,7 +1367,7 @@ var uvHelper = {
         }
     },
     addUvToGeom: function addUvToGeom(uvs, geom) {
-        if (geom.uvs) {
+        if (geom.uvs.length > 0) {
             return;
         }
         if (!uvs || uvs.length === 0) {

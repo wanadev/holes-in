@@ -7,36 +7,29 @@ var constants = require("./constants.js");
 
 var geomHelper = {
     mergeMeshes: function mergeMeshes(geoms) {
-        var considerOffset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
-
-        var res = geoms[0];
-        for (var i = 1; i < geoms.length; i++) {
-            res = geomHelper.mergeMesh(res, geoms[i], considerOffset);
+        var res = geomHelper.getEmptyGeom();
+        for (var i = 0; i < geoms.length; i++) {
+            if (Array.isArray(geoms[i])) {
+                res = geomHelper.mergeMesh(res, geomHelper.mergeMeshes(geoms[i]));
+                continue;
+            }
+            res = geomHelper.mergeMesh(res, geoms[i]);
         }
         return res;
     },
-    mergeMesh: function mergeMesh(geom1, geom2, considerOffset) {
-        var _geom1$points, _geom1$normals;
+    mergeMesh: function mergeMesh(geom1, geom2) {
+        var _geom1$faces, _geom1$points, _geom1$normals;
 
         if (!geom2) return geom1;
         if (!geom1) return geom2;
 
-        if (considerOffset) {
-            var _geom1$faces;
-
-            (_geom1$faces = geom1.faces).push.apply(_geom1$faces, _toConsumableArray(geom2.faces.map(function (f) {
-                return f + +geom1.offset;
-            })));
-            geom1.offset = +geom1.offset + +geom2.offset;
-        } else {
-            var _geom1$faces2;
-
-            (_geom1$faces2 = geom1.faces).push.apply(_geom1$faces2, _toConsumableArray(geom2.faces));
-            geom1.offset = Math.max(geom1.offset, geom2.offset);
-        }
+        var offset = geom1.points.length / 3;
+        (_geom1$faces = geom1.faces).push.apply(_geom1$faces, _toConsumableArray(geom2.faces.map(function (f) {
+            return f + offset;
+        })));
         (_geom1$points = geom1.points).push.apply(_geom1$points, _toConsumableArray(geom2.points));
         (_geom1$normals = geom1.normals).push.apply(_geom1$normals, _toConsumableArray(geom2.normals));
-        if (geom1.uvs && geom2.uvs) {
+        if (geom2.uvs) {
             var _geom1$uvs;
 
             (_geom1$uvs = geom1.uvs).push.apply(_geom1$uvs, _toConsumableArray(geom2.uvs));
@@ -70,7 +63,7 @@ var geomHelper = {
         // add uvs:
         geomHelper.addUvsToVertGeom(res, +idxPtDwn, pathDwn, pathsByDepth, indexDepthDwn, indexDepthUp);
 
-        return res;
+        return Object.assign(geomHelper.getEmptyGeom(), res);
     },
 
 
@@ -200,7 +193,6 @@ var geomHelper = {
     },
     getGeomFromTriangulation: function getGeomFromTriangulation(triangles, depth) {
         var invertNormal = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-        var offset = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
 
         var points = [];
 
@@ -219,10 +211,10 @@ var geomHelper = {
         var faces = [];
         for (var _i2 = 0; _i2 < triangles.triangles.length; _i2++) {
             faces.push.apply(faces, _toConsumableArray(triangles.triangles[_i2].map(function (index) {
-                return index + offset;
+                return index;
             }))); // eslint-disable-line
         }
-        offset += triangles.points.length;
+        // offset += triangles.points.length;
 
         // get normals:
         var normals = [];
@@ -239,12 +231,11 @@ var geomHelper = {
             normals.push.apply(normals, _toConsumableArray(normal));
         }
 
-        return {
+        return Object.assign(geomHelper.getEmptyGeom(), {
             points: points,
             faces: faces,
-            normals: normals,
-            offset: offset
-        };
+            normals: normals
+        });
     },
     getNormalToPlan: function getNormalToPlan(point1, point2, point4) {
         var vec1 = geomHelper.pointsToVec(point1, point2);
@@ -263,6 +254,15 @@ var geomHelper = {
     normalizeVec: function normalizeVec(vec) {
         var norm = Math.sqrt(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2]);
         return [vec[0] / norm, vec[1] / norm, vec[2] / norm];
+    },
+    getEmptyGeom: function getEmptyGeom() {
+        return {
+            points: [],
+            faces: [],
+            normals: [],
+            uvs: [],
+            offset: 0
+        };
     }
 };
 module.exports = geomHelper;

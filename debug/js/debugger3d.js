@@ -36,10 +36,15 @@ const debugger3d = {
             cpyOptions.doNotBuild = JSON.parse(JSON.stringify(debugger3d.doNotBuild));
             holesIn.scaleUpPath(cpyOptions.doNotBuild);
         }
-
+        cpyOptions.mergeVerticalGeometries = false;
         let geom= holesIn.getGeometry(cpyOut,cpyHoles,cpyOptions);
 
+        // let geom2= holesIn.getGeometry(JSON.parse(JSON.stringify(outerShape)),JSON.parse(JSON.stringify(holes)),Object.assign(cpyOptions,{mergeVerticalGeometries: false}) );
+        //
+        //
          let geomMerged= holesIn.mergeMeshes([geom.frontMesh, geom.backMesh, geom.inMesh, geom.outMesh,geom.horizontalMesh]);
+        //  let geomMerged2= holesIn.mergeMeshes([geom2.frontMesh, geom2.backMesh, geom2.inMesh, geom2.outMesh,geom2.horizontalMesh]);
+
          let nullMesh= false;
          if(!geomMerged){
              geomMerged={};

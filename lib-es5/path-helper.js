@@ -237,7 +237,7 @@ var pathHelper = {
         return { X: edge.X / norm, Y: edge.Y / norm };
     },
     isApproxAligned: function isApproxAligned(e11, e12, e21, e22) {
-        var epsilon = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0.1;
+        var epsilon = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0.0001;
 
         // checks the area of the triangles:
         //           [ Ax   * (By    -  Cy)   +  Bx   * (Cy    -  Ay)   + Cx    * (Ay    -  By) ] / 2
@@ -245,7 +245,11 @@ var pathHelper = {
         //           [ Ax   * (By    -  Cy)   +  Bx   * (Cy    -  Ay)   + Cx    * (Ay    -  By) ] / 2
         var area2 = e11.X * (e12.Y - e22.Y) + e12.X * (e22.Y - e11.Y) + e22.X * (e11.Y - e12.Y);
 
-        return (Math.abs(area1) + Math.abs(area2)) / (constants.scaleFactor * constants.scaleFactor) < epsilon;
+        var lengthAB = (e11.X - e12.X) * (e11.X - e12.X) + (e11.Y - e12.Y) * (e11.Y - e12.Y);
+        var lengthAC1 = (e11.X - e21.X) * (e11.X - e21.X) + (e11.Y - e21.Y) * (e11.Y - e21.Y);
+        var lengthAC2 = (e11.X - e22.X) * (e11.X - e22.X) + (e11.Y - e22.Y) * (e11.Y - e22.Y);
+
+        return Math.abs(area1) / (lengthAB + lengthAC1) + Math.abs(area2) / (lengthAB + lengthAC2) < epsilon;
     },
     getEdge: function getEdge(point1, point2) {
         return {

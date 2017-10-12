@@ -12,8 +12,10 @@ var extruder = {
      * returns a mesh from an outer shape and holes
      */
     getGeometry: function getGeometry(outerShape, holes) {
-        var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : { inMesh: true, outMesh: true, frontMesh: true, backMesh: true, horizontalMesh: true, doNotBuild: [] };
+        var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
+
+        options = Object.assign(extruder.getDefaultOptions(), options);
 
         // get the topology 2D paths by depth
         var data = extruder.getDataByDepth(outerShape, holes);
@@ -41,7 +43,7 @@ var extruder = {
         }
         if (options.inMesh) {
             uvHelper.mapVertical(innerPathsByDepth, outerShape, options);
-            res.inMesh = extruder.getVerticalGeom(innerPathsByDepth, 0, true);
+            res.inMesh = extruder.getVerticalGeom(innerPathsByDepth, 0, true, options.mergeVerticalGeometries);
         }
         if (options.horizontalMesh) {
             var indexes = [];
@@ -55,7 +57,7 @@ var extruder = {
             res.horizontalMesh = meshHor;
         }
         if (options.outMesh) {
-            var outMesh = extruder.getVerticalGeom(outerPathsByDepth, null, 0, false);
+            var outMesh = extruder.getVerticalGeom(outerPathsByDepth, 0, false, options.mergeVerticalGeometries);
             res.outMesh = outMesh;
         }
 
@@ -67,6 +69,7 @@ var extruder = {
     getVerticalGeom: function getVerticalGeom(innerPathsByDepth) {
         var offset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
         var invertNormal = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+        var mergeMeshes = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
 
         var geom = [];
 
@@ -79,16 +82,19 @@ var extruder = {
                     var idxNPtDwn = (idxPtDwn + 1) % path.length;
                     if (path[idxPtDwn]._holesInForbidden) continue;
 
-                    var currgeom = geomHelper.getOneVerticalGeom(idxPtDwn, idxNPtDwn, +indexDepth, path, innerPathsByDepth, +offset, invertNormal);
+                    var currgeom = geomHelper.getOneVerticalGeom(idxPtDwn, idxNPtDwn, +indexDepth, path, innerPathsByDepth, 0, invertNormal);
                     if (!currgeom) {
                         continue;
                     }
                     geom.push(currgeom);
-                    offset = currgeom.offset;
+                    // offset = currgeom.offset;
                 }
             }
         }
-        return geomHelper.mergeMeshes(geom, false);
+        if (mergeMeshes) {
+            return geomHelper.mergeMeshes(geom);
+        }
+        return geom;
     },
 
 
@@ -108,7 +114,7 @@ var extruder = {
             horrGeom.push(geomHelper.getHorizontalGeom(triangles, 0, invertNormal));
         }
         // get points, normal and faces from it:
-        return geomHelper.mergeMeshes(horrGeom, true);
+        return geomHelper.mergeMeshes(horrGeom);
     },
     getDataByDepth: function getDataByDepth(outerShape, holes) {
         var outerPaths = [];
@@ -279,6 +285,17 @@ var extruder = {
                 }
             }
         }
+    },
+    getDefaultOptions: function getDefaultOptions() {
+        return {
+            inMesh: true,
+            outMesh: true,
+            frontMesh: true,
+            backMesh: true,
+            horizontalMesh: true,
+            mergeVerticalGeometries: true,
+            doNotBuild: []
+        };
     }
 };
 
