@@ -154,12 +154,12 @@ const debug = {
         const holes =  [...holesCheckboxes].map( (checkbox, index ) => {
              if(checkbox.checked){
                  const val = debugger3d.toClipperString(checkbox.getAttribute("data-hole"));
-                 const hole = JSON.parse(val);
+                 const hole = JSON.parse(val.replace(/x/g, "X").replace(/y/g, "Y"));
                  hole.depth = +holesDepths[index].value;
                  return hole;
              }
          }).filter (elt => elt);
-         const outerShape = JSON.parse(debug.elems.outerShape.value);
+         const outerShape = JSON.parse(debug.elems.outerShape.value.replace(/x/g, "X").replace(/y/g, "Y"));
          return {outerShape, holes, doNotBuild: debugger3d.doNotBuild};
     },
 
