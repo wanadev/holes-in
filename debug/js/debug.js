@@ -35,13 +35,13 @@ const debug = {
                   };
 
         if(store.get("outerShape")) {
-            debug.elems.outerShape.value = stringify(JSON.parse(store.get("outerShape")), null, 2);
+            debug.elems.outerShape.value = store.get("outerShape");
         }
         if(store.get("holes")) {
-            debug.elems.holes.value = stringify(JSON.parse(store.get("holes")), null, 2);
+            debug.elems.holes.value = store.get("holes");
         }
         if(store.get("doNotBuild").trim()) {
-            debug.elems.doNotBuild.value = stringify(JSON.parse(store.get("doNotBuild")), null, 2);
+            debug.elems.doNotBuild.value = store.get("doNotBuild");
         }
 
         debugger2d.elems = debug.elems;
@@ -183,6 +183,16 @@ const debug = {
         debug.elems.generated.innerHTML = "";
         debug.createCheckboxesPaths(JSON.parse(debug.elems.holes.value));
         debug.rebuildGeometry();
+
+        if (debug.elems.outerShape.value) {
+            debug.elems.outerShape.value = stringify(JSON.parse(debug.elems.outerShape.value), null, 2);
+        }
+        if (debug.elems.holes.value) {
+            debug.elems.holes.value = stringify(JSON.parse(debug.elems.holes.value), null, 2);
+        }
+        if (debug.elems.doNotBuild.value) {
+            debug.elems.doNotBuild.value = stringify(JSON.parse(debug.elems.doNotBuild.value), null, 2);
+        }
     },
 
     getCheckboxValue(targetName) {

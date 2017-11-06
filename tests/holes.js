@@ -7,6 +7,8 @@ getPaths: function(){
         outerShape: { path: [ {X:50,Y:50}, {X:150,Y:50}, {X:150,Y:150}, {X:50,Y:150} ], depth:100},
         inHole1: { path: [{X:70,Y:70},{X:70,Y:90},{X:90,Y:90},{X:90,Y:70}], depth: 0 },
         inHole2: { path: [{X:75,Y:75},{X:75,Y:90},{X:105,Y:90},{X:105,Y:75}], depth: 0 },
+        inHole3: {"path": [{"X": 70, "Y": 70},{"X": 140, "Y": 70},{"X": 140, "Y": 90},{"X": 90, "Y": 90},{"X": 90, "Y": 140},{"X": 70, "Y": 140}],"depth": 0},
+        inHole4: {"path": [{"X": 110, "Y": 60},{"X": 130, "Y": 60},{"X": 130, "Y": 130},{"X": 60, "Y": 130},{"X": 60, "Y": 110},{"X": 110, "Y": 110}],"depth": 0},
         outHole1: { path: [{X:75,Y:60},{X:75,Y:180},{X:100,Y:180},{X:100,Y:60}], depth: 0 },
         outHole2: { path: [{X:10,Y:130},{X:200,Y:130},{X:200,Y:200},{X:10,Y:200}], depth: 0 },
         outerShape_colinear: JSON.parse('{"path":[{"X":-1612.59,"Y":-155.8},{"X":-1585.46,"Y":1065.19},{"X":62.96,"Y":1028.56},{"X":-2.14,"Y":-191.58}],"depth":100}'),
@@ -158,6 +160,16 @@ getTestPaths: function () {
              backMesh:15,
              horrizontalMesh: 15,
          }
+      },
+      {
+        testName: "Holes' topology",
+        outerShape:input.outerShape,
+        holes: [input.inHole3, input.inHole4],
+        result: {
+            // @fixme TO CHECK
+            backMesh:15,
+            horrizontalMesh: 15,
+        }
       }
   ];
       return JSON.parse(JSON.stringify(res));
