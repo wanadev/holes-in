@@ -158,7 +158,7 @@ getTestPaths: function () {
          doNotBuild:JSON.parse('[[{"X":1617.23655,"Y":-268.56688},{"X":1647.23655,"Y":-298.56688}],[{"X":1647.23655,"Y":-298.56688},{"X":-474.74283,"Y":-298.56688}],[{"X":-474.74283,"Y":-298.56688},{"X":-444.74283,"Y":-268.56688}],[{"X":-444.74283,"Y":-268.56688},{"X":1617.23655,"Y":-268.56688}],[{"X":1627.23655,"Y":-278.56688},{"X":1627.23655,"Y":524.92507}],[{"X":1627.23655,"Y":524.92507},{"X":880.6194451329999,"Y":524.92507}],[{"X":880.6194451329999,"Y":524.92507},{"X":870.6194451329999,"Y":514.92507}],[{"X":870.6194451329999,"Y":514.92507},{"X":870.6194451329999,"Y":-268.56687999999997}],[{"X":870.6194451329999,"Y":-268.56687999999997},{"X":880.6194451329999,"Y":-278.56687999999997}],[{"X":880.6194451329999,"Y":-278.56687999999997},{"X":1627.23655,"Y":-278.56688}]]'),
          result: {
              backMesh:15,
-             horrizontalMesh: 15,
+             horizontalMesh: 15,
          }
       },
       {
@@ -166,9 +166,23 @@ getTestPaths: function () {
         outerShape:input.outerShape,
         holes: [input.inHole3, input.inHole4],
         result: {
-            // @fixme TO CHECK
-            backMesh:15,
-            horrizontalMesh: 15,
+            frontMesh:66,
+            backMesh:66,
+            outMesh:48,
+            inMesh:96,
+            horizontalMesh:0,
+        }
+      },
+      {
+        testName: "Holes' topology - no zero depth",
+        outerShape:input.outerShape,
+        holes: [getholes.changeDepth(input.inHole3, 50), input.inHole4],
+        result: {
+            frontMesh:66,
+            backMesh:30,
+            outMesh:48,
+            inMesh:120,
+            horizontalMesh:24,
         }
       }
   ];

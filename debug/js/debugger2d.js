@@ -126,6 +126,7 @@ const debugger2d = {
         holesByDepth.forEach((holesAtDepth, index) => {
             pathTracer.tracePathsInRow(canvas, holesAtDepth.keep, transform, "green","");
             pathTracer.tracePathsInRow(canvas, holesAtDepth.stop, transform, "red","hatch");
+            pathTracer.tracePathsInRow(canvas, holesAtDepth.outer, transform, "blue","hatch2");
             if(outerShape) {
               pathTracer.tracePathsInRow(canvas, [outerShape.path], transform, "black","");
             }

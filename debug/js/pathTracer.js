@@ -19,8 +19,8 @@ const pathTracer = {
         ctx.lineWidth = lineWidth;
 
         ctx.fillStyle = fillStyle;
-        if(fillStyle == "hatch"){
-            const pattern = ctx.createPattern(pathTracer.getHatchPattern(strokeStyle),"repeat");
+        if(fillStyle.startsWith("hatch")){
+            const pattern = ctx.createPattern(pathTracer.getHatchPattern(strokeStyle, fillStyle === "hatch2"),"repeat");
             ctx.fillStyle = pattern;
         }
 
@@ -171,7 +171,7 @@ const pathTracer = {
     },
 
 
-    getHatchPattern(color = "black") {
+    getHatchPattern(color = "black", reversed) {
         const canvasPattern = document.createElement("canvas");
         canvasPattern.width = 10;
         canvasPattern.height = 10;
@@ -179,8 +179,13 @@ const pathTracer = {
 
         contextPattern.strokeStyle = color;
         contextPattern.beginPath();
+        if (reversed) {
+            contextPattern.moveTo(10,0);
+            contextPattern.lineTo(0,10);
+        } else {
             contextPattern.moveTo(0,0);
             contextPattern.lineTo(10,10);
+        }
         contextPattern.stroke();
         return canvasPattern;
     }

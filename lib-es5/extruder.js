@@ -1,5 +1,7 @@
 "use strict";
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 var pathHelper = require("./path-helper.js");
 var geomHelper = require("./geom-helper.js");
 var cdt2dHelper = require("./cdt2d-helper.js");
@@ -129,15 +131,17 @@ var extruder = {
         });
 
         var holesByDepth = extruder.getHolesByDepth(holes, outerShape);
-        var stack = 0;
 
+        var stackOuter = [];
         for (var _i = 0; _i < holesByDepth.length; _i++) {
+            var _outer, _horr;
 
             var outer = JSON.parse(JSON.stringify([outerShape.path]));
 
             var removeFromOuter = pathHelper.getUnionOfPaths(holesByDepth[_i].keep.concat(holesByDepth[_i].stop));
             outer = pathHelper.getDiffOfPaths(outer, removeFromOuter);
             outer = pathHelper.getUnionOfPaths(outer);
+            (_outer = outer).push.apply(_outer, _toConsumableArray(holesByDepth[_i].outer));
             outer = pathHelper.cleanPaths(outer, 20);
             outerPaths.push(outer);
 
@@ -152,16 +156,15 @@ var extruder = {
                 horr = pathHelper.getInterOfPaths(horr, holesByDepth[_i].stop);
             }
 
+            // Adding non-holes in holes
+            var nonHolesHorr = _i === 0 ? holesByDepth[_i].outer : _i === holesByDepth.length - 1 ? holesByDepth[_i].outer : pathHelper.getDiffOfPaths(holesByDepth[_i + 1].outer, holesByDepth[_i].outer);
+
             horr = pathHelper.getDiffOfPaths(horr, holesByDepth[_i].keep);
+            (_horr = horr).push.apply(_horr, _toConsumableArray(nonHolesHorr));
+
             horr = pathHelper.cleanPaths(horr, 20);
 
-            // let horrFromHoles = pathHelper.getUnionOfPaths(holesByDepth[i].keep, holesByDepth[i].stop);
-            // horrFromHoles = pathHelper.getDiffOfPaths(horrFromHoles, holesByDepth[i].keep.concat(holesByDepth[i].stop));
-            // horrFromHoles = pathHelper.cleanPaths(horrFromHoles, 20);
-
-            //  horizontalPaths.push(pathHelper.getUnionOfPaths(horr,horrFromHoles));
             horizontalPaths.push(horr);
-            // horizontalPaths.push(horr.concat(horrFromHoles));
         }
 
         for (var _i2 = 0; _i2 < outerPaths.length; _i2++) {
@@ -201,6 +204,7 @@ var extruder = {
 
         holes.forEach(function (elt) {
             if (!elt.path) return;
+            // TODO: remove to use holes in holes
             pathHelper.setDirectionPath(elt.path, 1);
         });
 
@@ -261,6 +265,11 @@ var extruder = {
         }
 
         for (var _i6 = 0; _i6 < depths.length; _i6++) {
+            var keepAndStop = pathHelper.getUnionOfPaths(res[_i6].keep.concat(res[_i6].stop));
+            res[_i6].outer = keepAndStop.filter(function (path) {
+                return pathHelper.getDirectionPath(path) < 0;
+            });
+
             res[_i6].stop = pathHelper.getUnionOfPaths(res[_i6].stop);
             res[_i6].keep = pathHelper.getUnionOfPaths(res[_i6].keep);
         }
