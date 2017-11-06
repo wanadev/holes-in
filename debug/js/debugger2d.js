@@ -79,9 +79,6 @@ const debugger2d = {
         debugger2d.traceDelimiter(canvas, 1, num);
         pathTracer.tracePathsInRow(canvas, inputPaths, transform, "black","");
         pathTracer.tracePathsInRow(canvas, doNotBuild, transform, "red","");
-
-
-
     },
 
     traceInputHoles(holes,outerShape, parent, transform) {
@@ -102,9 +99,7 @@ const debugger2d = {
         debugger2d.traceDelimiter(canvas, holes.length, holes.length +1);
         pathTracer.tracePathsInRow(canvas, allHolesPaths, transform, "red","");
         pathTracer.tracePathsInRow(canvas, [outerShape.path], transform, "black", "");
-
     },
-
 
     traceDataByDepth(dataByDepth, parent, transform, title) {
         transform = debugger2d._objectClone(transform);
@@ -115,7 +110,7 @@ const debugger2d = {
 
         for(let index = 0; index< dataByDepth.holesByDepth.length; index++) {
             pathTracer.tracePathsInRow(canvas, dataByDepth.horizontalPathsByDepth[index].paths, transform,"red", "hatch");
-            pathTracer.tracePathsInRow(canvas, dataByDepth.innerPathsByDepth[index].paths, transform, "green", "");
+            pathTracer.tracePathsInRow(canvas, dataByDepth.innerPathsByDepth[index].paths, transform, "green", "rgba(255, 255, 255, 0.7)");
             pathTracer.tracePathsInRow(canvas, dataByDepth.outerPathsByDepth[index].paths,transform,  "black","");
             debugger2d.translateRight(transform, index, num);
             debugger2d.traceDelimiter(canvas, index, num);

@@ -165,19 +165,19 @@ const debugger3d = {
   },
 
   initEvents(){
-      [...document.getElementById('option').getElementsByTagName('input')].forEach(el =>
-          {
-              el.addEventListener("change", e => {
-                  let value = (e.target.checked);
-                  if (el.getAttribute("data-target") == "enableTexture") {
-                      value = "../assets/" + document.getElementById("textureSelect").value;
-                  }
-                  debugger3d.options[el.getAttribute("data-target")] = value;
-                  debugger3d.meshDirty = true;
-              });
-              el.checked = debugger3d.options[el.getAttribute("data-target")];
-          }
-      );
+      ["option", "option3d"].forEach(elementId => {
+        [...document.getElementById(elementId).getElementsByTagName('input')].forEach(el => {
+            el.addEventListener("change", e => {
+                let value = (e.target.checked);
+                if (el.getAttribute("data-target") == "enableTexture") {
+                    value = "../assets/" + document.getElementById("textureSelect").value;
+                }
+                debugger3d.options[el.getAttribute("data-target")] = value;
+                debugger3d.meshDirty = true;
+            });
+            el.checked = debugger3d.options[el.getAttribute("data-target")];
+        });
+      });
 
       document.getElementById("textureSelect").addEventListener("change", e => {
 

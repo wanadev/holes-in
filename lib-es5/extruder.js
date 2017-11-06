@@ -87,7 +87,6 @@ var extruder = {
                         continue;
                     }
                     geom.push(currgeom);
-                    // offset = currgeom.offset;
                 }
             }
         }

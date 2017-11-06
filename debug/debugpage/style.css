@@ -5,26 +5,23 @@
 
 
 .canvas3d {
+    height: 350px;
     border: 1px solid black;
-}
-
-.canvas512 {
-    border: 1px solid black;
-    width: 512px;
-    height: 512px;
-}
-.right {
-    float: right;
-    width: 50%;
-}
-.right input {
-    margin-top: 30px;
 }
 
 .block {
-    margin-bottom: 20px;
-    padding: 10px;
+    margin: 5px;
+    padding: 0;
     background-color: #eee;
+    border: 1px solid #444;
+}
+
+.block h3 {
+    margin: 0;
+    padding: 3px 5px;
+    margin-bottom: 5px;
+    background: #444;
+    color: #FFF;
 }
 
 .buttons {
@@ -36,16 +33,52 @@
 
 #generated-data .depthcontainer{
     display: block;
-    padding-left: 38px;
+    padding-left: 20px;
 }
 
 textarea {
     display: block;
-    width: 100%;
-    height: 80px;
+    height: 100%;
 }
 
+.page {
+    display: flex;
+}
 
-#babylon{
-    width: 75%;
+.menu {
+    flex-grow: 1;
+}
+
+.menu h3, .result-content p {
+    margin: 0;
+    padding: 3px 5px;
+    margin-bottom: 5px;
+    background: #444;
+    color: #FFF;
+}
+
+.menu .block, .result-content .block {
+    padding: 0;
+}
+
+.menu .block > div {
+    padding: 0 10px 5px 5px;
+}
+
+.result-content {
+    padding: 10px;
+    flex-grow: 0;
+    text-align: center;
+}
+
+#data {
+    display: flex;
+    flex-direction: horizontal;
+}
+
+#data > div {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    height: 200px;
 }

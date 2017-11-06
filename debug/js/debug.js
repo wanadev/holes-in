@@ -8,6 +8,7 @@ const holesIn = require("../../lib/index.js");
 const cdt2d = require("cdt2d");
 // const shapeEditor = require("./shape-editor.js");
 const getHoles = require("../../tests/holes.js");
+const stringify = require("json-stringify-pretty-compact")
 
 
 const debug = {
@@ -33,14 +34,14 @@ const debug = {
                       debugCheckboxes:  [...document.getElementById('logs').getElementsByTagName('input')]
                   };
 
-        if(store.get("outerShape")){
-            debug.elems.outerShape.value = store.get("outerShape");
+        if(store.get("outerShape")) {
+            debug.elems.outerShape.value = stringify(JSON.parse(store.get("outerShape")), null, 2);
         }
-        if(store.get("holes")){
-            debug.elems.holes.value = store.get("holes");
+        if(store.get("holes")) {
+            debug.elems.holes.value = stringify(JSON.parse(store.get("holes")), null, 2);
         }
-        if(store.get("doNotBuild")){
-            debug.elems.doNotBuild.value = store.get("doNotBuild");
+        if(store.get("doNotBuild").trim()) {
+            debug.elems.doNotBuild.value = stringify(JSON.parse(store.get("doNotBuild")), null, 2);
         }
 
         debugger2d.elems = debug.elems;
@@ -52,6 +53,7 @@ const debug = {
             store.set('holes', debug.elems.holes.value);
             store.set('doNotBuild', debug.elems.doNotBuild.value);
             debug.refresh();
+            window.location.href = "#page";
         });
 
         debug.elems.customDraw.addEventListener("click", () => {
@@ -105,7 +107,7 @@ const debug = {
     },
 
     createCheckboxesPaths() {
-        debug.elems.generated.innerHTML = "";
+        debug.elems.generated.innerHTML = "<h3>Input holes</h3>";
         const holesValue = JSON.parse(debug.elems.holes.value);
 
         holesValue.forEach( (hole, index)=> {

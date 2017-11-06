@@ -10,6 +10,17 @@
 
 > A javascript library to generate 3D mesh from a 2D outer path and 2D inner paths.
 
+## Contributing guide
+
+Setup the debug page:
+
+```
+npm install
+npm run watchifyDebug&
+python3 -m http.server 3001 .
+# Open http://localhost:3001/debug/debugpage/debugPage.html
+```
+
 ## Documentation
 
 [Please visit the Documentation page](https://wanadev.github.io/holes-in/)

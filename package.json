@@ -51,6 +51,7 @@
   },
   "dependencies": {
     "cdt2d": "^1.0.0",
-    "clipper-lib": "git+https://github.com/wanadev/clipper-lib.git"
+    "clipper-lib": "git+https://github.com/wanadev/clipper-lib.git",
+    "json-stringify-pretty-compact": "^1.0.4"
   }
 }
