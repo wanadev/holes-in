@@ -1,13 +1,14 @@
 "use strict";
 
-const holesIn = require("../../lib/index.js");
+const holesIn = require("../../lib/index");
+const pathHelper = require("../../lib/path-helper")
 const BABYLON = require("babylonjs");
 
 const debugger3d = {
 
     cssclass: "canvas3d",
     options: {inMesh:true, outMesh:true, frontMesh:true, backMesh:true, horizontalMesh:true,
-                wireframe:false, backFaceCulling:false,normals:false,swapToBabylon:true, displayNormals:false, lengthU: 100, lengthV: 100, enableTexture: "../assets/cat.png" },
+                wireframe:false, backFaceCulling:false,normals:false,swapToBabylon:true, displayNormals:false, lengthU: 100, lengthV: 100, enableTexture: "../assets/checkerboard.jpg" },
 
     engine: null,
     scene: null,
@@ -34,16 +35,12 @@ const debugger3d = {
             const val = debugger3d.toClipperString(document.getElementById("doNotBuild").value);
             debugger3d.pathToEdge(JSON.parse(val));
             cpyOptions.doNotBuild = JSON.parse(JSON.stringify(debugger3d.doNotBuild));
-            holesIn.scaleUpPath(cpyOptions.doNotBuild);
+            pathHelper.scaleUpPath(cpyOptions.doNotBuild);
         }
         cpyOptions.mergeVerticalGeometries = false;
         let geom= holesIn.getGeometry(cpyOut,cpyHoles,cpyOptions);
 
-        // let geom2= holesIn.getGeometry(JSON.parse(JSON.stringify(outerShape)),JSON.parse(JSON.stringify(holes)),Object.assign(cpyOptions,{mergeVerticalGeometries: false}) );
-        //
-        //
-         let geomMerged= holesIn.mergeMeshes([geom.frontMesh, geom.backMesh, geom.inMesh, geom.outMesh,geom.horizontalMesh]);
-        //  let geomMerged2= holesIn.mergeMeshes([geom2.frontMesh, geom2.backMesh, geom2.inMesh, geom2.outMesh,geom2.horizontalMesh]);
+        let geomMerged= holesIn.mergeMeshes([geom.frontMesh, geom.backMesh, geom.inMesh, geom.outMesh,geom.horizontalMesh]);
 
          let nullMesh= false;
          if(!geomMerged){
@@ -93,7 +90,7 @@ const debugger3d = {
   displayNormals(geom){
        for(let i=0;i<geom.points.length;i+=3){
            let origin = new BABYLON.Vector3(geom.points[i],geom.points[i+1],geom.points[i+2]);
-           let norm = new BABYLON.Vector3(geom.normals[i],geom.normals[i+1],geom.normals[i+2]).scale(100);
+           let norm = new BABYLON.Vector3(geom.normals[i],geom.normals[i+1],geom.normals[i+2]).scale(5);
            let dst= origin.add(norm);
            var lineMesh =new BABYLON.Mesh.CreateLines("lines"+i, [origin ,dst],debugger3d.scene);
        }

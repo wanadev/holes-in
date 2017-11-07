@@ -21,6 +21,8 @@ var holesIn = {
     scaleDownPath: pathHelper.scaleDownPath,
     scaleDownPaths: pathHelper.scaleDownPaths,
     getDataByDepth: extruder.getDataByDepth,
+    getDataByDepth: extruder.getDataByDepth,
+
     computeTriangulation: cdt2dHelper.computeTriangulation,
 
     drawInitialPaths: drawHelper.drawInitialPaths,

@@ -1,7 +1,11 @@
 "use strict";
 
-const pathTracer = require("./pathTracer.js");
-const holesIn = require("../../lib/index.js");
+const pathTracer = require("./pathTracer");
+const holesIn = require("../../lib/index");
+const extruder = require("../../lib/extruder");
+const pathHelper = require('../../lib/path-helper');
+const cdt2dHelper = require('../../lib/cdt2d-helper');
+
 
 const debugger2d = {
 
@@ -37,16 +41,11 @@ const debugger2d = {
         let cpyHoles = debugger2d._objectClone(holes);
         let cpyOuterShape = debugger2d._objectClone(outerShape);
 
-        holesIn.scaleUpPath(cpyOuterShape.path);
-        for (let i = 0; i < cpyHoles.length; i++) {
-            holesIn.scaleUpPath(cpyHoles[i].path);
-        }
-        let holesByDepth = holesIn.getHolesByDepth(cpyHoles, cpyOuterShape);
-        const transform = debugger2d.getTransform(cpyOuterShape, cpyHoles, holesByDepth.length);
+        pathHelper.scaleUpPath(cpyOuterShape.path);
+        cpyHoles.forEach(elt => pathHelper.scaleUpPath(elt.path))
 
-        cpyHoles = debugger2d._objectClone(holes);
-        cpyOuterShape = debugger2d._objectClone(outerShape);
-        let dataByDepth = holesIn.getDataByDepth(cpyOuterShape, cpyHoles);
+        let dataByDepth = extruder.getDataByDepth(cpyOuterShape, cpyHoles);
+        const transform = debugger2d.getTransform(cpyOuterShape, cpyHoles, dataByDepth.depthsCount);
 
         const parent = document.getElementById("container");
         debugger2d.traceInputHoles(cpyHoles, cpyOuterShape, parent, transform);
@@ -55,10 +54,10 @@ const debugger2d = {
             // cpyHoles = debugger2d._objectClone(holes);
             // cpyOuterShape = debugger2d._objectClone(outerShape);
             let cpyDoNotBuild = debugger2d._objectClone(doNotBuild);
-            cpyDoNotBuild.forEach(path => holesIn.scaleUpPath(path));
+            cpyDoNotBuild.forEach(path => pathHelper.scaleUpPath(path));
             debugger2d.traceDoNotBuild(cpyOuterShape, cpyHoles, cpyDoNotBuild, parent, transform);
         }
-        debugger2d.traceHolesByDepth(holesByDepth, parent, transform, cpyOuterShape);
+        // debugger2d.traceHolesByDepth(holesByDepth, parent, transform, cpyOuterShape);
         debugger2d.traceDataByDepth(dataByDepth, parent, transform);
         debugger2d.traceTriangulationByDepth(dataByDepth, parent, transform);
 
@@ -106,9 +105,9 @@ const debugger2d = {
 
         debugger2d.createLegend("legend", parent,"data by depth");
         const canvas = debugger2d.createCanvas("dataByDepth", parent, debugger2d.cssclass);
-        const num = dataByDepth.outerPathsByDepth.length;
+        const num = dataByDepth.depthsCount;
 
-        for(let index = 0; index< dataByDepth.holesByDepth.length; index++) {
+        for(let index = 0; index< dataByDepth.depthsCount; index++) {
             pathTracer.tracePathsInRow(canvas, dataByDepth.horizontalPathsByDepth[index].paths, transform,"red", "hatch");
             pathTracer.tracePathsInRow(canvas, dataByDepth.innerPathsByDepth[index].paths, transform, "green", "rgba(255, 255, 255, 0.7)");
             pathTracer.tracePathsInRow(canvas, dataByDepth.outerPathsByDepth[index].paths,transform,  "black","");
@@ -116,7 +115,7 @@ const debugger2d = {
             debugger2d.traceDelimiter(canvas, index, num);
         }
     },
-
+/*
     traceHolesByDepth(holesByDepth, parent, transform, outerShape) {
         transform = debugger2d._objectClone(transform);
         debugger2d.createLegend("legend", parent,"holes by depth");
@@ -134,7 +133,7 @@ const debugger2d = {
             debugger2d.traceDelimiter(canvas, index, num);
         });
 
-    },
+    },*/
 
     traceTriangulationByDepth(dataByDepth, parent, transform) {
         transform = debugger2d._objectClone(transform);
@@ -142,14 +141,14 @@ const debugger2d = {
         const canvas = debugger2d.createCanvas("triangulationByDepth", parent, debugger2d.cssclass);
         const ctx = canvas.getContext("2d");
 
-        const num = dataByDepth.horizontalPathsByDepth.length;
-        for (let i = 0; i < dataByDepth.horizontalPathsByDepth.length; i++) {
+        const num = dataByDepth.depthsCount;
+        for (let i = 0; i < num; i++) {
             const innerPaths = dataByDepth.innerPathsByDepth[i].paths;
             const horizontalPathsByDepth = dataByDepth.horizontalPathsByDepth;
             const outerPathsByDepth = dataByDepth.outerPathsByDepth;
 
 
-            const triangles = holesIn.computeTriangulation(horizontalPathsByDepth[i].paths);
+            const triangles = cdt2dHelper.computeTriangulation(horizontalPathsByDepth[i].paths);
             triangles.depth = horizontalPathsByDepth[i].depth;
             pathTracer.traceTriangulation(ctx, triangles,transform, "black", "");
             debugger2d.translateRight(transform, i, num);

@@ -1,7 +1,5 @@
 "use strict";
 
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
 var pathHelper = require("./path-helper.js");
 var geomHelper = require("./geom-helper.js");
 var cdt2dHelper = require("./cdt2d-helper.js");
@@ -59,7 +57,7 @@ var extruder = {
             res.horizontalMesh = meshHor;
         }
         if (options.outMesh) {
-            var outMesh = extruder.getVerticalGeom(outerPathsByDepth, 0, false, options.mergeVerticalGeometries);
+            var outMesh = extruder.getVerticalGeom(outerPathsByDepth, 0, true, options.mergeVerticalGeometries);
             res.outMesh = outMesh;
         }
 
@@ -117,95 +115,83 @@ var extruder = {
         // get points, normal and faces from it:
         return geomHelper.mergeMeshes(horrGeom);
     },
-    getDataByDepth: function getDataByDepth(outerShape, holes) {
-        var outerPaths = [];
-        var innerPaths = [];
-        var horizontalPaths = [];
 
-        pathHelper.scaleUpPath(outerShape.path);
-        for (var i = 0; i < holes.length; i++) {
-            pathHelper.scaleUpPath(holes[i].path);
-        }
-        holes = holes.map(function (hole) {
-            return { path: pathHelper.offsetPath(hole.path), depth: hole.depth };
-        });
-
-        var holesByDepth = extruder.getHolesByDepth(holes, outerShape);
-
-        var stackOuter = [];
-        for (var _i = 0; _i < holesByDepth.length; _i++) {
-            var _outer, _horr;
-
-            var outer = JSON.parse(JSON.stringify([outerShape.path]));
-
-            var removeFromOuter = pathHelper.getUnionOfPaths(holesByDepth[_i].keep.concat(holesByDepth[_i].stop));
-            outer = pathHelper.getDiffOfPaths(outer, removeFromOuter);
-            outer = pathHelper.getUnionOfPaths(outer);
-            (_outer = outer).push.apply(_outer, _toConsumableArray(holesByDepth[_i].outer));
-            outer = pathHelper.cleanPaths(outer, 20);
-            outerPaths.push(outer);
-
-            // fit the inner paths into the outer:
-            var innerPath = pathHelper.getInterOfPaths(holesByDepth[Math.max(_i - 1, 0)].keep, outer);
-            innerPath = pathHelper.getUnionOfPaths(innerPath);
-            innerPaths.push(innerPath);
-
-            //finds the horizontatl path:
-            var horr = JSON.parse(JSON.stringify([outerShape.path]));
-            if (holesByDepth[_i].stop.length > 0) {
-                horr = pathHelper.getInterOfPaths(horr, holesByDepth[_i].stop);
+    /*
+        getDataByDepth(outerShape, holes) {
+            let outerPaths = [];
+            let innerPaths = [];
+            let horizontalPaths = [];
+    
+            pathHelper.scaleUpPath(outerShape.path);
+            for (let i = 0; i < holes.length; i++) {
+                pathHelper.scaleUpPath(holes[i].path);
             }
+            holes = holes.map(hole => ({path: pathHelper.offsetPath(hole.path), depth: hole.depth }) );
+    
+            const holesByDepth = extruder.getHolesByDepth(holes, outerShape);
+    
+            let stackOuter = [];
+            for (let i = 0; i < holesByDepth.length; i++) {
+    
+                let outer = JSON.parse(JSON.stringify(outerShape.paths));
+    
+                const removeFromOuter = pathHelper.getUnionOfPaths(holesByDepth[i].keep.concat(holesByDepth[i].stop));
+                outer = pathHelper.getDiffOfPaths(outer, removeFromOuter);
+                outer = pathHelper.getUnionOfPaths(outer);
+                outer.push(...holesByDepth[i].outer);
+                outer = pathHelper.cleanPaths(outer,20);
+                outerPaths.push(outer);
+    
+                // fit the inner paths into the outer:
+                let innerPath = pathHelper.getInterOfPaths(holesByDepth[Math.max(i-1, 0)].keep, outer);
+                innerPath = pathHelper.getUnionOfPaths(innerPath);
+                innerPaths.push(innerPath);
+    
+                //finds the horizontatl path:
+                let horr = JSON.parse(JSON.stringify(outerShape.paths));
+                if(holesByDepth[i].stop.length > 0) {
+                    horr = pathHelper.getInterOfPaths(horr, holesByDepth[i].stop);
+                }
+    
+                // Adding non-holes in holes
+                const nonHolesHorr = (i === 0) ? holesByDepth[i].outer :
+                    (i === holesByDepth.length - 1) ?  holesByDepth[i].outer :
+                    pathHelper.getDiffOfPaths(holesByDepth[i+1].outer,holesByDepth[i].outer);
+    
+                horr = pathHelper.getDiffOfPaths(horr,holesByDepth[i].keep);
+                horr.push(...nonHolesHorr);
+    
+                horr = pathHelper.cleanPaths(horr, 20);
+    
+                horizontalPaths.push(horr)
+            }
+    
+            for (let i = 0; i < outerPaths.length; i++) {
+                outerPaths[i] = pathHelper.cleanPaths(outerPaths[i],3);
+                innerPaths[i] = pathHelper.cleanPaths(innerPaths[i],3);
+                horizontalPaths[i] = pathHelper.cleanPaths(horizontalPaths[i],3);
+    
+                pathHelper.setDirectionPaths(outerPaths[i], -1);
+                pathHelper.setDirectionPaths(innerPaths[i], -1);
+                pathHelper.setDirectionPaths(horizontalPaths[i], -1);
+            }
+    
+            for (let i = 0; i < holesByDepth.length; i++) {
+                outerPaths[i] = { paths: outerPaths[i], depth: holesByDepth[i].depth };
+                innerPaths[i] = { paths: innerPaths[i], depth: holesByDepth[i].depth };
+                horizontalPaths[i] = { paths: horizontalPaths[i], depth: holesByDepth[i].depth };
+            }
+    
+            return { outerPathsByDepth: outerPaths,
+                innerPathsByDepth: innerPaths,
+                horizontalPathsByDepth: horizontalPaths,
+                holesByDepth };
+        },*/
 
-            // Adding non-holes in holes
-            var nonHolesHorr = _i === 0 ? holesByDepth[_i].outer : _i === holesByDepth.length - 1 ? holesByDepth[_i].outer : pathHelper.getDiffOfPaths(holesByDepth[_i + 1].outer, holesByDepth[_i].outer);
-
-            horr = pathHelper.getDiffOfPaths(horr, holesByDepth[_i].keep);
-            (_horr = horr).push.apply(_horr, _toConsumableArray(nonHolesHorr));
-
-            horr = pathHelper.cleanPaths(horr, 20);
-
-            horizontalPaths.push(horr);
-        }
-
-        for (var _i2 = 0; _i2 < outerPaths.length; _i2++) {
-            outerPaths[_i2] = pathHelper.cleanPaths(outerPaths[_i2], 3);
-            innerPaths[_i2] = pathHelper.cleanPaths(innerPaths[_i2], 3);
-            horizontalPaths[_i2] = pathHelper.cleanPaths(horizontalPaths[_i2], 3);
-
-            pathHelper.setDirectionPaths(outerPaths[_i2], -1);
-            pathHelper.setDirectionPaths(innerPaths[_i2], -1);
-            pathHelper.setDirectionPaths(horizontalPaths[_i2], -1);
-        }
-
-        for (var _i3 = 0; _i3 < holesByDepth.length; _i3++) {
-            outerPaths[_i3] = { paths: outerPaths[_i3], depth: holesByDepth[_i3].depth };
-            innerPaths[_i3] = { paths: innerPaths[_i3], depth: holesByDepth[_i3].depth };
-            horizontalPaths[_i3] = { paths: horizontalPaths[_i3], depth: holesByDepth[_i3].depth };
-        }
-
-        return { outerPathsByDepth: outerPaths,
-            innerPathsByDepth: innerPaths,
-            horizontalPathsByDepth: horizontalPaths,
-            holesByDepth: holesByDepth };
-    },
-
-
-    /**
-     *  Takes an array of paths representing holes at different depths.
-     *  One depth value/ path.
-     *  returns an array of paths at each depth: simplify the geometry for each stage.
-     */
-    getHolesByDepth: function getHolesByDepth(holes, outerShape) {
-
+    getDataByDepth: function getDataByDepth(outerShape, holes) {
         // sets all depths deeper than outerDepth  or equals to 0 to outerDepth:
         holes.forEach(function (elt) {
             elt.depth >= outerShape.depth || elt.depth === 0 ? elt.depth = outerShape.depth + 1 : elt.depth = elt.depth; // eslint-disable-line
-        });
-
-        holes.forEach(function (elt) {
-            if (!elt.path) return;
-            // TODO: remove to use holes in holes
-            pathHelper.setDirectionPath(elt.path, 1);
         });
 
         // get all depths:
@@ -226,57 +212,135 @@ var extruder = {
         holes = holes.filter(function (hole) {
             return hole.path !== undefined;
         });
+        holes.forEach(function (hole) {
+            return pathHelper.scaleUpPath(hole.path);
+        });
+        holes = holes.map(function (hole) {
+            return { path: pathHelper.offsetPath(hole.path), depth: hole.depth };
+        });
 
-        // get paths by depth:
-        var res = [];
+        pathHelper.scaleUpPath(outerShape.path);
 
-        var _loop = function _loop(_i4) {
-            var deeperHoles = holes.filter(function (s) {
-                return s.depth > depths[_i4];
+        var outerPaths = [];
+        var innerPaths = [];
+        var horriPaths = [];
+
+        depths.forEach(function (depth, i) {
+            var keep = holes.filter(function (hole) {
+                return hole.depth >= depth;
+            }).map(function (hole) {
+                return hole.path;
             });
-            var keep = [];
-            deeperHoles.forEach(function (s) {
-                return keep.push(s.path);
+            var diff = pathHelper.getDiffOfPaths([outerShape.path], keep, { polyTree: false });
+
+            var outerPathAtDepth = diff.filter(function (path) {
+                return pathHelper.getDirectionPath(path) > 0;
             });
-
-            var stopHoles = holes.filter(function (s) {
-                return s.depth === depths[_i4];
-            });
-            var stop = [];
-            stopHoles.forEach(function (s) {
-                return stop.push(s.path);
-            });
-
-            // take only the paths of the holes which reach this depth
-            res.push({
-                keep: keep,
-                stop: stop,
-                depth: depths[_i4]
-            });
-        };
-
-        for (var _i4 = 0; _i4 < depths.length; _i4++) {
-            _loop(_i4);
-        }
-
-        // gets the difference between keep and stop:
-        for (var _i5 = 0; _i5 < depths.length; _i5++) {
-            res[_i5].stop = pathHelper.getDiffOfPaths(res[_i5].stop, res[_i5].keep);
-        }
-
-        for (var _i6 = 0; _i6 < depths.length; _i6++) {
-            var keepAndStop = pathHelper.getUnionOfPaths(res[_i6].keep.concat(res[_i6].stop));
-            res[_i6].outer = keepAndStop.filter(function (path) {
+            var innerPathAtDepth = diff.filter(function (path) {
                 return pathHelper.getDirectionPath(path) < 0;
             });
 
-            res[_i6].stop = pathHelper.getUnionOfPaths(res[_i6].stop);
-            res[_i6].keep = pathHelper.getUnionOfPaths(res[_i6].keep);
-        }
+            outerPaths.push({ paths: pathHelper.cleanPaths(outerPathAtDepth, 20), depth: depth });
+            innerPaths.push({ paths: pathHelper.cleanPaths(innerPathAtDepth, 20), depth: depth });
 
-        return res;
+            var horr = void 0;
+            if (i === 0) {
+                horr = outerPathAtDepth.concat(innerPathAtDepth);
+            } else {
+                keep = holes.filter(function (hole) {
+                    return hole.depth > depth;
+                }).map(function (hole) {
+                    return hole.path;
+                });
+                var stop = pathHelper.getUnionOfPaths(holes.filter(function (hole) {
+                    return hole.depth === depth;
+                }).map(function (hole) {
+                    return hole.path;
+                }));
+                horr = [JSON.parse(JSON.stringify(outerShape.path))];
+                if (stop.length > 0) {
+                    horr = pathHelper.getInterOfPaths(horr, stop, { pathPreProcess: false });
+                }
+                horr = pathHelper.getDiffOfPaths(horr, keep, { pathPreProcess: false });
+                horr = pathHelper.cleanPaths(horr, 20);
+            }
+            horriPaths.push({ paths: horr, depth: depth });
+        });
+        var allHorrizontals = horriPaths.map(function (elt) {
+            return elt.paths;
+        });
+        horriPaths[horriPaths.length - 1].paths = outerPaths[outerPaths.length - 1].paths.concat(innerPaths[innerPaths.length - 1].paths);
+        return { outerPathsByDepth: outerPaths,
+            innerPathsByDepth: innerPaths,
+            horizontalPathsByDepth: horriPaths,
+            depthsCount: outerPaths.length
+        };
     },
 
+
+    /**
+     *  Takes an array of paths representing holes at different depths.
+     *  One depth value/ path.
+     *  returns an array of paths at each depth: simplify the geometry for each stage.
+     */
+    /*getHolesByDepth(holes, outerShape) {
+        if (!outerShape.paths) outerShape.paths = [outerShape.path];
+         holes.forEach(hole => {
+            if(hole.depth !== 0) return;
+            if(pathHelper.getDiffOfPaths([hole.path], outerShape.paths).length === 0 ) return;
+            outerShape.paths = pathHelper.getDiffOfPaths(outerShape.paths, [hole.path]);
+        })
+         // sets all depths deeper than outerDepth  or equals to 0 to outerDepth:
+        holes.forEach(elt => {
+             (elt.depth >= outerShape.depth || elt.depth === 0) ? elt.depth = outerShape.depth + 1 : elt.depth = elt.depth; // eslint-disable-line
+        });
+         holes.forEach(elt => {
+            if(!elt.path) return;
+            // TODO: remove to use holes in holes
+            pathHelper.setDirectionPath(elt.path, 1);
+        });
+         // get all depths:
+        let depths = new Set();
+        for (let i = 0; i < holes.length; i++) {
+            if (holes[i].depth < outerShape.depth) { depths.add(holes[i].depth); }
+        }
+        depths.add(0);
+        depths.add(outerShape.depth);
+        depths = Array.from(depths);
+        depths.sort(
+            function (a, b) {
+                return a - b;
+            });
+          // filter:
+        holes = holes.filter(hole => hole.path !== undefined);
+         // get paths by depth:
+        const res = [];
+        for (let i = 0; i < depths.length; i++) {
+            const deeperHoles = holes.filter(s => s.depth > depths[i]);
+            const keep = [];
+            deeperHoles.forEach(s => keep.push(s.path));
+             const stopHoles = holes.filter(s => s.depth === depths[i]);
+            const stop = [];
+            stopHoles.forEach(s => stop.push(s.path));
+             // take only the paths of the holes which reach this depth
+            res.push({
+                keep,
+                stop,
+                depth: depths[i],
+            });
+        }
+         // gets the difference between keep and stop:
+        for (let i = 0; i < depths.length; i++) {
+            res[i].stop = pathHelper.getDiffOfPaths(res[i].stop, res[i].keep);
+        }
+         for (let i = 0; i < depths.length; i++) {
+            const keepAndStop = pathHelper.getUnionOfPaths(res[i].keep.concat(res[i].stop));
+            res[i].outer = keepAndStop.filter(path => pathHelper.getDirectionPath(path) < 0);
+             res[i].stop = pathHelper.getUnionOfPaths(res[i].stop);
+            res[i].keep = pathHelper.getUnionOfPaths(res[i].keep);
+        }
+         return res;
+    },*/
 
     // mark all points that bbelong to one of the edges as forbidden
     markAsForbidden: function markAsForbidden(pathsByDepth, edges) {

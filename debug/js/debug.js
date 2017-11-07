@@ -4,10 +4,11 @@ const pathTracer = require("./pathTracer");
 const debugger2d = require("./debugger2d");
 const debugger3d = require("./debugger3d");
 const store = require("store");
-const holesIn = require("../../lib/index.js");
+const holesIn = require("../../lib/index");
+const extruder = require("../../lib/extruder");
+const cdt2dHelper = require("../../lib/cdt2d-helper");
 const cdt2d = require("cdt2d");
-// const shapeEditor = require("./shape-editor.js");
-const getHoles = require("../../tests/holes.js");
+const getHoles = require("../../tests/holes");
 const stringify = require("json-stringify-pretty-compact")
 
 
@@ -40,8 +41,8 @@ const debug = {
         if(store.get("holes")) {
             debug.elems.holes.value = store.get("holes");
         }
-        if(store.get("doNotBuild").trim()) {
-            debug.elems.doNotBuild.value = store.get("doNotBuild");
+        if(store.get("doNotBuild")) {
+            debug.elems.doNotBuild.value = store.get("doNotBuild").trim();
         }
 
         debugger2d.elems = debug.elems;
@@ -207,24 +208,11 @@ const debug = {
 
         let cpyHoles = debugger2d._objectClone(holes);
         let cpyOuterShape = debugger2d._objectClone(outerShape);
-        holesIn.scaleUpPath(cpyOuterShape.path);
-        for (let i = 0; i < cpyHoles.length; i++) {
-            holesIn.scaleUpPath(cpyHoles[i].path);
-        }
-        if(debug.getCheckboxValue("debugHolesByDepth")) {
-            debugger;
-        }
-        let holesByDepth = holesIn.getHolesByDepth(cpyHoles, cpyOuterShape);
 
-        if(debug.getCheckboxValue("logHolesByDepth")) {
-            console.log("holesByDepth", holesByDepth);
-        }
-        cpyHoles = debugger2d._objectClone(holes);
-        cpyOuterShape = debugger2d._objectClone(outerShape);
         if(debug.getCheckboxValue("debugDataByDepth")) {
             debugger;
         }
-        let dataByDepth = holesIn.getDataByDepth(cpyOuterShape, cpyHoles);
+        let dataByDepth = extruder.getDataByDepth(cpyOuterShape, cpyHoles);
         if(debug.getCheckboxValue("logDataByDepth")) {
             console.log("dataByDepth", dataByDepth);
         }
@@ -233,7 +221,7 @@ const debug = {
             debugger;
         }
         dataByDepth.horizontalPathsByDepth.forEach((dataAtDepth, index) => {
-            const triangles = holesIn.computeTriangulation(dataAtDepth.paths);
+            const triangles = cdt2dHelper.computeTriangulation(dataAtDepth.paths);
             if(debug.getCheckboxValue("logTriangulation")) {
                 console.log("triangles at depth ", index," : ", triangles);
             }
@@ -265,35 +253,7 @@ const debug = {
 
 
     startNewDraw(){
-        const data = debug.getData();
 
-        let cpyHoles = debugger2d._objectClone(data.holes);
-        let cpyOuterShape = debugger2d._objectClone(data.outerShape);
-        holesIn.scaleUpPath(cpyOuterShape.path);
-        for (let i = 0; i < cpyHoles.length; i++) {
-            holesIn.scaleUpPath(cpyHoles[i].path);
-        }
-        let holesByDepth = holesIn.getHolesByDepth(cpyHoles, cpyOuterShape);
-        const transform = debugger2d.getTransform(cpyOuterShape, cpyHoles, holesByDepth.length);
-
-        cpyHoles = debugger2d._objectClone(data.holes);
-        cpyOuterShape = debugger2d._objectClone(data.outerShape);
-        let dataByDepth = holesIn.getDataByDepth(cpyOuterShape, cpyHoles);
-
-        const parent = document.getElementById("container");
-        const canvas = debugger2d.createCanvas("newCanvas", parent, debugger2d.cssclass);
-        const ctx = canvas.getContext("2d");
-        debug.scrollDown();
-        debugger;
-
-        pathTracer.tracePath(ctx, [], transform);
-        /* drawinbg functions :
-            pathTracer.tracePath(ctx, path,  transform)
-            pathTracer.traceTriangulation(ctx, triangulation, transform)
-            pathTracer.tracePathsInRow(canvas, paths,transform)
-            debugger2d.translateRight(transform)
-            debugger2d.traceDelimiter(canvas, x)
-        */
 
     },
 
