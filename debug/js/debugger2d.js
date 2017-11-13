@@ -115,25 +115,6 @@ const debugger2d = {
             debugger2d.traceDelimiter(canvas, index, num);
         }
     },
-/*
-    traceHolesByDepth(holesByDepth, parent, transform, outerShape) {
-        transform = debugger2d._objectClone(transform);
-        debugger2d.createLegend("legend", parent,"holes by depth");
-        const canvas = debugger2d.createCanvas("holesByDepth", parent, debugger2d.cssclass);
-
-        const num = holesByDepth.length;
-        holesByDepth.forEach((holesAtDepth, index) => {
-            pathTracer.tracePathsInRow(canvas, holesAtDepth.keep, transform, "green","");
-            pathTracer.tracePathsInRow(canvas, holesAtDepth.stop, transform, "red","hatch");
-            pathTracer.tracePathsInRow(canvas, holesAtDepth.outer, transform, "blue","hatch2");
-            if(outerShape) {
-              pathTracer.tracePathsInRow(canvas, [outerShape.path], transform, "black","");
-            }
-            debugger2d.translateRight(transform, index,num);
-            debugger2d.traceDelimiter(canvas, index, num);
-        });
-
-    },*/
 
     traceTriangulationByDepth(dataByDepth, parent, transform) {
         transform = debugger2d._objectClone(transform);
@@ -156,7 +137,6 @@ const debugger2d = {
         }
 
     },
-
 
     traceDelimiter(canvas, x, num) {
             x = (x+1) * debugger2d.canvasWidth / num;

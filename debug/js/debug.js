@@ -79,16 +79,15 @@ const debug = {
         //                     debug.elems.shapeEditorHoleButton, debug.elems.shapeEditorDefaultButton);
 
         // init unitary tests select :
-        getHoles.getTestPaths().forEach((test, index) => {
+        getHoles.getTestPaths().concat(getHoles.getTestDoNotBuild()).forEach((test, index) => {
             const option = document.createElement('option');
             option.value = index;
-            option.innerHTML = index;
+            option.innerHTML = index +"--" + test.name;
             debug.elems.testSelect.appendChild(option);
         });
 
         debug.elems.testSelect.addEventListener('change', function() {
-            console.log('Selection changed!', debug.elems.testSelect.selectedIndex);
-            const unitaryTest = getHoles.getTestPaths()[debug.elems.testSelect.selectedIndex];
+            const unitaryTest = getHoles.getTestPaths().concat(getHoles.getTestDoNotBuild())[debug.elems.testSelect.selectedIndex];
             const options = getHoles.getDefaultOptions();
             const jsonOuterSape = JSON.stringify(unitaryTest.outerShape);
             const jsonHoles = JSON.stringify(unitaryTest.holes);

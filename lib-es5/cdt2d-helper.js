@@ -1,10 +1,10 @@
 "use strict";
 
 var cdt2d = require("cdt2d");
+var constants = require("./constants");
 
 var cdt2dHelper = {
     computeTriangulation: function computeTriangulation(points, options) {
-        // let points= xor.concat(intersection).concat(pathOuter);
         var cdtPoints = cdt2dHelper.clipperTocdt2d(points);
         var cdtEdges = cdt2dHelper.pathsToEdges(points);
         if (!options) {
@@ -14,6 +14,16 @@ var cdt2dHelper = {
             };
         }
         var triangles = cdt2d(cdtPoints, cdtEdges, options);
+        // removes degenerated triangles:
+        triangles = triangles.filter(function (triangle) {
+            var ba = { x: cdtPoints[triangle[1]][0] - cdtPoints[triangle[0]][0],
+                y: cdtPoints[triangle[1]][1] - cdtPoints[triangle[0]][1] };
+            var bc = { x: cdtPoints[triangle[1]][0] - cdtPoints[triangle[2]][0],
+                y: cdtPoints[triangle[1]][1] - cdtPoints[triangle[2]][1] };
+            var area = 0.5 * (ba.y * bc.x) - ba.x * bc.y;
+            return Math.abs(area) / (constants.scaleFactor * constants.scaleFactor) > 0.1;
+        });
+
         return {
             points: cdtPoints,
             triangles: triangles
