@@ -1,10 +1,14 @@
 ---
 title: Basics
-menuOrder: 0
-autotoc: false
 ---
 
+
 > A javascript library to generate 3D mesh from a 2D outer path and 2D inner paths.
+
+
+## Demo:
+<a href="https://wanadev.github.io/holes-in/debugPage.html">Please visit the demo here</a>
+
 
 ## Usage:
 
@@ -63,5 +67,8 @@ vertexData.applyToMesh(mesh, 1);
 ```
 
 
-## Not supported yet:
-TODO: Bevel
+## Advanved features:
+
+ - Do not merge: holes-in can return an array of geometries
+ - Do not build: holes-in can avoid some faces (see demo)
+ - UV Mapping: choose the size of the uvs.

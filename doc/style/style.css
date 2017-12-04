@@ -1,4 +1,3 @@
-
 .canvas2d {
     border: 1px solid black;
 }
@@ -25,7 +24,6 @@
 }
 
 .buttons {
-    background-color: #8DE969;
     width: 100%;
     height: 50px;
     border: none;

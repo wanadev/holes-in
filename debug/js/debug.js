@@ -82,14 +82,11 @@ const debug = {
               }
           );
 
-        debug.elems.submit.dispatchEvent(new Event('click'));
 
         document.debugLib = this;
         document.holesIn = holesIn;
         document.cdt2d = cdt2d;
 
-        // shapeEditor.initIntoCanvas(debug.elems.interactiveCanvas, debug.elems.shapeEditorOutButton,
-        //                     debug.elems.shapeEditorHoleButton, debug.elems.shapeEditorDefaultButton);
 
         // init unitary tests select :
         getHoles.getTestPaths().concat(getHoles.getTestDoNotBuild()).forEach((test, index) => {
@@ -115,7 +112,9 @@ const debug = {
             debug.refresh();
 
          }, false);
-
+        debug.elems.testSelect.value = "19";
+        debug.elems.testSelect.dispatchEvent(new Event("change"))
+        debug.elems.submit.dispatchEvent(new Event('click'));
 
     },
 
