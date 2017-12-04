@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+
+<html>
+
+    <head>
+        <meta charset="UTF-8" />
+        <title>debugPage.html - holes-in</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        
+            <link rel="shortcut icon" type="image/png" href="images/holes-in-logo.svg" />
+        
+        
+            <link type="text/css" rel="stylesheet" href="style/holes-in.css" />
+        
+            <link type="text/css" rel="stylesheet" href="style/solarized-dark.css" />
+        
+            <link type="text/css" rel="stylesheet" href="style/style.css" />
+        
+    </head>
+
+    <body class=" page-with-nav">
+
+        <div class="page">
+
+            
+                <div id="toggle-mobile-menu" title="Toggle menu">☰</div>
+            
+
+            
+                <nav class="links">
+                    <ul>
+                        <li><a href="https://github.com/wanadev/holes-in">Github</a></li><li><a href="https://www.npmjs.com/package/holes-in">NPM</a></li>
+                    </ul>
+                </nav>
+            
+
+            <header>
+                <h1>
+                    
+                        <img src="images/holes-in-logo.svg"  alt="holes-in logo" />
+                    
+                    <span>holes-in</span>
+                </h1>
+            </header>
+
+            <div class="content">
+
+                
+                    <nav>
+                        
+                            
+
+    <ul class="menu">
+        
+            
+            <li>
+                <a href="index.html" >Basics</a>
+                
+            </li>
+        
+            
+            <li>
+                <a href="demo.html" >Demo</a>
+                
+            </li>
+        
+    </ul>
+
+
+                        
+                    </nav>
+                
+                <article>
+                        <link rel="stylesheet" type="text/css" href="style/style.css">
+    <script type="text/javascript" src="./holes-in.js"></script>
+    <script type="text/javascript" src="./debuglib.js"></script>
+    <style>
+        .page-with-nav .content{
+            max-width: none;
+        }
+
+        nav, header, footer {
+            display: none;
+        }
+        .content article h3 {
+            margin-top: 0px;
+        }
+    </style>
+
+    <div class ="demo-container">
+    <div id="input">
+        <div id="data">
+            <div class="block">
+                <h3>outerShape</h3>
+                <textarea id="outerShape"></textarea>
+            </div>
+            <div class="block">
+                <h3>holes</h3>
+                <textarea id="holes"></textarea>
+            </div>
+            <div class="block">
+                <h3>doNotBuild</h3>
+                <textarea id="doNotBuild"></textarea>
+            </div>
+        </div>
+        <div>
+            <input type="button" id="submit" value="runTest" class="buttons"></input>
+        </div>
+    </div>
+
+    <div id="page" class="page">
+        <div id="settings" class="menu">
+            <div id="generated-data" class="block">
+            </div>
+
+            <div id="option" class="block">
+                <h3>Holes-In Options</h3>
+                <div>
+                    <label>
+                        <input type="checkbox" data-target="inMesh" checked="true">Inner Mesh Generation</label>
+                </div>
+                <div>
+                    <label>
+                        <input type="checkbox" data-target="outMesh" checked="true">Outer Mesh Generation</label>
+                </div>
+                <div>
+                    <label>
+                        <input type="checkbox" data-target="frontMesh" checked="true">Front Mesh Generation</label>
+                </div>
+                <div>
+                    <label>
+                        <input type="checkbox" data-target="backMesh" checked="true">Back Mesh Generation</label>
+                </div>
+                <div>
+                    <label>
+                        <input type="checkbox" data-target="horizontalMesh" checked="true">Horizontal Mesh Generation</label>
+                </div>
+                <div>
+                    <label>
+                        <input type="checkbox" data-target="doNotBuild" checked="true">Enable doNotBuild Option</label>
+                </div>
+            </div>
+
+            <div id="option3d" class="block">
+                <h3>Options 3D</h3>
+                <div>
+                    <label>
+                        <input type="checkbox" data-target="wireframe">Wire Frame</label>
+                </div>
+                <div>
+                    <label>
+                        <input type="checkbox" data-target="backFaceCulling">Back Face Culling</label>
+                </div>
+                <div>
+                    <label>
+                        <input type="checkbox" data-target="displayNormals" checked="false">Display normals</label>
+                </div>
+                <div>
+                    Texture:
+                    <select id="textureSelect">
+                        <option value="cat.png">cat</option>
+                        <option value="checkerboard.jpg">checkerboard</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="logs" class="block">
+                <h3>Logging</h3>
+                <div>
+                    <label>
+                        <input type="checkbox" data-target="logHolesByDepth" checked="true">log HolesByDepth</label>
+                </div>
+                <div>
+                    <label>
+                        <input type="checkbox" data-target="logDataByDepth" checked="true">log DataByDepth</label>
+                </div>
+                <div>
+                    <label>
+                        <input type="checkbox" data-target="logTriangulation" checked="true">log Triangulation</label>
+                </div>
+                <div>
+                    <label>
+                        <input type="checkbox" data-target="logGeometry" checked="true">log Geometry</label>
+                </div>
+
+                <div>
+                    <label>
+                        <input type="checkbox" data-target="debugHolesByDepth" checked="true">debug HolesByDepth</label>
+                </div>
+                <div>
+                    <label>
+                        <input type="checkbox" data-target="debugDataByDepth" checked="true">debug DataByDepth</label>
+                </div>
+                <div>
+                    <label>
+                        <input type="checkbox" data-target="debugTriangulation" checked="true">debug Triangulation</label>
+                </div>
+                <div>
+                    <label>
+                        <input type="checkbox" data-target="debugGeometry" checked="true">debug Geometry</label>
+                </div>
+
+            </div>
+            <div id="tests" class="block">
+                <h3>Unit tests</h3>
+                <div>
+                    Test index:
+                    <select id="testSelect">
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="result-content">
+            <canvas id="babylon"></canvas>
+            <div id="container"></div>
+        </div>
+    </div>
+
+    <div style="display:none">
+        <input type="button" id="customDraw" value="customDraw" class="buttons"></input>
+    </div>
+</div>
+
+                </article>
+            </div>
+
+            <footer>
+                Copyright (c)  2017 Wanadev
+- <a href="http://www.wanadev.fr/">www.wanadev.fr</a><br />
+Unless otherwise specified, this documentation is published under the
+<a href="http://creativecommons.org/licenses/by-sa/3.0/deed.en">cc by-sa 3.0</a> license<br />
+Generated using <a href="https://wanadev.github.io/enlightme/\">Enlight'me</a> 0.1.1
+
+            </footer>
+
+        </div>
+
+        <script>
+
+(function() {
+
+    var MENU_UNFOLDED_CLASS = "mobile-menu-unfolded";
+
+    var menuButton = document.getElementById("toggle-mobile-menu");
+    var menuItems = document.querySelectorAll(".content nav a");
+
+    function getAbsolutePosition(element) {
+        if (typeof(element) == "string") {
+            element = document.getElementById(element);
+        }
+        if (!(element instanceof Element)) {
+            return {x: 0, y: 0};
+        }
+
+        var css;
+        var origElement = element;
+
+        try {
+            css = getComputedStyle(element);
+        } catch (e) {
+            return {x: 0, y: 0};
+        }
+
+        if (!css) {
+            return {x: 0, y: 0};
+        }
+
+        var x = -parseInt(css.borderLeftWidth);
+        var y = -parseInt(css.borderTopWidth);
+
+        while (element.offsetParent) {
+            css = getComputedStyle(element);
+
+            x += element.offsetLeft || 0;
+            x += parseInt(css.borderLeftWidth);
+
+            y += element.offsetTop || 0;
+            y += parseInt(css.borderTopWidth);
+
+            element = element.offsetParent;
+        }
+
+        element = origElement;
+
+        while (element.parentNode && !(element instanceof HTMLBodyElement)) {
+            x -= element.scrollLeft || 0;
+            y -= element.scrollTop || 0;
+            element = element.parentNode;
+        }
+
+        return {x: x, y: y};
+    };
+
+    function openMenu() {
+        document.body.classList.add(MENU_UNFOLDED_CLASS);
+    }
+
+    function closeMenu() {
+        document.body.classList.remove(MENU_UNFOLDED_CLASS);
+    }
+
+    function toggleMenu() {
+        document.body.classList.toggle(MENU_UNFOLDED_CLASS);
+    }
+
+    function _onMenuItemClicked(event) {
+        var href = this.getAttribute("href");
+
+        if (href[0] != "#") {
+            return;
+        }
+
+        event.preventDefault();
+
+        var anchor = href.substr(1, href.length-1);
+        var anchorPosition = getAbsolutePosition(anchor);
+        document.scrollingElement.scrollTop = anchorPosition.y - menuButton.offsetHeight;
+
+        closeMenu();
+    }
+
+    menuButton.onclick = toggleMenu;
+    menuItems.forEach(function(item) {
+        item.onclick = _onMenuItemClicked;
+    });
+
+})();
+
+</script>
+
+    </body>
+
+</html>
