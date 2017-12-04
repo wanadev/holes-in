@@ -18,12 +18,10 @@
         
     </head>
 
-    <body class=" page-with-nav">
+    <body class="">
 
         <div class="page">
 
-            
-                <div id="toggle-mobile-menu" title="Toggle menu">☰</div>
             
 
             
@@ -46,34 +44,12 @@
             <div class="content">
 
                 
-                    <nav>
-                        
-                            
-
-    <ul class="menu">
-        
-            
-            <li>
-                <a href="index.html" class="active">Basics</a>
-                
-            </li>
-        
-            
-            <li>
-                <a href="demo.html" >Demo</a>
-                
-            </li>
-        
-    </ul>
-
-
-                        
-                    </nav>
-                
                 <article>
                     <blockquote>
 <p>A javascript library to generate 3D mesh from a 2D outer path and 2D inner paths.</p>
 </blockquote>
+<h2 id="demo-">Demo:</h2>
+<p><a href="https://wanadev.github.io/holes-in/debugPage.html">Please visit the demo here</a></p>
 <h2 id="usage-">Usage:</h2>
 <p>First you need to include holesIn library into your html code:</p>
 <pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"./holes-in.min.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></code></pre>
@@ -108,8 +84,12 @@ vertexData.normals = mergedGeometry.normals;
 vertexData.applyToMesh(mesh, <span class="hljs-number">1</span>);</code></pre>
 
 
-<h2 id="not-supported-yet-">Not supported yet:</h2>
-<p>TODO: Bevel</p>
+<h2 id="advanved-features-">Advanved features:</h2>
+<ul>
+<li>Do not merge: holes-in can return an array of geometries</li>
+<li>Do not build: holes-in can avoid some faces (see demo)</li>
+<li>UV Mapping: choose the size of the uvs.</li>
+</ul>
 
                 </article>
             </div>
