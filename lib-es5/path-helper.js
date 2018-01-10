@@ -100,6 +100,7 @@ var pathHelper = {
             }
         }
         var cpr = new clipperLib.Clipper();
+        cpr.StrictlySimple = true;
         cpr.AddPaths(pathsSubj, clipperLib.PolyType.ptSubject, true);
 
         if (pathsClip) {

@@ -107,7 +107,7 @@ var extruder = {
         var horrGeom = [];
         for (var i = 0; i < indexes.length; i++) {
             var innerPaths = innerPathsByDepth[indexes[i]].paths;
-            var paths = horizontalPathsByDepth[indexes[i]].paths; //.concat(innerPaths);
+            var paths = horizontalPathsByDepth[indexes[i]].paths;
             var triangles = cdt2dHelper.computeTriangulation(paths);
             triangles.depth = horizontalPathsByDepth[indexes[i]].depth;
             horrGeom.push(geomHelper.getHorizontalGeom(triangles, 0, invertNormal));

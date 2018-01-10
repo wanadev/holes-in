@@ -48,12 +48,13 @@ module.exports = babylonHelper;
 "use strict";
 
 var cdt2d = require("cdt2d");
+var pathHelper = require("./path-helper");
 var constants = require("./constants");
 
 var cdt2dHelper = {
-    computeTriangulation: function computeTriangulation(points, options) {
-        var cdtPoints = cdt2dHelper.clipperTocdt2d(points);
-        var cdtEdges = cdt2dHelper.pathsToEdges(points);
+    computeTriangulation: function computeTriangulation(paths, options) {
+        var cdtPoints = cdt2dHelper.clipperTocdt2d(paths);
+        var cdtEdges = cdt2dHelper.pathsToEdges(paths);
         if (!options) {
             options = {
                 exterior: false,
@@ -70,7 +71,33 @@ var cdt2dHelper = {
             var area = 0.5 * (ba.y * bc.x) - ba.x * bc.y;
             return Math.abs(area) / (constants.scaleFactor * constants.scaleFactor) > 0.1;
         });
+        if (paths.length && !triangles.length) {
+            var foundProblem = 0;
+            for (var i = 0; i < paths.length - 1; i++) {
+                var path0 = paths[i];
+                for (var j = i + 1; j < paths.length; j++) {
+                    var path1 = paths[j];
+                    for (var k = 0; k < path0.length; k++) {
+                        var point0 = path0[k];
+                        for (var l = 0; l < path1.length; l++) {
+                            var point1 = path1[l];
 
+                            if (pathHelper.getDistance(point0, point1) > 1) continue;
+
+                            var repulsion = { X: Math.max(10, (point1.X - point0.X) / 2), Y: Math.max(10, (point1.Y - point0.Y) / 2, 10) };
+                            path0[k] = { X: point0.X + repulsion.X, Y: point0.Y + repulsion.Y };
+                            path1[l] = { X: point1.X - repulsion.X, Y: point1.Y - repulsion.Y };
+                            foundProblem++;
+                        }
+                    }
+                }
+                if (foundProblem) {
+                    return cdt2dHelper.computeTriangulation(paths, options);
+                } else {
+                    console.warn("holes-in: warning a set points does not result in any triangulation.");
+                }
+            }
+        }
         return {
             points: cdtPoints,
             triangles: triangles
@@ -109,7 +136,7 @@ var cdt2dHelper = {
 };
 module.exports = cdt2dHelper;
 
-},{"./constants":3,"cdt2d":11}],3:[function(require,module,exports){
+},{"./constants":3,"./path-helper":8,"cdt2d":11}],3:[function(require,module,exports){
 "use strict";
 
 var constants = {
@@ -285,7 +312,7 @@ var extruder = {
         var horrGeom = [];
         for (var i = 0; i < indexes.length; i++) {
             var innerPaths = innerPathsByDepth[indexes[i]].paths;
-            var paths = horizontalPathsByDepth[indexes[i]].paths; //.concat(innerPaths);
+            var paths = horizontalPathsByDepth[indexes[i]].paths;
             var triangles = cdt2dHelper.computeTriangulation(paths);
             triangles.depth = horizontalPathsByDepth[indexes[i]].depth;
             horrGeom.push(geomHelper.getHorizontalGeom(triangles, 0, invertNormal));
@@ -802,6 +829,7 @@ var pathHelper = {
             }
         }
         var cpr = new clipperLib.Clipper();
+        cpr.StrictlySimple = true;
         cpr.AddPaths(pathsSubj, clipperLib.PolyType.ptSubject, true);
 
         if (pathsClip) {
