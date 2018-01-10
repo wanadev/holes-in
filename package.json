@@ -15,7 +15,6 @@
     "watchifyAll": "npm run watchify & npm run watchifyUI & npm run watchifyDebug",
     "prebuild-doc": "npm run build && cp dist/holes-in.js doc/holes-in.js && cp debug/dist/debuglib.js doc/debuglib.js && ./node_modules/.bin/enlightme",
     "build-doc": "./node_modules/.bin/enlightme",
-
     "prepublish": "npm run build-es5"
   },
   "repository": {
@@ -43,14 +42,15 @@
     "enlightme": "^0.1.1",
     "expect.js": "^0.3.1",
     "jshint": "^2.9.5",
+    "json-stringify-pretty-compact": "^1.0.4",
     "lru-cache": "^4.1.1",
     "mocha": "^4.0.0",
+    "pako": "^1.0.6",
     "paper": "^0.11.4",
     "sigmund": "^1.0.1",
     "store": "^2.0.12",
     "uglify-js": "^3.0.16",
-    "watchify": "^3.9.0",
-    "json-stringify-pretty-compact": "^1.0.4"
+    "watchify": "^3.9.0"
   },
   "dependencies": {
     "cdt2d": "^1.0.0",

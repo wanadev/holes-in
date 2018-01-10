@@ -9,8 +9,8 @@ const extruder = require("../../lib/extruder");
 const cdt2dHelper = require("../../lib/cdt2d-helper");
 const cdt2d = require("cdt2d");
 const getHoles = require("../../tests/holes");
-const stringify = require("json-stringify-pretty-compact")
-
+const stringify = require("json-stringify-pretty-compact");
+const pako = require("pako");
 
 const debug = {
     elems: null,
@@ -44,19 +44,37 @@ const debug = {
         if(store.get("doNotBuild")) {
             debug.elems.doNotBuild.value = store.get("doNotBuild").trim();
         }
-        const urlOuterShape = debug.getParameterByName("outerShape")
-        if(urlOuterShape){
-            debug.elems.outerShape.value = urlOuterShape;
-        }
-        const urlHoles = debug.getParameterByName("holes")
-        if(urlHoles){
-            debug.elems.holes.value = urlHoles;
+        const urlData = debug.getParameterByName("data");
+        if(urlData){
+            const data = JSON.parse(pako.inflate(JSON.parse("[" +urlData+ "]"), {to: "string"}));
+
+            if(data.outerShape){
+                debug.elems.outerShape.value = JSON.stringify(data.outerShape);
+            }
+            if(data.outShape){
+                debug.elems.outerShape.value = JSON.stringify(data.outShape);
+            }
+            if(data.holes){
+                debug.elems.holes.value = JSON.stringify(data.holes);
+            }
+            if(data.doNotBuild){
+                debug.elems.doNotBuild.value = JSON.stringify(data.doNotBuild);
+            }
         }
 
-        const urlDoNotBuild = debug.getParameterByName("doNotBuild")
-        if(urlDoNotBuild){
-            debug.elems.holes.value = urlDoNotBuild;
-        }
+        // const urlOuterShape = debug.getParameterByName("outerShape")
+        // if(urlOuterShape){
+        //
+        // }
+        // const urlHoles = debug.getParameterByName("holes")
+        // if(urlHoles){
+        //     debug.elems.holes.value = urlHoles;
+        // }
+        //
+        // const urlDoNotBuild = debug.getParameterByName("doNotBuild")
+        // if(urlDoNotBuild){
+        //     debug.elems.doNotBuild.value = urlDoNotBuild;
+        // }
 
         debugger2d.elems = debug.elems;
         debugger3d.elems = debug.elems;
@@ -112,8 +130,11 @@ const debug = {
             debug.refresh();
 
          }, false);
-        debug.elems.testSelect.value = "19";
-        debug.elems.testSelect.dispatchEvent(new Event("change"))
+
+         if(!debug.elems.outerShape.value || debug.elems.outerShape.value.length < 1){
+             debug.elems.testSelect.value = "19";
+             debug.elems.testSelect.dispatchEvent(new Event("change"))
+         }
         debug.elems.submit.dispatchEvent(new Event('click'));
 
     },
@@ -275,6 +296,7 @@ const debug = {
 
     getParameterByName(name, url) {
         if (!url) url = window.location.href;
+        //deflates url:
         name = name.replace(/[\[\]]/g, "\\$&");
         var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
             results = regex.exec(url);
