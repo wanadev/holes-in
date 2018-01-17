@@ -26,6 +26,7 @@ var cdt2dHelper = {
         });
         if (paths.length && !triangles.length) {
             var foundProblem = 0;
+            // checks if a point from a path if at the same position than a point from annother path.
             for (var i = 0; i < paths.length - 1; i++) {
                 var path0 = paths[i];
                 for (var j = i + 1; j < paths.length; j++) {
@@ -44,11 +45,38 @@ var cdt2dHelper = {
                         }
                     }
                 }
-                if (foundProblem) {
-                    return cdt2dHelper.computeTriangulation(paths, options);
-                } else {
-                    console.warn("holes-in: warning a set points does not result in any triangulation.");
+            }
+            if (foundProblem) {
+                return cdt2dHelper.computeTriangulation(paths, options);
+            }
+
+            // checks if a point if upon a segment
+            for (var _i = 0; _i < paths.length; _i++) {
+                var path = paths[_i];
+                for (var _j = 0; _j < path.length - 1; _j++) {
+                    var segmentA = path[_j];
+                    var segmentB = path[_j + 1];
+                    for (var _k = 0; _k < path.length; _k++) {
+                        if (_k == _j || _k == _j + 1) continue;
+                        var point = path[_k];
+                        if (!cdt2dHelper.isPointOnSegment(point, segmentA, segmentB)) continue;
+                        // displace the point:
+                        var norm = pathHelper.getDistance(segmentA, segmentB);
+                        var _repulsion = { X: -(segmentB.Y - segmentA.Y) / norm, Y: -(segmentB.X - segmentA.X) / norm };
+                        var vecPath = { X: path[(_k + 1) % path.length].X - point.X, Y: path[(_k + 1) % path.length].Y - point.Y };
+                        if (vecPath.X * _repulsion.X + vecPath.Y * _repulsion.Y < 0) {
+                            _repulsion.X = -_repulsion.X;
+                            _repulsion.Y = -_repulsion.Y;
+                        }
+                        path[_k] = { X: point.X + _repulsion.X, Y: point.Y + _repulsion.Y };
+                        foundProblem++;
+                    }
                 }
+            }
+            if (foundProblem) {
+                return cdt2dHelper.computeTriangulation(paths, options);
+            } else {
+                console.warn("holes-in: warning a set points does not result in any triangulation.");
             }
         }
         return {
@@ -85,6 +113,40 @@ var cdt2dHelper = {
     },
     clipperPointTocdt2dPoint: function clipperPointTocdt2dPoint(point) {
         return [point.X, point.Y];
+    },
+
+
+    /**
+     * Check if the point belongs to the segment.
+     * More presicely, if it's contained by the rectangle
+     * which contains the segment along its main axis
+     * and is small along the secondary axis
+     *
+     * @param {BABYLON.Vector2} p The point
+     * @param {BABYLON.Vector2} ss One extremum of the segment
+     * @param {BABYLON.Vector2} se The other extremum of the segment
+     * @param {Number} [threshold=helpers.math2d.DEFAULT_THRESHOLD]
+     * @return {Boolean}
+     */
+    isPointOnSegment: function isPointOnSegment(p, ss, se) {
+        var threshold = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 10;
+
+        // save the length and normalize v
+        // const v = se.subtract(ss);
+        var v = { X: se.X - ss.X, Y: se.Y - ss.Y };
+
+        var l = Math.sqrt(v.X * v.X + v.Y * v.Y);
+        v.X = v.X / l;
+        v.Y = v.Y / l;
+
+        // the minimal distance from the segment to the point
+        // and the projection of the point on the segment
+        // const w = p.subtract(ss);
+        var w = { X: p.X - ss.X, Y: p.Y - ss.Y };
+
+        var h = v.X * w.Y - v.Y * w.X;
+        var dot = v.X + w.X + v.Y + w.Y;
+        return Math.abs(h) < threshold && dot >= -threshold && dot <= l + threshold;
     }
 };
 module.exports = cdt2dHelper;
