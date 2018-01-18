@@ -9,13 +9,11 @@
     "build-dist": "mkdir -p dist/ && browserify -t [babelify --presets [ es2015 ] ] -s holesIn lib/index.js -o dist/holes-in.js",
     "build-es5": "cd lib/ && env babel *.js -d ../lib-es5",
     "build-uglify": "uglifyjs dist/holes-in.js -o dist/holes-in.min.js",
+    "build-debug": "mkdir -p debug/dist && browserify -t [babelify --presets [ es2015 ] ] -s debuglib debug/lib/index.js -o debug/dist/debuglib.js",
+    "prebuild-doc": "cp debug/dist/debuglib.js doc/debuglib.js && cp dist/holes-in.js doc/holes-in.js",
+    "build-doc": "npm run build && npm run build-debug && npm run prebuild-doc && ./node_modules/.bin/enlightme",
     "watchify": "mkdir -p dist && watchify -v --debug -s holes-in lib/index.js -o dist/holes-in.js",
-    "watchifyUI": "rm -f `pwd`/doc.generated/ui-bundle.js && ln -s `pwd`/doc/ui-bundle.js `pwd`/doc.generated/ui-bundle.js && watchify -v --debug doc/js/index.js -o doc.generated/ui-bundle.js",
-    "watchifyDebug": "watchify -v --debug debug/js/index.js -o debug/dist/debuglib.js",
-    "watchifyAll": "npm run watchify & npm run watchifyUI & npm run watchifyDebug",
-    "prebuild-doc": "npm run build && cp dist/holes-in.js doc/holes-in.js && cp debug/dist/debuglib.js doc/debuglib.js && ./node_modules/.bin/enlightme",
-    "build-doc": "./node_modules/.bin/enlightme",
-    "prepublish": "npm run build-es5"
+    "watchifyDebug":"npm run build-debug && watchify -v --debug debug/lib/index.js -o debug/dist/debuglib.js"
   },
   "repository": {
     "type": "git",
