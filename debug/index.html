@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <title>Debugger Holes in</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script type="text/javascript" src="./dist/debuglib.js"></script>
+</head>
+
+<body>
+    <div id="input">
+        <div id="data">
+            <div class="block">
+                <h3>outerShape</h3>
+                <textarea id="outerShape"></textarea>
+            </div>
+            <div class="block">
+                <h3>holes</h3>
+                <textarea id="holes"></textarea>
+            </div>
+            <div class="block">
+                <h3>doNotBuild</h3>
+                <textarea id="doNotBuild"></textarea>
+            </div>
+        </div>
+        <div>
+            <input type="button" id="submit" value="runTest" class="buttons"></input>
+        </div>
+    </div>
+
+    <div id="page" class="page">
+        <div id="settings" class="menu">
+            <div id="generated-data" class="block">
+            </div>
+
+            <div id="option" class="block">
+                <h3>Holes-In Options</h3>
+                <div>
+                    <label>
+                        <input type="checkbox" data-target="inMesh" checked="true">Inner Mesh Generation</label>
+                </div>
+                <div>
+                    <label>
+                        <input type="checkbox" data-target="outMesh" checked="true">Outer Mesh Generation</label>
+                </div>
+                <div>
+                    <label>
+                        <input type="checkbox" data-target="frontMesh" checked="true">Front Mesh Generation</label>
+                </div>
+                <div>
+                    <label>
+                        <input type="checkbox" data-target="backMesh" checked="true">Back Mesh Generation</label>
+                </div>
+                <div>
+                    <label>
+                        <input type="checkbox" data-target="horizontalMesh" checked="true">Horizontal Mesh Generation</label>
+                </div>
+                <div>
+                    <label>
+                        <input type="checkbox" data-target="doNotBuild" checked="true">Enable doNotBuild Option</label>
+                </div>
+            </div>
+
+            <div id="option3d" class="block">
+                <h3>Options 3D</h3>
+                <div>
+                    <label>
+                        <input type="checkbox" data-target="wireframe">Wire Frame</label>
+                </div>
+                <div>
+                    <label>
+                        <input type="checkbox" data-target="backFaceCulling">Back Face Culling</label>
+                </div>
+                <div>
+                    <label>
+                        <input type="checkbox" data-target="displayNormals" checked="false">Display normals</label>
+                </div>
+                <div>
+                    Texture:
+                    <select id="textureSelect">
+                        <option value="cat.png">cat</option>
+                        <option value="checkerboard.jpg">checkerboard</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="logs" class="block">
+                <h3>Logging</h3>
+                <div>
+                    <label>
+                        <input type="checkbox" data-target="logHolesByDepth" checked="true">log HolesByDepth</label>
+                </div>
+                <div>
+                    <label>
+                        <input type="checkbox" data-target="logDataByDepth" checked="true">log DataByDepth</label>
+                </div>
+                <div>
+                    <label>
+                        <input type="checkbox" data-target="logTriangulation" checked="true">log Triangulation</label>
+                </div>
+                <div>
+                    <label>
+                        <input type="checkbox" data-target="logGeometry" checked="true">log Geometry</label>
+                </div>
+
+                <div>
+                    <label>
+                        <input type="checkbox" data-target="debugHolesByDepth" checked="true">debug HolesByDepth</label>
+                </div>
+                <div>
+                    <label>
+                        <input type="checkbox" data-target="debugDataByDepth" checked="true">debug DataByDepth</label>
+                </div>
+                <div>
+                    <label>
+                        <input type="checkbox" data-target="debugTriangulation" checked="true">debug Triangulation</label>
+                </div>
+                <div>
+                    <label>
+                        <input type="checkbox" data-target="debugGeometry" checked="true">debug Geometry</label>
+                </div>
+
+            </div>
+            <div id="tests" class="block">
+                <h3>Unit tests</h3>
+                <div>
+                    Test index:
+                    <select id="testSelect">
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="result-content">
+            <canvas id="babylon"></canvas>
+            <div id="container"></div>
+        </div>
+    </div>
+
+    <div style="display:none">
+        <input type="button" id="customDraw" value="customDraw" class="buttons"></input>
+    </div>
+
+</body>
+
+</html>

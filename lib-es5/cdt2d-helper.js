@@ -6,6 +6,12 @@ var constants = require("./constants");
 
 var cdt2dHelper = {
     computeTriangulation: function computeTriangulation(paths, options) {
+        var callStack = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+
+        if (callStack > 3) {
+            console.warn("holes-in: warning a set points does not result in any triangulation.", JSON.stringify(paths));
+            return { triangles: [], faces: [] };
+        }
         var cdtPoints = cdt2dHelper.clipperTocdt2d(paths);
         var cdtEdges = cdt2dHelper.pathsToEdges(paths);
         if (!options) {
@@ -47,7 +53,7 @@ var cdt2dHelper = {
                 }
             }
             if (foundProblem) {
-                return cdt2dHelper.computeTriangulation(paths, options);
+                return cdt2dHelper.computeTriangulation(paths, options, callStack + 1);
             }
 
             // checks if a point if upon a segment
@@ -74,9 +80,7 @@ var cdt2dHelper = {
                 }
             }
             if (foundProblem) {
-                return cdt2dHelper.computeTriangulation(paths, options);
-            } else {
-                console.warn("holes-in: warning a set points does not result in any triangulation.");
+                return cdt2dHelper.computeTriangulation(paths, options, callStack + 1);
             }
         }
         return {
