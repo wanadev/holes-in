@@ -314,7 +314,7 @@ var pathHelper = {
         return point1.X === point2.X && point1.Y === point2.Y;
     },
     cleanPaths: function cleanPaths(paths) {
-        var threshold = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1.5;
+        var threshold = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 10;
 
         return clipperLib.Clipper.CleanPolygons(paths, threshold);
     }
