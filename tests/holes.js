@@ -154,7 +154,7 @@ getTestPaths: function () {
           outerShape:input.outerShape3,
           holes: input.paths3,
           result:{
-           frontMesh:3,
+           frontMesh:0,
            backMesh:6,
            outMesh:24,
            horizontalMesh:12}
