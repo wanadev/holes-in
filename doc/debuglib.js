@@ -48,23 +48,7 @@ var debug = {
         if (store.get("doNotBuild")) {
             debug.elems.doNotBuild.value = store.get("doNotBuild").trim();
         }
-        var urlData = debug.getParameterByName("data");
-        if (urlData) {
-            var data = JSON.parse(pako.inflate(JSON.parse("[" + urlData + "]"), { to: "string" }));
-
-            if (data.outerShape) {
-                debug.elems.outerShape.value = JSON.stringify(data.outerShape);
-            }
-            if (data.outShape) {
-                debug.elems.outerShape.value = JSON.stringify(data.outShape);
-            }
-            if (data.holes) {
-                debug.elems.holes.value = JSON.stringify(data.holes);
-            }
-            if (data.doNotBuild) {
-                debug.elems.doNotBuild.value = JSON.stringify(data.doNotBuild);
-            }
-        }
+        var urlData = debug.getUrlParameters("data");
 
         // const urlOuterShape = debug.getParameterByName("outerShape")
         // if(urlOuterShape){
@@ -283,15 +267,24 @@ var debug = {
     scrollDown: function scrollDown() {
         window.scrollTo(0, Math.max(document.body.scrollHeight, document.body.offsetHeight, document.documentElement.clientHeight, document.documentElement.scrollHeight, document.documentElement.offsetHeight));
     },
-    getParameterByName: function getParameterByName(name, url) {
-        if (!url) url = window.location.href;
+    getUrlParameters: function getUrlParameters() {
+        var url = window.location.href;
         //deflates url:
-        name = name.replace(/[\[\]]/g, "\\$&");
-        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-            results = regex.exec(url);
-        if (!results) return null;
-        if (!results[2]) return '';
-        return decodeURIComponent(results[2].replace(/\+/g, " "));
+        var stringArgs = String.fromCharCode.apply(null, pako.inflate(new URL(window.location.href).searchParams.get("data").split(',')));
+        var params = JSON.parse(stringArgs);
+
+        if (params.outerShape) {
+            debug.elems.outerShape.value = JSON.stringify(params.outerShape);
+        }
+        if (params.outShape) {
+            debug.elems.outerShape.value = JSON.stringify(params.outShape);
+        }
+        if (params.holes) {
+            debug.elems.holes.value = JSON.stringify(params.holes);
+        }
+        if (params.doNotBuild) {
+            debug.elems.doNotBuild.value = JSON.stringify(params.doNotBuild);
+        }
     }
 };
 
@@ -1184,6 +1177,8 @@ var extruder = {
 
         options = Object.assign(extruder.getDefaultOptions(), options);
 
+        extruder.generateDebugLink(outerShape, holes, options);
+
         // get the topology 2D paths by depth
         var data = extruder.getDataByDepth(outerShape, holes);
         var outerPathsByDepth = data.outerPathsByDepth;
@@ -1393,14 +1388,27 @@ var extruder = {
             backMesh: true,
             horizontalMesh: true,
             mergeVerticalGeometries: true,
-            doNotBuild: []
+            doNotBuild: [],
+            debug: false
         };
+    },
+    generateDebugLink: function generateDebugLink(outerShape, holes, options) {
+        // if(options.debug){
+        try {
+            var pako = require("pako");
+            var data64 = pako.deflate(JSON.stringify({ holes: holes, outerShape: outerShape, doNotBuild: options.doNotBuild }));
+            var urlParam = "data=" + encodeURIComponent(data64);
+            console.info("Holes in debug: https://wanadev.github.io/holes-in/debugPage.html?" + urlParam);
+        } catch (error) {
+            console.warn("error on holes-in generate debug link. You may need to install pako", error);
+        }
+        // }
     }
 };
 
 module.exports = extruder;
 
-},{"./babylon-helper.js":6,"./cdt2d-helper.js":7,"./constants.js":8,"./geom-helper.js":11,"./path-helper.js":13,"./uv-helper.js":14}],11:[function(require,module,exports){
+},{"./babylon-helper.js":6,"./cdt2d-helper.js":7,"./constants.js":8,"./geom-helper.js":11,"./path-helper.js":13,"./uv-helper.js":14,"pako":31}],11:[function(require,module,exports){
 "use strict";
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }

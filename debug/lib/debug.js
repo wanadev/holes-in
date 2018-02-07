@@ -44,23 +44,8 @@ const debug = {
         if(store.get("doNotBuild")) {
             debug.elems.doNotBuild.value = store.get("doNotBuild").trim();
         }
-        const urlData = debug.getParameterByName("data");
-        if(urlData){
-            const data = JSON.parse(pako.inflate(JSON.parse("[" +urlData+ "]"), {to: "string"}));
+        const urlData = debug.getUrlParameters("data");
 
-            if(data.outerShape){
-                debug.elems.outerShape.value = JSON.stringify(data.outerShape);
-            }
-            if(data.outShape){
-                debug.elems.outerShape.value = JSON.stringify(data.outShape);
-            }
-            if(data.holes){
-                debug.elems.holes.value = JSON.stringify(data.holes);
-            }
-            if(data.doNotBuild){
-                debug.elems.doNotBuild.value = JSON.stringify(data.doNotBuild);
-            }
-        }
 
         // const urlOuterShape = debug.getParameterByName("outerShape")
         // if(urlOuterShape){
@@ -294,15 +279,27 @@ const debug = {
                        document.documentElement.clientHeight, document.documentElement.scrollHeight, document.documentElement.offsetHeight ))
     },
 
-    getParameterByName(name, url) {
-        if (!url) url = window.location.href;
+    getUrlParameters() {
+        const url = window.location.href;
         //deflates url:
-        name = name.replace(/[\[\]]/g, "\\$&");
-        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-            results = regex.exec(url);
-        if (!results) return null;
-        if (!results[2]) return '';
-        return decodeURIComponent(results[2].replace(/\+/g, " "));
+        const stringArgs = String.fromCharCode
+        .apply(null,
+            pako.inflate(new URL(window.location.href).searchParams.get("data").split(',')
+        ));
+        const params = JSON.parse(stringArgs);
+
+        if(params.outerShape){
+            debug.elems.outerShape.value = JSON.stringify(params.outerShape);
+        }
+        if(params.outShape){
+            debug.elems.outerShape.value = JSON.stringify(params.outShape);
+        }
+        if(params.holes){
+            debug.elems.holes.value = JSON.stringify(params.holes);
+        }
+        if(params.doNotBuild){
+            debug.elems.doNotBuild.value = JSON.stringify(params.doNotBuild);
+        }
     }
 
 
