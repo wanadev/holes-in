@@ -297,7 +297,7 @@ var debug = {
 
 module.exports = debug;
 
-},{"../../lib/cdt2d-helper":7,"../../lib/extruder":10,"../../lib/index":12,"../../tests/holes":59,"./debugger2d":2,"./debugger3d":3,"./pathTracer":5,"cdt2d":17,"json-stringify-pretty-compact":23,"pako":24,"store":45}],2:[function(require,module,exports){
+},{"../../lib/cdt2d-helper":7,"../../lib/extruder":10,"../../lib/index":12,"../../tests/holes":59,"./debugger2d":2,"./debugger3d":3,"./pathTracer":5,"cdt2d":16,"json-stringify-pretty-compact":30,"pako":31,"store":47}],2:[function(require,module,exports){
 "use strict";
 
 var pathTracer = require("./pathTracer");
@@ -939,6 +939,15 @@ var constants = require("./constants");
 
 var cdt2dHelper = {
     computeTriangulation: function computeTriangulation(paths, options) {
+        var callStack = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+
+        if (callStack > 3) {
+            console.warn("holes-in: warning a set points does not result in any triangulation.", JSON.stringify(paths));
+            return { triangles: [], faces: [] };
+        }
+
+        // clean paths to avoid colinear and degenerated cases
+        paths = pathHelper.cleanPaths(paths);
         var cdtPoints = cdt2dHelper.clipperTocdt2d(paths);
         var cdtEdges = cdt2dHelper.pathsToEdges(paths);
         if (!options) {
@@ -954,8 +963,14 @@ var cdt2dHelper = {
                 y: cdtPoints[triangle[1]][1] - cdtPoints[triangle[0]][1] };
             var bc = { x: cdtPoints[triangle[1]][0] - cdtPoints[triangle[2]][0],
                 y: cdtPoints[triangle[1]][1] - cdtPoints[triangle[2]][1] };
+            var lba = Math.sqrt(ba.x * ba.x + ba.y * ba.y);
+            var lbc = Math.sqrt(bc.x * bc.x + bc.y * bc.y);
+            ba.x /= lba;
+            ba.y /= lba;
+            bc.x /= lbc;
+            bc.y /= lbc;
             var area = 0.5 * (ba.y * bc.x) - ba.x * bc.y;
-            return Math.abs(area) / (constants.scaleFactor * constants.scaleFactor) > 0.1;
+            return Math.abs(area) > 0.001;
         });
         if (paths.length && !triangles.length) {
             var foundProblem = 0;
@@ -980,7 +995,7 @@ var cdt2dHelper = {
                 }
             }
             if (foundProblem) {
-                return cdt2dHelper.computeTriangulation(paths, options);
+                return cdt2dHelper.computeTriangulation(paths, options, callStack + 1);
             }
 
             // checks if a point if upon a segment
@@ -1007,9 +1022,7 @@ var cdt2dHelper = {
                 }
             }
             if (foundProblem) {
-                return cdt2dHelper.computeTriangulation(paths, options);
-            } else {
-                console.warn("holes-in: warning a set points does not result in any triangulation.");
+                return cdt2dHelper.computeTriangulation(paths, options, callStack + 1);
             }
         }
         return {
@@ -1084,7 +1097,7 @@ var cdt2dHelper = {
 };
 module.exports = cdt2dHelper;
 
-},{"./constants":8,"./path-helper":13,"cdt2d":17}],8:[function(require,module,exports){
+},{"./constants":8,"./path-helper":13,"cdt2d":16}],8:[function(require,module,exports){
 "use strict";
 
 var constants = {
@@ -1158,6 +1171,7 @@ var geomHelper = require("./geom-helper.js");
 var cdt2dHelper = require("./cdt2d-helper.js");
 var uvHelper = require("./uv-helper.js");
 var babylonHelper = require("./babylon-helper.js");
+var constants = require("./constants.js");
 
 var extruder = {
 
@@ -1386,7 +1400,7 @@ var extruder = {
 
 module.exports = extruder;
 
-},{"./babylon-helper.js":6,"./cdt2d-helper.js":7,"./geom-helper.js":11,"./path-helper.js":13,"./uv-helper.js":14}],11:[function(require,module,exports){
+},{"./babylon-helper.js":6,"./cdt2d-helper.js":7,"./constants.js":8,"./geom-helper.js":11,"./path-helper.js":13,"./uv-helper.js":14}],11:[function(require,module,exports){
 "use strict";
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
@@ -1991,14 +2005,14 @@ var pathHelper = {
         return point1.X === point2.X && point1.Y === point2.Y;
     },
     cleanPaths: function cleanPaths(paths) {
-        var threshold = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1.5;
+        var threshold = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 10;
 
         return clipperLib.Clipper.CleanPolygons(paths, threshold);
     }
 };
 module.exports = pathHelper;
 
-},{"./constants.js":8,"clipper-lib":22}],14:[function(require,module,exports){
+},{"./constants.js":8,"clipper-lib":29}],14:[function(require,module,exports){
 "use strict";
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
@@ -70409,60 +70423,6 @@ if (((typeof window != "undefined" && window.module) || (typeof module != "undef
 };
 
 },{}],16:[function(require,module,exports){
-"use strict"
-
-function compileSearch(funcName, predicate, reversed, extraArgs, earlyOut) {
-  var code = [
-    "function ", funcName, "(a,l,h,", extraArgs.join(","),  "){",
-earlyOut ? "" : "var i=", (reversed ? "l-1" : "h+1"),
-";while(l<=h){\
-var m=(l+h)>>>1,x=a[m]"]
-  if(earlyOut) {
-    if(predicate.indexOf("c") < 0) {
-      code.push(";if(x===y){return m}else if(x<=y){")
-    } else {
-      code.push(";var p=c(x,y);if(p===0){return m}else if(p<=0){")
-    }
-  } else {
-    code.push(";if(", predicate, "){i=m;")
-  }
-  if(reversed) {
-    code.push("l=m+1}else{h=m-1}")
-  } else {
-    code.push("h=m-1}else{l=m+1}")
-  }
-  code.push("}")
-  if(earlyOut) {
-    code.push("return -1};")
-  } else {
-    code.push("return i};")
-  }
-  return code.join("")
-}
-
-function compileBoundsSearch(predicate, reversed, suffix, earlyOut) {
-  var result = new Function([
-  compileSearch("A", "x" + predicate + "y", reversed, ["y"], earlyOut),
-  compileSearch("P", "c(x,y)" + predicate + "0", reversed, ["y", "c"], earlyOut),
-"function dispatchBsearch", suffix, "(a,y,c,l,h){\
-if(typeof(c)==='function'){\
-return P(a,(l===void 0)?0:l|0,(h===void 0)?a.length-1:h|0,y,c)\
-}else{\
-return A(a,(c===void 0)?0:c|0,(l===void 0)?a.length-1:l|0,y)\
-}}\
-return dispatchBsearch", suffix].join(""))
-  return result()
-}
-
-module.exports = {
-  ge: compileBoundsSearch(">=", false, "GE"),
-  gt: compileBoundsSearch(">", false, "GT"),
-  lt: compileBoundsSearch("<", true, "LT"),
-  le: compileBoundsSearch("<=", true, "LE"),
-  eq: compileBoundsSearch("-", true, "EQ", true)
-}
-
-},{}],17:[function(require,module,exports){
 'use strict'
 
 var monotoneTriangulate = require('./lib/monotone')
@@ -70546,7 +70506,7 @@ function cdt2d(points, edges, options) {
   }
 }
 
-},{"./lib/delaunay":18,"./lib/filter":19,"./lib/monotone":20,"./lib/triangulation":21}],18:[function(require,module,exports){
+},{"./lib/delaunay":17,"./lib/filter":18,"./lib/monotone":19,"./lib/triangulation":20}],17:[function(require,module,exports){
 'use strict'
 
 var inCircle = require('robust-in-sphere')[4]
@@ -70663,7 +70623,7 @@ function delaunayRefine(points, triangulation) {
   }
 }
 
-},{"binary-search-bounds":16,"robust-in-sphere":40}],19:[function(require,module,exports){
+},{"binary-search-bounds":21,"robust-in-sphere":22}],18:[function(require,module,exports){
 'use strict'
 
 var bsearch = require('binary-search-bounds')
@@ -70845,7 +70805,7 @@ function classifyFaces(triangulation, target, infinity) {
   return result
 }
 
-},{"binary-search-bounds":16}],20:[function(require,module,exports){
+},{"binary-search-bounds":21}],19:[function(require,module,exports){
 'use strict'
 
 var bsearch = require('binary-search-bounds')
@@ -71034,7 +70994,7 @@ function monotoneTriangulate(points, edges) {
   return cells
 }
 
-},{"binary-search-bounds":16,"robust-orientation":41}],21:[function(require,module,exports){
+},{"binary-search-bounds":21,"robust-orientation":23}],20:[function(require,module,exports){
 'use strict'
 
 var bsearch = require('binary-search-bounds')
@@ -71140,7 +71100,836 @@ function createTriangulation(numVerts, edges) {
   return new Triangulation(stars, edges)
 }
 
-},{"binary-search-bounds":16}],22:[function(require,module,exports){
+},{"binary-search-bounds":21}],21:[function(require,module,exports){
+"use strict"
+
+function compileSearch(funcName, predicate, reversed, extraArgs, earlyOut) {
+  var code = [
+    "function ", funcName, "(a,l,h,", extraArgs.join(","),  "){",
+    earlyOut ? "" : "var i=", (reversed ? "l-1" : "h+1"),
+    ";while(l<=h){var m=(l+h)>>>1,x=a[m]"]
+  if(earlyOut) {
+    if(predicate.indexOf("c") < 0) {
+      code.push(";if(x===y){return m}else if(x<=y){")
+    } else {
+      code.push(";var p=c(x,y);if(p===0){return m}else if(p<=0){")
+    }
+  } else {
+    code.push(";if(", predicate, "){i=m;")
+  }
+  if(reversed) {
+    code.push("l=m+1}else{h=m-1}")
+  } else {
+    code.push("h=m-1}else{l=m+1}")
+  }
+  code.push("}")
+  if(earlyOut) {
+    code.push("return -1};")
+  } else {
+    code.push("return i};")
+  }
+  return code.join("")
+}
+
+function compileBoundsSearch(predicate, reversed, suffix, earlyOut) {
+  var result = new Function([
+  compileSearch("A", "x" + predicate + "y", reversed, ["y"], earlyOut),
+  compileSearch("P", "c(x,y)" + predicate + "0", reversed, ["y", "c"], earlyOut),
+"function dispatchBsearch", suffix, "(a,y,c,l,h){\
+if(typeof(c)==='function'){\
+return P(a,(l===void 0)?0:l|0,(h===void 0)?a.length-1:h|0,y,c)\
+}else{\
+return A(a,(c===void 0)?0:c|0,(l===void 0)?a.length-1:l|0,y)\
+}}\
+return dispatchBsearch", suffix].join(""))
+  return result()
+}
+
+module.exports = {
+  ge: compileBoundsSearch(">=", false,  "GE"),
+  gt: compileBoundsSearch(">",  false,  "GT"),
+  lt: compileBoundsSearch("<",  true,   "LT"),
+  le: compileBoundsSearch("<=", true,   "LE"),
+  eq: compileBoundsSearch("-",  true,   "EQ", true)
+}
+
+},{}],22:[function(require,module,exports){
+"use strict"
+
+var twoProduct = require("two-product")
+var robustSum = require("robust-sum")
+var robustDiff = require("robust-subtract")
+var robustScale = require("robust-scale")
+
+var NUM_EXPAND = 6
+
+function cofactor(m, c) {
+  var result = new Array(m.length-1)
+  for(var i=1; i<m.length; ++i) {
+    var r = result[i-1] = new Array(m.length-1)
+    for(var j=0,k=0; j<m.length; ++j) {
+      if(j === c) {
+        continue
+      }
+      r[k++] = m[i][j]
+    }
+  }
+  return result
+}
+
+function matrix(n) {
+  var result = new Array(n)
+  for(var i=0; i<n; ++i) {
+    result[i] = new Array(n)
+    for(var j=0; j<n; ++j) {
+      result[i][j] = ["m", j, "[", (n-i-2), "]"].join("")
+    }
+  }
+  return result
+}
+
+function generateSum(expr) {
+  if(expr.length === 1) {
+    return expr[0]
+  } else if(expr.length === 2) {
+    return ["sum(", expr[0], ",", expr[1], ")"].join("")
+  } else {
+    var m = expr.length>>1
+    return ["sum(", generateSum(expr.slice(0, m)), ",", generateSum(expr.slice(m)), ")"].join("")
+  }
+}
+
+function makeProduct(a, b) {
+  if(a.charAt(0) === "m") {
+    if(b.charAt(0) === "w") {
+      var toks = a.split("[")
+      return ["w", b.substr(1), "m", toks[0].substr(1)].join("")
+    } else {
+      return ["prod(", a, ",", b, ")"].join("")
+    }
+  } else {
+    return makeProduct(b, a)
+  }
+}
+
+function sign(s) {
+  if(s & 1 !== 0) {
+    return "-"
+  }
+  return ""
+}
+
+function determinant(m) {
+  if(m.length === 2) {
+    return [["diff(", makeProduct(m[0][0], m[1][1]), ",", makeProduct(m[1][0], m[0][1]), ")"].join("")]
+  } else {
+    var expr = []
+    for(var i=0; i<m.length; ++i) {
+      expr.push(["scale(", generateSum(determinant(cofactor(m, i))), ",", sign(i), m[0][i], ")"].join(""))
+    }
+    return expr
+  }
+}
+
+function makeSquare(d, n) {
+  var terms = []
+  for(var i=0; i<n-2; ++i) {
+    terms.push(["prod(m", d, "[", i, "],m", d, "[", i, "])"].join(""))
+  }
+  return generateSum(terms)
+}
+
+function orientation(n) {
+  var pos = []
+  var neg = []
+  var m = matrix(n)
+  for(var i=0; i<n; ++i) {
+    m[0][i] = "1"
+    m[n-1][i] = "w"+i
+  } 
+  for(var i=0; i<n; ++i) {
+    if((i&1)===0) {
+      pos.push.apply(pos,determinant(cofactor(m, i)))
+    } else {
+      neg.push.apply(neg,determinant(cofactor(m, i)))
+    }
+  }
+  var posExpr = generateSum(pos)
+  var negExpr = generateSum(neg)
+  var funcName = "exactInSphere" + n
+  var funcArgs = []
+  for(var i=0; i<n; ++i) {
+    funcArgs.push("m" + i)
+  }
+  var code = ["function ", funcName, "(", funcArgs.join(), "){"]
+  for(var i=0; i<n; ++i) {
+    code.push("var w",i,"=",makeSquare(i,n),";")
+    for(var j=0; j<n; ++j) {
+      if(j !== i) {
+        code.push("var w",i,"m",j,"=scale(w",i,",m",j,"[0]);")
+      }
+    }
+  }
+  code.push("var p=", posExpr, ",n=", negExpr, ",d=diff(p,n);return d[d.length-1];}return ", funcName)
+  var proc = new Function("sum", "diff", "prod", "scale", code.join(""))
+  return proc(robustSum, robustDiff, twoProduct, robustScale)
+}
+
+function inSphere0() { return 0 }
+function inSphere1() { return 0 }
+function inSphere2() { return 0 }
+
+var CACHED = [
+  inSphere0,
+  inSphere1,
+  inSphere2
+]
+
+function slowInSphere(args) {
+  var proc = CACHED[args.length]
+  if(!proc) {
+    proc = CACHED[args.length] = orientation(args.length)
+  }
+  return proc.apply(undefined, args)
+}
+
+function generateInSphereTest() {
+  while(CACHED.length <= NUM_EXPAND) {
+    CACHED.push(orientation(CACHED.length))
+  }
+  var args = []
+  var procArgs = ["slow"]
+  for(var i=0; i<=NUM_EXPAND; ++i) {
+    args.push("a" + i)
+    procArgs.push("o" + i)
+  }
+  var code = [
+    "function testInSphere(", args.join(), "){switch(arguments.length){case 0:case 1:return 0;"
+  ]
+  for(var i=2; i<=NUM_EXPAND; ++i) {
+    code.push("case ", i, ":return o", i, "(", args.slice(0, i).join(), ");")
+  }
+  code.push("}var s=new Array(arguments.length);for(var i=0;i<arguments.length;++i){s[i]=arguments[i]};return slow(s);}return testInSphere")
+  procArgs.push(code.join(""))
+
+  var proc = Function.apply(undefined, procArgs)
+
+  module.exports = proc.apply(undefined, [slowInSphere].concat(CACHED))
+  for(var i=0; i<=NUM_EXPAND; ++i) {
+    module.exports[i] = CACHED[i]
+  }
+}
+
+generateInSphereTest()
+},{"robust-scale":24,"robust-subtract":25,"robust-sum":26,"two-product":27}],23:[function(require,module,exports){
+"use strict"
+
+var twoProduct = require("two-product")
+var robustSum = require("robust-sum")
+var robustScale = require("robust-scale")
+var robustSubtract = require("robust-subtract")
+
+var NUM_EXPAND = 5
+
+var EPSILON     = 1.1102230246251565e-16
+var ERRBOUND3   = (3.0 + 16.0 * EPSILON) * EPSILON
+var ERRBOUND4   = (7.0 + 56.0 * EPSILON) * EPSILON
+
+function cofactor(m, c) {
+  var result = new Array(m.length-1)
+  for(var i=1; i<m.length; ++i) {
+    var r = result[i-1] = new Array(m.length-1)
+    for(var j=0,k=0; j<m.length; ++j) {
+      if(j === c) {
+        continue
+      }
+      r[k++] = m[i][j]
+    }
+  }
+  return result
+}
+
+function matrix(n) {
+  var result = new Array(n)
+  for(var i=0; i<n; ++i) {
+    result[i] = new Array(n)
+    for(var j=0; j<n; ++j) {
+      result[i][j] = ["m", j, "[", (n-i-1), "]"].join("")
+    }
+  }
+  return result
+}
+
+function sign(n) {
+  if(n & 1) {
+    return "-"
+  }
+  return ""
+}
+
+function generateSum(expr) {
+  if(expr.length === 1) {
+    return expr[0]
+  } else if(expr.length === 2) {
+    return ["sum(", expr[0], ",", expr[1], ")"].join("")
+  } else {
+    var m = expr.length>>1
+    return ["sum(", generateSum(expr.slice(0, m)), ",", generateSum(expr.slice(m)), ")"].join("")
+  }
+}
+
+function determinant(m) {
+  if(m.length === 2) {
+    return [["sum(prod(", m[0][0], ",", m[1][1], "),prod(-", m[0][1], ",", m[1][0], "))"].join("")]
+  } else {
+    var expr = []
+    for(var i=0; i<m.length; ++i) {
+      expr.push(["scale(", generateSum(determinant(cofactor(m, i))), ",", sign(i), m[0][i], ")"].join(""))
+    }
+    return expr
+  }
+}
+
+function orientation(n) {
+  var pos = []
+  var neg = []
+  var m = matrix(n)
+  var args = []
+  for(var i=0; i<n; ++i) {
+    if((i&1)===0) {
+      pos.push.apply(pos, determinant(cofactor(m, i)))
+    } else {
+      neg.push.apply(neg, determinant(cofactor(m, i)))
+    }
+    args.push("m" + i)
+  }
+  var posExpr = generateSum(pos)
+  var negExpr = generateSum(neg)
+  var funcName = "orientation" + n + "Exact"
+  var code = ["function ", funcName, "(", args.join(), "){var p=", posExpr, ",n=", negExpr, ",d=sub(p,n);\
+return d[d.length-1];};return ", funcName].join("")
+  var proc = new Function("sum", "prod", "scale", "sub", code)
+  return proc(robustSum, twoProduct, robustScale, robustSubtract)
+}
+
+var orientation3Exact = orientation(3)
+var orientation4Exact = orientation(4)
+
+var CACHED = [
+  function orientation0() { return 0 },
+  function orientation1() { return 0 },
+  function orientation2(a, b) { 
+    return b[0] - a[0]
+  },
+  function orientation3(a, b, c) {
+    var l = (a[1] - c[1]) * (b[0] - c[0])
+    var r = (a[0] - c[0]) * (b[1] - c[1])
+    var det = l - r
+    var s
+    if(l > 0) {
+      if(r <= 0) {
+        return det
+      } else {
+        s = l + r
+      }
+    } else if(l < 0) {
+      if(r >= 0) {
+        return det
+      } else {
+        s = -(l + r)
+      }
+    } else {
+      return det
+    }
+    var tol = ERRBOUND3 * s
+    if(det >= tol || det <= -tol) {
+      return det
+    }
+    return orientation3Exact(a, b, c)
+  },
+  function orientation4(a,b,c,d) {
+    var adx = a[0] - d[0]
+    var bdx = b[0] - d[0]
+    var cdx = c[0] - d[0]
+    var ady = a[1] - d[1]
+    var bdy = b[1] - d[1]
+    var cdy = c[1] - d[1]
+    var adz = a[2] - d[2]
+    var bdz = b[2] - d[2]
+    var cdz = c[2] - d[2]
+    var bdxcdy = bdx * cdy
+    var cdxbdy = cdx * bdy
+    var cdxady = cdx * ady
+    var adxcdy = adx * cdy
+    var adxbdy = adx * bdy
+    var bdxady = bdx * ady
+    var det = adz * (bdxcdy - cdxbdy) 
+            + bdz * (cdxady - adxcdy)
+            + cdz * (adxbdy - bdxady)
+    var permanent = (Math.abs(bdxcdy) + Math.abs(cdxbdy)) * Math.abs(adz)
+                  + (Math.abs(cdxady) + Math.abs(adxcdy)) * Math.abs(bdz)
+                  + (Math.abs(adxbdy) + Math.abs(bdxady)) * Math.abs(cdz)
+    var tol = ERRBOUND4 * permanent
+    if ((det > tol) || (-det > tol)) {
+      return det
+    }
+    return orientation4Exact(a,b,c,d)
+  }
+]
+
+function slowOrient(args) {
+  var proc = CACHED[args.length]
+  if(!proc) {
+    proc = CACHED[args.length] = orientation(args.length)
+  }
+  return proc.apply(undefined, args)
+}
+
+function generateOrientationProc() {
+  while(CACHED.length <= NUM_EXPAND) {
+    CACHED.push(orientation(CACHED.length))
+  }
+  var args = []
+  var procArgs = ["slow"]
+  for(var i=0; i<=NUM_EXPAND; ++i) {
+    args.push("a" + i)
+    procArgs.push("o" + i)
+  }
+  var code = [
+    "function getOrientation(", args.join(), "){switch(arguments.length){case 0:case 1:return 0;"
+  ]
+  for(var i=2; i<=NUM_EXPAND; ++i) {
+    code.push("case ", i, ":return o", i, "(", args.slice(0, i).join(), ");")
+  }
+  code.push("}var s=new Array(arguments.length);for(var i=0;i<arguments.length;++i){s[i]=arguments[i]};return slow(s);}return getOrientation")
+  procArgs.push(code.join(""))
+
+  var proc = Function.apply(undefined, procArgs)
+  module.exports = proc.apply(undefined, [slowOrient].concat(CACHED))
+  for(var i=0; i<=NUM_EXPAND; ++i) {
+    module.exports[i] = CACHED[i]
+  }
+}
+
+generateOrientationProc()
+},{"robust-scale":24,"robust-subtract":25,"robust-sum":26,"two-product":27}],24:[function(require,module,exports){
+"use strict"
+
+var twoProduct = require("two-product")
+var twoSum = require("two-sum")
+
+module.exports = scaleLinearExpansion
+
+function scaleLinearExpansion(e, scale) {
+  var n = e.length
+  if(n === 1) {
+    var ts = twoProduct(e[0], scale)
+    if(ts[0]) {
+      return ts
+    }
+    return [ ts[1] ]
+  }
+  var g = new Array(2 * n)
+  var q = [0.1, 0.1]
+  var t = [0.1, 0.1]
+  var count = 0
+  twoProduct(e[0], scale, q)
+  if(q[0]) {
+    g[count++] = q[0]
+  }
+  for(var i=1; i<n; ++i) {
+    twoProduct(e[i], scale, t)
+    var pq = q[1]
+    twoSum(pq, t[0], q)
+    if(q[0]) {
+      g[count++] = q[0]
+    }
+    var a = t[1]
+    var b = q[1]
+    var x = a + b
+    var bv = x - a
+    var y = b - bv
+    q[1] = x
+    if(y) {
+      g[count++] = y
+    }
+  }
+  if(q[1]) {
+    g[count++] = q[1]
+  }
+  if(count === 0) {
+    g[count++] = 0.0
+  }
+  g.length = count
+  return g
+}
+},{"two-product":27,"two-sum":28}],25:[function(require,module,exports){
+"use strict"
+
+module.exports = robustSubtract
+
+//Easy case: Add two scalars
+function scalarScalar(a, b) {
+  var x = a + b
+  var bv = x - a
+  var av = x - bv
+  var br = b - bv
+  var ar = a - av
+  var y = ar + br
+  if(y) {
+    return [y, x]
+  }
+  return [x]
+}
+
+function robustSubtract(e, f) {
+  var ne = e.length|0
+  var nf = f.length|0
+  if(ne === 1 && nf === 1) {
+    return scalarScalar(e[0], -f[0])
+  }
+  var n = ne + nf
+  var g = new Array(n)
+  var count = 0
+  var eptr = 0
+  var fptr = 0
+  var abs = Math.abs
+  var ei = e[eptr]
+  var ea = abs(ei)
+  var fi = -f[fptr]
+  var fa = abs(fi)
+  var a, b
+  if(ea < fa) {
+    b = ei
+    eptr += 1
+    if(eptr < ne) {
+      ei = e[eptr]
+      ea = abs(ei)
+    }
+  } else {
+    b = fi
+    fptr += 1
+    if(fptr < nf) {
+      fi = -f[fptr]
+      fa = abs(fi)
+    }
+  }
+  if((eptr < ne && ea < fa) || (fptr >= nf)) {
+    a = ei
+    eptr += 1
+    if(eptr < ne) {
+      ei = e[eptr]
+      ea = abs(ei)
+    }
+  } else {
+    a = fi
+    fptr += 1
+    if(fptr < nf) {
+      fi = -f[fptr]
+      fa = abs(fi)
+    }
+  }
+  var x = a + b
+  var bv = x - a
+  var y = b - bv
+  var q0 = y
+  var q1 = x
+  var _x, _bv, _av, _br, _ar
+  while(eptr < ne && fptr < nf) {
+    if(ea < fa) {
+      a = ei
+      eptr += 1
+      if(eptr < ne) {
+        ei = e[eptr]
+        ea = abs(ei)
+      }
+    } else {
+      a = fi
+      fptr += 1
+      if(fptr < nf) {
+        fi = -f[fptr]
+        fa = abs(fi)
+      }
+    }
+    b = q0
+    x = a + b
+    bv = x - a
+    y = b - bv
+    if(y) {
+      g[count++] = y
+    }
+    _x = q1 + x
+    _bv = _x - q1
+    _av = _x - _bv
+    _br = x - _bv
+    _ar = q1 - _av
+    q0 = _ar + _br
+    q1 = _x
+  }
+  while(eptr < ne) {
+    a = ei
+    b = q0
+    x = a + b
+    bv = x - a
+    y = b - bv
+    if(y) {
+      g[count++] = y
+    }
+    _x = q1 + x
+    _bv = _x - q1
+    _av = _x - _bv
+    _br = x - _bv
+    _ar = q1 - _av
+    q0 = _ar + _br
+    q1 = _x
+    eptr += 1
+    if(eptr < ne) {
+      ei = e[eptr]
+    }
+  }
+  while(fptr < nf) {
+    a = fi
+    b = q0
+    x = a + b
+    bv = x - a
+    y = b - bv
+    if(y) {
+      g[count++] = y
+    } 
+    _x = q1 + x
+    _bv = _x - q1
+    _av = _x - _bv
+    _br = x - _bv
+    _ar = q1 - _av
+    q0 = _ar + _br
+    q1 = _x
+    fptr += 1
+    if(fptr < nf) {
+      fi = -f[fptr]
+    }
+  }
+  if(q0) {
+    g[count++] = q0
+  }
+  if(q1) {
+    g[count++] = q1
+  }
+  if(!count) {
+    g[count++] = 0.0  
+  }
+  g.length = count
+  return g
+}
+},{}],26:[function(require,module,exports){
+"use strict"
+
+module.exports = linearExpansionSum
+
+//Easy case: Add two scalars
+function scalarScalar(a, b) {
+  var x = a + b
+  var bv = x - a
+  var av = x - bv
+  var br = b - bv
+  var ar = a - av
+  var y = ar + br
+  if(y) {
+    return [y, x]
+  }
+  return [x]
+}
+
+function linearExpansionSum(e, f) {
+  var ne = e.length|0
+  var nf = f.length|0
+  if(ne === 1 && nf === 1) {
+    return scalarScalar(e[0], f[0])
+  }
+  var n = ne + nf
+  var g = new Array(n)
+  var count = 0
+  var eptr = 0
+  var fptr = 0
+  var abs = Math.abs
+  var ei = e[eptr]
+  var ea = abs(ei)
+  var fi = f[fptr]
+  var fa = abs(fi)
+  var a, b
+  if(ea < fa) {
+    b = ei
+    eptr += 1
+    if(eptr < ne) {
+      ei = e[eptr]
+      ea = abs(ei)
+    }
+  } else {
+    b = fi
+    fptr += 1
+    if(fptr < nf) {
+      fi = f[fptr]
+      fa = abs(fi)
+    }
+  }
+  if((eptr < ne && ea < fa) || (fptr >= nf)) {
+    a = ei
+    eptr += 1
+    if(eptr < ne) {
+      ei = e[eptr]
+      ea = abs(ei)
+    }
+  } else {
+    a = fi
+    fptr += 1
+    if(fptr < nf) {
+      fi = f[fptr]
+      fa = abs(fi)
+    }
+  }
+  var x = a + b
+  var bv = x - a
+  var y = b - bv
+  var q0 = y
+  var q1 = x
+  var _x, _bv, _av, _br, _ar
+  while(eptr < ne && fptr < nf) {
+    if(ea < fa) {
+      a = ei
+      eptr += 1
+      if(eptr < ne) {
+        ei = e[eptr]
+        ea = abs(ei)
+      }
+    } else {
+      a = fi
+      fptr += 1
+      if(fptr < nf) {
+        fi = f[fptr]
+        fa = abs(fi)
+      }
+    }
+    b = q0
+    x = a + b
+    bv = x - a
+    y = b - bv
+    if(y) {
+      g[count++] = y
+    }
+    _x = q1 + x
+    _bv = _x - q1
+    _av = _x - _bv
+    _br = x - _bv
+    _ar = q1 - _av
+    q0 = _ar + _br
+    q1 = _x
+  }
+  while(eptr < ne) {
+    a = ei
+    b = q0
+    x = a + b
+    bv = x - a
+    y = b - bv
+    if(y) {
+      g[count++] = y
+    }
+    _x = q1 + x
+    _bv = _x - q1
+    _av = _x - _bv
+    _br = x - _bv
+    _ar = q1 - _av
+    q0 = _ar + _br
+    q1 = _x
+    eptr += 1
+    if(eptr < ne) {
+      ei = e[eptr]
+    }
+  }
+  while(fptr < nf) {
+    a = fi
+    b = q0
+    x = a + b
+    bv = x - a
+    y = b - bv
+    if(y) {
+      g[count++] = y
+    } 
+    _x = q1 + x
+    _bv = _x - q1
+    _av = _x - _bv
+    _br = x - _bv
+    _ar = q1 - _av
+    q0 = _ar + _br
+    q1 = _x
+    fptr += 1
+    if(fptr < nf) {
+      fi = f[fptr]
+    }
+  }
+  if(q0) {
+    g[count++] = q0
+  }
+  if(q1) {
+    g[count++] = q1
+  }
+  if(!count) {
+    g[count++] = 0.0  
+  }
+  g.length = count
+  return g
+}
+},{}],27:[function(require,module,exports){
+"use strict"
+
+module.exports = twoProduct
+
+var SPLITTER = +(Math.pow(2, 27) + 1.0)
+
+function twoProduct(a, b, result) {
+  var x = a * b
+
+  var c = SPLITTER * a
+  var abig = c - a
+  var ahi = c - abig
+  var alo = a - ahi
+
+  var d = SPLITTER * b
+  var bbig = d - b
+  var bhi = d - bbig
+  var blo = b - bhi
+
+  var err1 = x - (ahi * bhi)
+  var err2 = err1 - (alo * bhi)
+  var err3 = err2 - (ahi * blo)
+
+  var y = alo * blo - err3
+
+  if(result) {
+    result[0] = y
+    result[1] = x
+    return result
+  }
+
+  return [ y, x ]
+}
+},{}],28:[function(require,module,exports){
+"use strict"
+
+module.exports = fastTwoSum
+
+function fastTwoSum(a, b, result) {
+	var x = a + b
+	var bv = x - a
+	var av = x - bv
+	var br = b - bv
+	var ar = a - av
+	if(result) {
+		result[0] = ar + br
+		result[1] = x
+		return result
+	}
+	return [ar+br, x]
+}
+},{}],29:[function(require,module,exports){
 // rev 482
 /********************************************************************************
  *                                                                              *
@@ -78177,7 +78966,7 @@ function createTriangulation(numVerts, edges) {
   };
 })();
 
-},{}],23:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 // Copyright 2014, 2016 Simon Lydell
 // X11 (“MIT”) Licensed. (See LICENSE.)
 
@@ -78264,7 +79053,7 @@ function get (options, name, defaultValue) {
 
 module.exports = stringify
 
-},{}],24:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 // Top level file is just a mixin of submodules & constants
 'use strict';
 
@@ -78280,7 +79069,7 @@ assign(pako, deflate, inflate, constants);
 
 module.exports = pako;
 
-},{"./lib/deflate":25,"./lib/inflate":26,"./lib/utils/common":27,"./lib/zlib/constants":30}],25:[function(require,module,exports){
+},{"./lib/deflate":32,"./lib/inflate":33,"./lib/utils/common":34,"./lib/zlib/constants":37}],32:[function(require,module,exports){
 'use strict';
 
 
@@ -78682,7 +79471,7 @@ exports.deflate = deflate;
 exports.deflateRaw = deflateRaw;
 exports.gzip = gzip;
 
-},{"./utils/common":27,"./utils/strings":28,"./zlib/deflate":32,"./zlib/messages":37,"./zlib/zstream":39}],26:[function(require,module,exports){
+},{"./utils/common":34,"./utils/strings":35,"./zlib/deflate":39,"./zlib/messages":44,"./zlib/zstream":46}],33:[function(require,module,exports){
 'use strict';
 
 
@@ -79102,7 +79891,7 @@ exports.inflate = inflate;
 exports.inflateRaw = inflateRaw;
 exports.ungzip  = inflate;
 
-},{"./utils/common":27,"./utils/strings":28,"./zlib/constants":30,"./zlib/gzheader":33,"./zlib/inflate":35,"./zlib/messages":37,"./zlib/zstream":39}],27:[function(require,module,exports){
+},{"./utils/common":34,"./utils/strings":35,"./zlib/constants":37,"./zlib/gzheader":40,"./zlib/inflate":42,"./zlib/messages":44,"./zlib/zstream":46}],34:[function(require,module,exports){
 'use strict';
 
 
@@ -79209,7 +79998,7 @@ exports.setTyped = function (on) {
 
 exports.setTyped(TYPED_OK);
 
-},{}],28:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 // String encode/decode helpers
 'use strict';
 
@@ -79396,7 +80185,7 @@ exports.utf8border = function (buf, max) {
   return (pos + _utf8len[buf[pos]] > max) ? pos : max;
 };
 
-},{"./common":27}],29:[function(require,module,exports){
+},{"./common":34}],36:[function(require,module,exports){
 'use strict';
 
 // Note: adler32 takes 12% for level 0 and 2% for level 6.
@@ -79449,7 +80238,7 @@ function adler32(adler, buf, len, pos) {
 
 module.exports = adler32;
 
-},{}],30:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -79519,7 +80308,7 @@ module.exports = {
   //Z_NULL:                 null // Use -1 or null inline, depending on var type
 };
 
-},{}],31:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 'use strict';
 
 // Note: we can't get significant speed boost here.
@@ -79580,7 +80369,7 @@ function crc32(crc, buf, len, pos) {
 
 module.exports = crc32;
 
-},{}],32:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -81456,7 +82245,7 @@ exports.deflatePrime = deflatePrime;
 exports.deflateTune = deflateTune;
 */
 
-},{"../utils/common":27,"./adler32":29,"./crc32":31,"./messages":37,"./trees":38}],33:[function(require,module,exports){
+},{"../utils/common":34,"./adler32":36,"./crc32":38,"./messages":44,"./trees":45}],40:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -81516,7 +82305,7 @@ function GZheader() {
 
 module.exports = GZheader;
 
-},{}],34:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -81863,7 +82652,7 @@ module.exports = function inflate_fast(strm, start) {
   return;
 };
 
-},{}],35:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -83421,7 +84210,7 @@ exports.inflateSyncPoint = inflateSyncPoint;
 exports.inflateUndermine = inflateUndermine;
 */
 
-},{"../utils/common":27,"./adler32":29,"./crc32":31,"./inffast":34,"./inftrees":36}],36:[function(require,module,exports){
+},{"../utils/common":34,"./adler32":36,"./crc32":38,"./inffast":41,"./inftrees":43}],43:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -83766,7 +84555,7 @@ module.exports = function inflate_table(type, lens, lens_index, codes, table, ta
   return 0;
 };
 
-},{"../utils/common":27}],37:[function(require,module,exports){
+},{"../utils/common":34}],44:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -83800,7 +84589,7 @@ module.exports = {
   '-6':   'incompatible version' /* Z_VERSION_ERROR (-6) */
 };
 
-},{}],38:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -85022,7 +85811,7 @@ exports._tr_flush_block  = _tr_flush_block;
 exports._tr_tally = _tr_tally;
 exports._tr_align = _tr_align;
 
-},{"../utils/common":27}],39:[function(require,module,exports){
+},{"../utils/common":34}],46:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -85071,731 +85860,7 @@ function ZStream() {
 
 module.exports = ZStream;
 
-},{}],40:[function(require,module,exports){
-"use strict"
-
-var twoProduct = require("two-product")
-var robustSum = require("robust-sum")
-var robustDiff = require("robust-subtract")
-var robustScale = require("robust-scale")
-
-var NUM_EXPAND = 6
-
-function cofactor(m, c) {
-  var result = new Array(m.length-1)
-  for(var i=1; i<m.length; ++i) {
-    var r = result[i-1] = new Array(m.length-1)
-    for(var j=0,k=0; j<m.length; ++j) {
-      if(j === c) {
-        continue
-      }
-      r[k++] = m[i][j]
-    }
-  }
-  return result
-}
-
-function matrix(n) {
-  var result = new Array(n)
-  for(var i=0; i<n; ++i) {
-    result[i] = new Array(n)
-    for(var j=0; j<n; ++j) {
-      result[i][j] = ["m", j, "[", (n-i-2), "]"].join("")
-    }
-  }
-  return result
-}
-
-function generateSum(expr) {
-  if(expr.length === 1) {
-    return expr[0]
-  } else if(expr.length === 2) {
-    return ["sum(", expr[0], ",", expr[1], ")"].join("")
-  } else {
-    var m = expr.length>>1
-    return ["sum(", generateSum(expr.slice(0, m)), ",", generateSum(expr.slice(m)), ")"].join("")
-  }
-}
-
-function makeProduct(a, b) {
-  if(a.charAt(0) === "m") {
-    if(b.charAt(0) === "w") {
-      var toks = a.split("[")
-      return ["w", b.substr(1), "m", toks[0].substr(1)].join("")
-    } else {
-      return ["prod(", a, ",", b, ")"].join("")
-    }
-  } else {
-    return makeProduct(b, a)
-  }
-}
-
-function sign(s) {
-  if(s & 1 !== 0) {
-    return "-"
-  }
-  return ""
-}
-
-function determinant(m) {
-  if(m.length === 2) {
-    return [["diff(", makeProduct(m[0][0], m[1][1]), ",", makeProduct(m[1][0], m[0][1]), ")"].join("")]
-  } else {
-    var expr = []
-    for(var i=0; i<m.length; ++i) {
-      expr.push(["scale(", generateSum(determinant(cofactor(m, i))), ",", sign(i), m[0][i], ")"].join(""))
-    }
-    return expr
-  }
-}
-
-function makeSquare(d, n) {
-  var terms = []
-  for(var i=0; i<n-2; ++i) {
-    terms.push(["prod(m", d, "[", i, "],m", d, "[", i, "])"].join(""))
-  }
-  return generateSum(terms)
-}
-
-function orientation(n) {
-  var pos = []
-  var neg = []
-  var m = matrix(n)
-  for(var i=0; i<n; ++i) {
-    m[0][i] = "1"
-    m[n-1][i] = "w"+i
-  } 
-  for(var i=0; i<n; ++i) {
-    if((i&1)===0) {
-      pos.push.apply(pos,determinant(cofactor(m, i)))
-    } else {
-      neg.push.apply(neg,determinant(cofactor(m, i)))
-    }
-  }
-  var posExpr = generateSum(pos)
-  var negExpr = generateSum(neg)
-  var funcName = "exactInSphere" + n
-  var funcArgs = []
-  for(var i=0; i<n; ++i) {
-    funcArgs.push("m" + i)
-  }
-  var code = ["function ", funcName, "(", funcArgs.join(), "){"]
-  for(var i=0; i<n; ++i) {
-    code.push("var w",i,"=",makeSquare(i,n),";")
-    for(var j=0; j<n; ++j) {
-      if(j !== i) {
-        code.push("var w",i,"m",j,"=scale(w",i,",m",j,"[0]);")
-      }
-    }
-  }
-  code.push("var p=", posExpr, ",n=", negExpr, ",d=diff(p,n);return d[d.length-1];}return ", funcName)
-  var proc = new Function("sum", "diff", "prod", "scale", code.join(""))
-  return proc(robustSum, robustDiff, twoProduct, robustScale)
-}
-
-function inSphere0() { return 0 }
-function inSphere1() { return 0 }
-function inSphere2() { return 0 }
-
-var CACHED = [
-  inSphere0,
-  inSphere1,
-  inSphere2
-]
-
-function slowInSphere(args) {
-  var proc = CACHED[args.length]
-  if(!proc) {
-    proc = CACHED[args.length] = orientation(args.length)
-  }
-  return proc.apply(undefined, args)
-}
-
-function generateInSphereTest() {
-  while(CACHED.length <= NUM_EXPAND) {
-    CACHED.push(orientation(CACHED.length))
-  }
-  var args = []
-  var procArgs = ["slow"]
-  for(var i=0; i<=NUM_EXPAND; ++i) {
-    args.push("a" + i)
-    procArgs.push("o" + i)
-  }
-  var code = [
-    "function testInSphere(", args.join(), "){switch(arguments.length){case 0:case 1:return 0;"
-  ]
-  for(var i=2; i<=NUM_EXPAND; ++i) {
-    code.push("case ", i, ":return o", i, "(", args.slice(0, i).join(), ");")
-  }
-  code.push("}var s=new Array(arguments.length);for(var i=0;i<arguments.length;++i){s[i]=arguments[i]};return slow(s);}return testInSphere")
-  procArgs.push(code.join(""))
-
-  var proc = Function.apply(undefined, procArgs)
-
-  module.exports = proc.apply(undefined, [slowInSphere].concat(CACHED))
-  for(var i=0; i<=NUM_EXPAND; ++i) {
-    module.exports[i] = CACHED[i]
-  }
-}
-
-generateInSphereTest()
-},{"robust-scale":42,"robust-subtract":43,"robust-sum":44,"two-product":57}],41:[function(require,module,exports){
-"use strict"
-
-var twoProduct = require("two-product")
-var robustSum = require("robust-sum")
-var robustScale = require("robust-scale")
-var robustSubtract = require("robust-subtract")
-
-var NUM_EXPAND = 5
-
-var EPSILON     = 1.1102230246251565e-16
-var ERRBOUND3   = (3.0 + 16.0 * EPSILON) * EPSILON
-var ERRBOUND4   = (7.0 + 56.0 * EPSILON) * EPSILON
-
-function cofactor(m, c) {
-  var result = new Array(m.length-1)
-  for(var i=1; i<m.length; ++i) {
-    var r = result[i-1] = new Array(m.length-1)
-    for(var j=0,k=0; j<m.length; ++j) {
-      if(j === c) {
-        continue
-      }
-      r[k++] = m[i][j]
-    }
-  }
-  return result
-}
-
-function matrix(n) {
-  var result = new Array(n)
-  for(var i=0; i<n; ++i) {
-    result[i] = new Array(n)
-    for(var j=0; j<n; ++j) {
-      result[i][j] = ["m", j, "[", (n-i-1), "]"].join("")
-    }
-  }
-  return result
-}
-
-function sign(n) {
-  if(n & 1) {
-    return "-"
-  }
-  return ""
-}
-
-function generateSum(expr) {
-  if(expr.length === 1) {
-    return expr[0]
-  } else if(expr.length === 2) {
-    return ["sum(", expr[0], ",", expr[1], ")"].join("")
-  } else {
-    var m = expr.length>>1
-    return ["sum(", generateSum(expr.slice(0, m)), ",", generateSum(expr.slice(m)), ")"].join("")
-  }
-}
-
-function determinant(m) {
-  if(m.length === 2) {
-    return [["sum(prod(", m[0][0], ",", m[1][1], "),prod(-", m[0][1], ",", m[1][0], "))"].join("")]
-  } else {
-    var expr = []
-    for(var i=0; i<m.length; ++i) {
-      expr.push(["scale(", generateSum(determinant(cofactor(m, i))), ",", sign(i), m[0][i], ")"].join(""))
-    }
-    return expr
-  }
-}
-
-function orientation(n) {
-  var pos = []
-  var neg = []
-  var m = matrix(n)
-  var args = []
-  for(var i=0; i<n; ++i) {
-    if((i&1)===0) {
-      pos.push.apply(pos, determinant(cofactor(m, i)))
-    } else {
-      neg.push.apply(neg, determinant(cofactor(m, i)))
-    }
-    args.push("m" + i)
-  }
-  var posExpr = generateSum(pos)
-  var negExpr = generateSum(neg)
-  var funcName = "orientation" + n + "Exact"
-  var code = ["function ", funcName, "(", args.join(), "){var p=", posExpr, ",n=", negExpr, ",d=sub(p,n);\
-return d[d.length-1];};return ", funcName].join("")
-  var proc = new Function("sum", "prod", "scale", "sub", code)
-  return proc(robustSum, twoProduct, robustScale, robustSubtract)
-}
-
-var orientation3Exact = orientation(3)
-var orientation4Exact = orientation(4)
-
-var CACHED = [
-  function orientation0() { return 0 },
-  function orientation1() { return 0 },
-  function orientation2(a, b) { 
-    return b[0] - a[0]
-  },
-  function orientation3(a, b, c) {
-    var l = (a[1] - c[1]) * (b[0] - c[0])
-    var r = (a[0] - c[0]) * (b[1] - c[1])
-    var det = l - r
-    var s
-    if(l > 0) {
-      if(r <= 0) {
-        return det
-      } else {
-        s = l + r
-      }
-    } else if(l < 0) {
-      if(r >= 0) {
-        return det
-      } else {
-        s = -(l + r)
-      }
-    } else {
-      return det
-    }
-    var tol = ERRBOUND3 * s
-    if(det >= tol || det <= -tol) {
-      return det
-    }
-    return orientation3Exact(a, b, c)
-  },
-  function orientation4(a,b,c,d) {
-    var adx = a[0] - d[0]
-    var bdx = b[0] - d[0]
-    var cdx = c[0] - d[0]
-    var ady = a[1] - d[1]
-    var bdy = b[1] - d[1]
-    var cdy = c[1] - d[1]
-    var adz = a[2] - d[2]
-    var bdz = b[2] - d[2]
-    var cdz = c[2] - d[2]
-    var bdxcdy = bdx * cdy
-    var cdxbdy = cdx * bdy
-    var cdxady = cdx * ady
-    var adxcdy = adx * cdy
-    var adxbdy = adx * bdy
-    var bdxady = bdx * ady
-    var det = adz * (bdxcdy - cdxbdy) 
-            + bdz * (cdxady - adxcdy)
-            + cdz * (adxbdy - bdxady)
-    var permanent = (Math.abs(bdxcdy) + Math.abs(cdxbdy)) * Math.abs(adz)
-                  + (Math.abs(cdxady) + Math.abs(adxcdy)) * Math.abs(bdz)
-                  + (Math.abs(adxbdy) + Math.abs(bdxady)) * Math.abs(cdz)
-    var tol = ERRBOUND4 * permanent
-    if ((det > tol) || (-det > tol)) {
-      return det
-    }
-    return orientation4Exact(a,b,c,d)
-  }
-]
-
-function slowOrient(args) {
-  var proc = CACHED[args.length]
-  if(!proc) {
-    proc = CACHED[args.length] = orientation(args.length)
-  }
-  return proc.apply(undefined, args)
-}
-
-function generateOrientationProc() {
-  while(CACHED.length <= NUM_EXPAND) {
-    CACHED.push(orientation(CACHED.length))
-  }
-  var args = []
-  var procArgs = ["slow"]
-  for(var i=0; i<=NUM_EXPAND; ++i) {
-    args.push("a" + i)
-    procArgs.push("o" + i)
-  }
-  var code = [
-    "function getOrientation(", args.join(), "){switch(arguments.length){case 0:case 1:return 0;"
-  ]
-  for(var i=2; i<=NUM_EXPAND; ++i) {
-    code.push("case ", i, ":return o", i, "(", args.slice(0, i).join(), ");")
-  }
-  code.push("}var s=new Array(arguments.length);for(var i=0;i<arguments.length;++i){s[i]=arguments[i]};return slow(s);}return getOrientation")
-  procArgs.push(code.join(""))
-
-  var proc = Function.apply(undefined, procArgs)
-  module.exports = proc.apply(undefined, [slowOrient].concat(CACHED))
-  for(var i=0; i<=NUM_EXPAND; ++i) {
-    module.exports[i] = CACHED[i]
-  }
-}
-
-generateOrientationProc()
-},{"robust-scale":42,"robust-subtract":43,"robust-sum":44,"two-product":57}],42:[function(require,module,exports){
-"use strict"
-
-var twoProduct = require("two-product")
-var twoSum = require("two-sum")
-
-module.exports = scaleLinearExpansion
-
-function scaleLinearExpansion(e, scale) {
-  var n = e.length
-  if(n === 1) {
-    var ts = twoProduct(e[0], scale)
-    if(ts[0]) {
-      return ts
-    }
-    return [ ts[1] ]
-  }
-  var g = new Array(2 * n)
-  var q = [0.1, 0.1]
-  var t = [0.1, 0.1]
-  var count = 0
-  twoProduct(e[0], scale, q)
-  if(q[0]) {
-    g[count++] = q[0]
-  }
-  for(var i=1; i<n; ++i) {
-    twoProduct(e[i], scale, t)
-    var pq = q[1]
-    twoSum(pq, t[0], q)
-    if(q[0]) {
-      g[count++] = q[0]
-    }
-    var a = t[1]
-    var b = q[1]
-    var x = a + b
-    var bv = x - a
-    var y = b - bv
-    q[1] = x
-    if(y) {
-      g[count++] = y
-    }
-  }
-  if(q[1]) {
-    g[count++] = q[1]
-  }
-  if(count === 0) {
-    g[count++] = 0.0
-  }
-  g.length = count
-  return g
-}
-},{"two-product":57,"two-sum":58}],43:[function(require,module,exports){
-"use strict"
-
-module.exports = robustSubtract
-
-//Easy case: Add two scalars
-function scalarScalar(a, b) {
-  var x = a + b
-  var bv = x - a
-  var av = x - bv
-  var br = b - bv
-  var ar = a - av
-  var y = ar + br
-  if(y) {
-    return [y, x]
-  }
-  return [x]
-}
-
-function robustSubtract(e, f) {
-  var ne = e.length|0
-  var nf = f.length|0
-  if(ne === 1 && nf === 1) {
-    return scalarScalar(e[0], -f[0])
-  }
-  var n = ne + nf
-  var g = new Array(n)
-  var count = 0
-  var eptr = 0
-  var fptr = 0
-  var abs = Math.abs
-  var ei = e[eptr]
-  var ea = abs(ei)
-  var fi = -f[fptr]
-  var fa = abs(fi)
-  var a, b
-  if(ea < fa) {
-    b = ei
-    eptr += 1
-    if(eptr < ne) {
-      ei = e[eptr]
-      ea = abs(ei)
-    }
-  } else {
-    b = fi
-    fptr += 1
-    if(fptr < nf) {
-      fi = -f[fptr]
-      fa = abs(fi)
-    }
-  }
-  if((eptr < ne && ea < fa) || (fptr >= nf)) {
-    a = ei
-    eptr += 1
-    if(eptr < ne) {
-      ei = e[eptr]
-      ea = abs(ei)
-    }
-  } else {
-    a = fi
-    fptr += 1
-    if(fptr < nf) {
-      fi = -f[fptr]
-      fa = abs(fi)
-    }
-  }
-  var x = a + b
-  var bv = x - a
-  var y = b - bv
-  var q0 = y
-  var q1 = x
-  var _x, _bv, _av, _br, _ar
-  while(eptr < ne && fptr < nf) {
-    if(ea < fa) {
-      a = ei
-      eptr += 1
-      if(eptr < ne) {
-        ei = e[eptr]
-        ea = abs(ei)
-      }
-    } else {
-      a = fi
-      fptr += 1
-      if(fptr < nf) {
-        fi = -f[fptr]
-        fa = abs(fi)
-      }
-    }
-    b = q0
-    x = a + b
-    bv = x - a
-    y = b - bv
-    if(y) {
-      g[count++] = y
-    }
-    _x = q1 + x
-    _bv = _x - q1
-    _av = _x - _bv
-    _br = x - _bv
-    _ar = q1 - _av
-    q0 = _ar + _br
-    q1 = _x
-  }
-  while(eptr < ne) {
-    a = ei
-    b = q0
-    x = a + b
-    bv = x - a
-    y = b - bv
-    if(y) {
-      g[count++] = y
-    }
-    _x = q1 + x
-    _bv = _x - q1
-    _av = _x - _bv
-    _br = x - _bv
-    _ar = q1 - _av
-    q0 = _ar + _br
-    q1 = _x
-    eptr += 1
-    if(eptr < ne) {
-      ei = e[eptr]
-    }
-  }
-  while(fptr < nf) {
-    a = fi
-    b = q0
-    x = a + b
-    bv = x - a
-    y = b - bv
-    if(y) {
-      g[count++] = y
-    } 
-    _x = q1 + x
-    _bv = _x - q1
-    _av = _x - _bv
-    _br = x - _bv
-    _ar = q1 - _av
-    q0 = _ar + _br
-    q1 = _x
-    fptr += 1
-    if(fptr < nf) {
-      fi = -f[fptr]
-    }
-  }
-  if(q0) {
-    g[count++] = q0
-  }
-  if(q1) {
-    g[count++] = q1
-  }
-  if(!count) {
-    g[count++] = 0.0  
-  }
-  g.length = count
-  return g
-}
-},{}],44:[function(require,module,exports){
-"use strict"
-
-module.exports = linearExpansionSum
-
-//Easy case: Add two scalars
-function scalarScalar(a, b) {
-  var x = a + b
-  var bv = x - a
-  var av = x - bv
-  var br = b - bv
-  var ar = a - av
-  var y = ar + br
-  if(y) {
-    return [y, x]
-  }
-  return [x]
-}
-
-function linearExpansionSum(e, f) {
-  var ne = e.length|0
-  var nf = f.length|0
-  if(ne === 1 && nf === 1) {
-    return scalarScalar(e[0], f[0])
-  }
-  var n = ne + nf
-  var g = new Array(n)
-  var count = 0
-  var eptr = 0
-  var fptr = 0
-  var abs = Math.abs
-  var ei = e[eptr]
-  var ea = abs(ei)
-  var fi = f[fptr]
-  var fa = abs(fi)
-  var a, b
-  if(ea < fa) {
-    b = ei
-    eptr += 1
-    if(eptr < ne) {
-      ei = e[eptr]
-      ea = abs(ei)
-    }
-  } else {
-    b = fi
-    fptr += 1
-    if(fptr < nf) {
-      fi = f[fptr]
-      fa = abs(fi)
-    }
-  }
-  if((eptr < ne && ea < fa) || (fptr >= nf)) {
-    a = ei
-    eptr += 1
-    if(eptr < ne) {
-      ei = e[eptr]
-      ea = abs(ei)
-    }
-  } else {
-    a = fi
-    fptr += 1
-    if(fptr < nf) {
-      fi = f[fptr]
-      fa = abs(fi)
-    }
-  }
-  var x = a + b
-  var bv = x - a
-  var y = b - bv
-  var q0 = y
-  var q1 = x
-  var _x, _bv, _av, _br, _ar
-  while(eptr < ne && fptr < nf) {
-    if(ea < fa) {
-      a = ei
-      eptr += 1
-      if(eptr < ne) {
-        ei = e[eptr]
-        ea = abs(ei)
-      }
-    } else {
-      a = fi
-      fptr += 1
-      if(fptr < nf) {
-        fi = f[fptr]
-        fa = abs(fi)
-      }
-    }
-    b = q0
-    x = a + b
-    bv = x - a
-    y = b - bv
-    if(y) {
-      g[count++] = y
-    }
-    _x = q1 + x
-    _bv = _x - q1
-    _av = _x - _bv
-    _br = x - _bv
-    _ar = q1 - _av
-    q0 = _ar + _br
-    q1 = _x
-  }
-  while(eptr < ne) {
-    a = ei
-    b = q0
-    x = a + b
-    bv = x - a
-    y = b - bv
-    if(y) {
-      g[count++] = y
-    }
-    _x = q1 + x
-    _bv = _x - q1
-    _av = _x - _bv
-    _br = x - _bv
-    _ar = q1 - _av
-    q0 = _ar + _br
-    q1 = _x
-    eptr += 1
-    if(eptr < ne) {
-      ei = e[eptr]
-    }
-  }
-  while(fptr < nf) {
-    a = fi
-    b = q0
-    x = a + b
-    bv = x - a
-    y = b - bv
-    if(y) {
-      g[count++] = y
-    } 
-    _x = q1 + x
-    _bv = _x - q1
-    _av = _x - _bv
-    _br = x - _bv
-    _ar = q1 - _av
-    q0 = _ar + _br
-    q1 = _x
-    fptr += 1
-    if(fptr < nf) {
-      fi = f[fptr]
-    }
-  }
-  if(q0) {
-    g[count++] = q0
-  }
-  if(q1) {
-    g[count++] = q1
-  }
-  if(!count) {
-    g[count++] = 0.0  
-  }
-  g.length = count
-  return g
-}
-},{}],45:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 var engine = require('../src/store-engine')
 
 var storages = require('../storages/all')
@@ -85803,7 +85868,7 @@ var plugins = [require('../plugins/json2')]
 
 module.exports = engine.createStore(storages, plugins)
 
-},{"../plugins/json2":46,"../src/store-engine":48,"../storages/all":50}],46:[function(require,module,exports){
+},{"../plugins/json2":48,"../src/store-engine":50,"../storages/all":52}],48:[function(require,module,exports){
 module.exports = json2Plugin
 
 function json2Plugin() {
@@ -85811,7 +85876,7 @@ function json2Plugin() {
 	return {}
 }
 
-},{"./lib/json2":47}],47:[function(require,module,exports){
+},{"./lib/json2":49}],49:[function(require,module,exports){
 /* eslint-disable */
 
 //  json2.js
@@ -86320,7 +86385,7 @@ if (typeof JSON !== "object") {
         };
     }
 }());
-},{}],48:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 var util = require('./util')
 var slice = util.slice
 var pluck = util.pluck
@@ -86559,7 +86624,7 @@ function createStore(storages, plugins, namespace) {
 	return store
 }
 
-},{"./util":49}],49:[function(require,module,exports){
+},{"./util":51}],51:[function(require,module,exports){
 (function (global){
 var assign = make_assign()
 var create = make_create()
@@ -86681,7 +86746,7 @@ function isObject(val) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],50:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 module.exports = [
 	// Listed in order of usage preference
 	require('./localStorage'),
@@ -86692,7 +86757,7 @@ module.exports = [
 	require('./memoryStorage')
 ]
 
-},{"./cookieStorage":51,"./localStorage":52,"./memoryStorage":53,"./oldFF-globalStorage":54,"./oldIE-userDataStorage":55,"./sessionStorage":56}],51:[function(require,module,exports){
+},{"./cookieStorage":53,"./localStorage":54,"./memoryStorage":55,"./oldFF-globalStorage":56,"./oldIE-userDataStorage":57,"./sessionStorage":58}],53:[function(require,module,exports){
 // cookieStorage is useful Safari private browser mode, where localStorage
 // doesn't work but cookies do. This implementation is adopted from
 // https://developer.mozilla.org/en-US/docs/Web/API/Storage/LocalStorage
@@ -86755,7 +86820,7 @@ function _has(key) {
 	return (new RegExp("(?:^|;\\s*)" + escape(key).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=")).test(doc.cookie)
 }
 
-},{"../src/util":49}],52:[function(require,module,exports){
+},{"../src/util":51}],54:[function(require,module,exports){
 var util = require('../src/util')
 var Global = util.Global
 
@@ -86795,7 +86860,7 @@ function clearAll() {
 	return localStorage().clear()
 }
 
-},{"../src/util":49}],53:[function(require,module,exports){
+},{"../src/util":51}],55:[function(require,module,exports){
 // memoryStorage is a useful last fallback to ensure that the store
 // is functions (meaning store.get(), store.set(), etc will all function).
 // However, stored values will not persist when the browser navigates to
@@ -86836,7 +86901,7 @@ function clearAll(key) {
 	memoryStorage = {}
 }
 
-},{}],54:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 // oldFF-globalStorage provides storage for Firefox
 // versions 6 and 7, where no localStorage, etc
 // is available.
@@ -86880,7 +86945,7 @@ function clearAll() {
 	})
 }
 
-},{"../src/util":49}],55:[function(require,module,exports){
+},{"../src/util":51}],57:[function(require,module,exports){
 // oldIE-userDataStorage provides storage for Internet Explorer
 // versions 6 and 7, where no localStorage, sessionStorage, etc
 // is available.
@@ -87009,7 +87074,7 @@ function _makeIEStorageElFunction() {
 	}
 }
 
-},{"../src/util":49}],56:[function(require,module,exports){
+},{"../src/util":51}],58:[function(require,module,exports){
 var util = require('../src/util')
 var Global = util.Global
 
@@ -87049,59 +87114,7 @@ function clearAll() {
 	return sessionStorage().clear()
 }
 
-},{"../src/util":49}],57:[function(require,module,exports){
-"use strict"
-
-module.exports = twoProduct
-
-var SPLITTER = +(Math.pow(2, 27) + 1.0)
-
-function twoProduct(a, b, result) {
-  var x = a * b
-
-  var c = SPLITTER * a
-  var abig = c - a
-  var ahi = c - abig
-  var alo = a - ahi
-
-  var d = SPLITTER * b
-  var bbig = d - b
-  var bhi = d - bbig
-  var blo = b - bhi
-
-  var err1 = x - (ahi * bhi)
-  var err2 = err1 - (alo * bhi)
-  var err3 = err2 - (ahi * blo)
-
-  var y = alo * blo - err3
-
-  if(result) {
-    result[0] = y
-    result[1] = x
-    return result
-  }
-
-  return [ y, x ]
-}
-},{}],58:[function(require,module,exports){
-"use strict"
-
-module.exports = fastTwoSum
-
-function fastTwoSum(a, b, result) {
-	var x = a + b
-	var bv = x - a
-	var av = x - bv
-	var br = b - bv
-	var ar = a - av
-	if(result) {
-		result[0] = ar + br
-		result[1] = x
-		return result
-	}
-	return [ar+br, x]
-}
-},{}],59:[function(require,module,exports){
+},{"../src/util":51}],59:[function(require,module,exports){
 "use strict";
 
 var getholes = {
@@ -87127,7 +87140,9 @@ var getholes = {
             outerShape2: JSON.parse('{"path":[{"X":-205.31347,"Y":40.82987},{"X":-349.39021,"Y":29.09185},{"X":-690.76716,"Y":72.94609},{"X":-543.93586,"Y":84.33026}],"depth":250}'),
             paths2: JSON.parse(' [{"path":[{"X":-366.56312,"Y":337.86501},{"X":-607.5471,"Y":345.39576},{"X":-625.51538,"Y":-229.58911},{"X":-362.9509,"Y":-237.79425}],"depth":0.1},{"path":[{"X":-615.87971,"Y":78.75229},{"X":-690.76716,"Y":72.94609},{"X":-616.35986,"Y":63.38752}],"depth":0.1},{"path":[{"X":-205.31347,"Y":40.82987},{"X":-364.82783,"Y":61.32154},{"X":-364.63788,"Y":31.05061},{"X":-349.39021,"Y":29.09185}],"depth":0.1}]'),
             outerShape3: JSON.parse('{"path":[{"X":-543.93586,"Y":84.33026},{"X":-690.76716,"Y":72.94609},{"X":-249.49753218746076,"Y":201.0389630123621},{"X":-241.13428994873618,"Y":172.2282674418554}],"depth":250}'),
-            paths3: JSON.parse(' [{"path":[{"X":-366.56312,"Y":337.86501},{"X":-607.5471,"Y":345.39576},{"X":-625.51538,"Y":-229.58911},{"X":-362.9509,"Y":-237.79425}],"depth":0.1},{"path":[{"X":-241.13428,"Y":172.22826},{"X":-249.49753,"Y":201.03896},{"X":-365.49326,"Y":167.36742},{"X":-365.2976,"Y":136.18582}],"depth":0.1},{"path":[{"X":-615.87971,"Y":78.75229},{"X":-615.37727,"Y":94.83046},{"X":-690.76716,"Y":72.94609}],"depth":0.1}]')
+            paths3: JSON.parse(' [{"path":[{"X":-366.56312,"Y":337.86501},{"X":-607.5471,"Y":345.39576},{"X":-625.51538,"Y":-229.58911},{"X":-362.9509,"Y":-237.79425}],"depth":0.1},{"path":[{"X":-241.13428,"Y":172.22826},{"X":-249.49753,"Y":201.03896},{"X":-365.49326,"Y":167.36742},{"X":-365.2976,"Y":136.18582}],"depth":0.1},{"path":[{"X":-615.87971,"Y":78.75229},{"X":-615.37727,"Y":94.83046},{"X":-690.76716,"Y":72.94609}],"depth":0.1}]'),
+            outerShapeSelfIntersect: { path: [{ X: 50, Y: 50 }, { X: 150, Y: 50 }, { X: 150, Y: 150 }, { X: 125, Y: 150 }, { X: 100, Y: 50 }, { X: 75, Y: 150 }, { X: 50, Y: 150 }], depth: 100 }
+
         };
     },
 
@@ -87248,7 +87263,7 @@ var getholes = {
             outerShape: input.outerShape3,
             holes: input.paths3,
             result: {
-                frontMesh: 3,
+                frontMesh: 0,
                 backMesh: 6,
                 outMesh: 24,
                 horizontalMesh: 12 }
@@ -87324,6 +87339,15 @@ var getholes = {
                 outMesh: 48,
                 inMesh: 144,
                 horizontalMesh: 36
+            }
+        }, {
+            name: "selfIntersects",
+            outerShape: input.outerShapeSelfIntersect,
+            holes: [],
+            result: {
+                frontMesh: 12,
+                backMesh: 12,
+                outMesh: 42
             }
         }];
         return JSON.parse(JSON.stringify(res));
