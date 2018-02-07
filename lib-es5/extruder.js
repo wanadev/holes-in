@@ -5,6 +5,7 @@ var geomHelper = require("./geom-helper.js");
 var cdt2dHelper = require("./cdt2d-helper.js");
 var uvHelper = require("./uv-helper.js");
 var babylonHelper = require("./babylon-helper.js");
+var constants = require("./constants.js");
 
 var extruder = {
 
