@@ -268,11 +268,12 @@ var debug = {
         window.scrollTo(0, Math.max(document.body.scrollHeight, document.body.offsetHeight, document.documentElement.clientHeight, document.documentElement.scrollHeight, document.documentElement.offsetHeight));
     },
     getUrlParameters: function getUrlParameters() {
-        var url = window.location.href;
+        var urlArguments = new URL(window.location.href).searchParams.get("data");
+        if (urlArguments || !urlArguments.length) return;
         //deflates url:
-        var stringArgs = String.fromCharCode.apply(null, pako.inflate(new URL(window.location.href).searchParams.get("data").split(',')));
+        var stringArgs = String.fromCharCode.apply(null, pako.inflate(urlArguments.split(',')));
+        if (!stringArgs || !stringArgs.length) return;
         var params = JSON.parse(stringArgs);
-
         if (params.outerShape) {
             debug.elems.outerShape.value = JSON.stringify(params.outerShape);
         }
@@ -1393,16 +1394,16 @@ var extruder = {
         };
     },
     generateDebugLink: function generateDebugLink(outerShape, holes, options) {
-        // if(options.debug){
-        try {
-            var pako = require("pako");
-            var data64 = pako.deflate(JSON.stringify({ holes: holes, outerShape: outerShape, doNotBuild: options.doNotBuild }));
-            var urlParam = "data=" + encodeURIComponent(data64);
-            console.info("Holes in debug: https://wanadev.github.io/holes-in/debugPage.html?" + urlParam);
-        } catch (error) {
-            console.warn("error on holes-in generate debug link. You may need to install pako", error);
+        if (options.debug) {
+            try {
+                var pako = require("pako");
+                var data64 = pako.deflate(JSON.stringify({ holes: holes, outerShape: outerShape, doNotBuild: options.doNotBuild }));
+                var urlParam = "data=" + encodeURIComponent(data64);
+                console.info("Holes in debug: https://wanadev.github.io/holes-in/debugPage.html?" + urlParam);
+            } catch (error) {
+                console.warn("error on holes-in generate debug link. You may need to install pako", error);
+            }
         }
-        // }
     }
 };
 

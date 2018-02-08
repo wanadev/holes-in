@@ -514,16 +514,16 @@ var extruder = {
         };
     },
     generateDebugLink: function generateDebugLink(outerShape, holes, options) {
-        // if(options.debug){
-        try {
-            var pako = require("pako");
-            var data64 = pako.deflate(JSON.stringify({ holes: holes, outerShape: outerShape, doNotBuild: options.doNotBuild }));
-            var urlParam = "data=" + encodeURIComponent(data64);
-            console.info("Holes in debug: https://wanadev.github.io/holes-in/debugPage.html?" + urlParam);
-        } catch (error) {
-            console.warn("error on holes-in generate debug link. You may need to install pako", error);
+        if (options.debug) {
+            try {
+                var pako = require("pako");
+                var data64 = pako.deflate(JSON.stringify({ holes: holes, outerShape: outerShape, doNotBuild: options.doNotBuild }));
+                var urlParam = "data=" + encodeURIComponent(data64);
+                console.info("Holes in debug: https://wanadev.github.io/holes-in/debugPage.html?" + urlParam);
+            } catch (error) {
+                console.warn("error on holes-in generate debug link. You may need to install pako", error);
+            }
         }
-        // }
     }
 };
 

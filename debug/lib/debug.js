@@ -280,14 +280,15 @@ const debug = {
     },
 
     getUrlParameters() {
-        const url = window.location.href;
+        const urlArguments = new URL(window.location.href).searchParams.get("data");
+        if(urlArguments || !urlArguments.length) return;
         //deflates url:
         const stringArgs = String.fromCharCode
         .apply(null,
-            pako.inflate(new URL(window.location.href).searchParams.get("data").split(',')
+            pako.inflate(urlArguments.split(',')
         ));
+        if(!stringArgs || !stringArgs.length) return;
         const params = JSON.parse(stringArgs);
-
         if(params.outerShape){
             debug.elems.outerShape.value = JSON.stringify(params.outerShape);
         }
