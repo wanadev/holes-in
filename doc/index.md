@@ -7,7 +7,7 @@ title: Basics
 
 
 ## Demo:
-<a href="https://wanadev.github.io/holes-in/debugPage.html">Please visit the demo here</a>
+<a href="https://wanadev.github.io/holes-in/debug/index.html">Please visit the demo here</a>
 
 
 ## Usage:

@@ -281,7 +281,7 @@ const debug = {
 
     getUrlParameters() {
         const urlArguments = new URL(window.location.href).searchParams.get("data");
-        if(urlArguments || !urlArguments.length) return;
+        if(!urlArguments || !urlArguments.length) return;
         //deflates url:
         const stringArgs = String.fromCharCode
         .apply(null,
