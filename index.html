@@ -14,8 +14,6 @@
         
             <link type="text/css" rel="stylesheet" href="style/solarized-dark.css" />
         
-            <link type="text/css" rel="stylesheet" href="style/style.css" />
-        
     </head>
 
     <body class="">
@@ -49,7 +47,7 @@
 <p>A javascript library to generate 3D mesh from a 2D outer path and 2D inner paths.</p>
 </blockquote>
 <h2 id="demo-">Demo:</h2>
-<p><a href="https://wanadev.github.io/holes-in/debugPage.html">Please visit the demo here</a></p>
+<p><a href="https://wanadev.github.io/holes-in/debug/index.html">Please visit the demo here</a></p>
 <h2 id="usage-">Usage:</h2>
 <p>First you need to include holesIn library into your html code:</p>
 <pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"./holes-in.min.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></code></pre>
@@ -57,45 +55,58 @@
 <h3 id="1-define-your-shape-and-holes">1 Define your shape and holes</h3>
 <p>Holes and depth are represented by the same structure: a path and a depth. The depth of the out path represents the height of the final mesh.</p>
 <p>A hole with a 0 depth will be dug throughout the mesh.</p>
-<pre><code class="hljs javascript"><span class="hljs-keyword">let</span> out= {<span class="hljs-attr">path</span>: [{<span class="hljs-attr">X</span>:<span class="hljs-number">10</span>,<span class="hljs-attr">Y</span>:<span class="hljs-number">10</span>},{<span class="hljs-attr">X</span>:<span class="hljs-number">110</span>,<span class="hljs-attr">Y</span>:<span class="hljs-number">10</span>},{<span class="hljs-attr">X</span>:<span class="hljs-number">110</span>,<span class="hljs-attr">Y</span>:<span class="hljs-number">110</span>},{<span class="hljs-attr">X</span>:<span class="hljs-number">10</span>,<span class="hljs-attr">Y</span>:<span class="hljs-number">110</span>}],<span class="hljs-attr">depth</span>:<span class="hljs-number">100</span>};
-<span class="hljs-keyword">let</span> hole1= {<span class="hljs-attr">path</span>: [{<span class="hljs-attr">X</span>:<span class="hljs-number">50</span>,<span class="hljs-attr">Y</span>:<span class="hljs-number">50</span>},{<span class="hljs-attr">X</span>:<span class="hljs-number">50</span>,<span class="hljs-attr">Y</span>:<span class="hljs-number">100</span>},{<span class="hljs-attr">X</span>:<span class="hljs-number">100</span>,<span class="hljs-attr">Y</span>:<span class="hljs-number">100</span>},{<span class="hljs-attr">X</span>:<span class="hljs-number">100</span>,<span class="hljs-attr">Y</span>:<span class="hljs-number">50</span>}],<span class="hljs-attr">depth</span>:<span class="hljs-number">0</span>};</code></pre>
+<pre><code class="hljs javascript"><span class="hljs-keyword">const</span> out= { <span class="hljs-attr">path</span>: [ { <span class="hljs-attr">X</span>: <span class="hljs-number">10</span>, <span class="hljs-attr">Y</span>: <span class="hljs-number">10</span> }, { <span class="hljs-attr">X</span>: <span class="hljs-number">110</span>, <span class="hljs-attr">Y</span>: <span class="hljs-number">10</span> }, { <span class="hljs-attr">X</span>: <span class="hljs-number">110</span>, <span class="hljs-attr">Y</span>: <span class="hljs-number">110</span> }, { <span class="hljs-attr">X</span>: <span class="hljs-number">10</span>, <span class="hljs-attr">Y</span>: <span class="hljs-number">110</span> } ], <span class="hljs-attr">depth</span>: <span class="hljs-number">100</span> };
+<span class="hljs-keyword">const</span> holes= [ { <span class="hljs-attr">path</span>: [{ <span class="hljs-attr">X</span>: <span class="hljs-number">50</span>, <span class="hljs-attr">Y</span>: <span class="hljs-number">50</span> }, { <span class="hljs-attr">X</span>: <span class="hljs-number">50</span>, <span class="hljs-attr">Y</span>: <span class="hljs-number">100</span> }, { <span class="hljs-attr">X</span>: <span class="hljs-number">100</span>, <span class="hljs-attr">Y</span>: <span class="hljs-number">100</span> }, { <span class="hljs-attr">X</span>: <span class="hljs-number">100</span>, <span class="hljs-attr">Y</span>: <span class="hljs-number">50</span> } ], <span class="hljs-attr">depth</span>: <span class="hljs-number">0</span> } ];</code></pre>
 
 <h3 id="2-choose-your-options">2 Choose your options</h3>
 <p>You can choose to build all the mesh or only a part of it. Please check-out the DEMO for more details.
- <pre><code class="hljs javascript"><span class="hljs-keyword">let</span> options= {<span class="hljs-attr">inMesh</span>:<span class="hljs-literal">true</span>, <span class="hljs-attr">outMesh</span>:<span class="hljs-literal">true</span>, <span class="hljs-attr">frontMesh</span>:<span class="hljs-literal">true</span>, <span class="hljs-attr">backMesh</span>:<span class="hljs-literal">true</span>, <span class="hljs-attr">horizontalMesh</span>: <span class="hljs-literal">true</span>};</code></pre></p>
+ <pre><code class="hljs javascript"><span class="hljs-keyword">const</span> options= { <span class="hljs-attr">inMesh</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">outMesh</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">frontMesh</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">backMesh</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">horizontalMesh</span>: <span class="hljs-literal">true</span> };</code></pre></p>
 <h3 id="3-generate-your-mesh">3 Generate your mesh</h3>
-<pre><code class="hljs javascript"><span class="hljs-keyword">let</span> geom= holesIn.getGeometry(outerShape,holes,options);</code></pre>
+<pre><code class="hljs javascript"><span class="hljs-keyword">const</span> geom= holesIn.getGeometry(outerShape, holes, options);</code></pre>
 
 <h3 id="4-merge-it">4 Merge it</h3>
 <p>If you want to merge the meshes into a single one, nothing is simpler:</p>
-<pre><code class="hljs javascript"><span class="hljs-keyword">let</span> mergedMesh= holesIn.mergeMeshes([geom.frontMesh, geom.backMesh, geom.inMesh, geom.outMesh]);</code></pre>
+<pre><code class="hljs javascript"><span class="hljs-keyword">const</span> mergedMesh= holesIn.mergeMeshes([geom.frontMesh, geom.backMesh, geom.inMesh, geom.outMesh]);</code></pre>
 
-<h3 id="4-export-it">4 Export it</h3>
-<p> You can also export your mesh to obj format:
- <pre><code class="hljs javascript"><span class="hljs-keyword">let</span> obj = holesIn.meshesToObj(geom);</code></pre></p>
 <h3 id="5-display-it-in-babylon-js">5 Display it in BABYLON js</h3>
- <pre><code class="hljs javascript"><span class="hljs-keyword">let</span> mesh= <span class="hljs-keyword">new</span> BABYLON.Mesh(<span class="hljs-string">"DemoMesh"</span>, scene);
-<span class="hljs-keyword">let</span> vertexData = <span class="hljs-keyword">new</span> BABYLON.VertexData();
-<span class="hljs-keyword">let</span> geom= holesIn.getGeometry(outerShape,holes,options);
-<span class="hljs-keyword">let</span> mergedGeometry= holesIn.mergeMeshes([geom.frontMesh, geom.backMesh, geom.inMesh, geom.outMesh, geom.horizontalMesh]);
+ <pre><code class="hljs javascript"><span class="hljs-keyword">const</span> mesh= <span class="hljs-keyword">new</span> BABYLON.Mesh(<span class="hljs-string">"DemoMesh"</span>, scene);
+<span class="hljs-keyword">const</span> vertexData = <span class="hljs-keyword">new</span> BABYLON.VertexData();
+<span class="hljs-keyword">const</span> geom= holesIn.getGeometry(outerShape, holes, options);
+<span class="hljs-keyword">const</span> mergedGeometry= holesIn.mergeMeshes([geom.frontMesh, geom.backMesh, geom.inMesh, geom.outMesh, geom.horizontalMesh]);
 vertexData.positions = mergedGeometry.points;
 vertexData.indices = mergedGeometry.faces;
 vertexData.normals = mergedGeometry.normals;
 vertexData.applyToMesh(mesh, <span class="hljs-number">1</span>);</code></pre>
 
-
-<h2 id="advanved-features-">Advanved features:</h2>
+<h3 id="debug">Debug</h3>
+<p>You can generate a link to the DEMO page by passing the <strong>debug = true</strong> option to getGeometry.</p>
+<h2 id="api">API</h2>
+<p>Holes-in provides two functions</p>
 <ul>
-<li>Do not merge: holes-in can return an array of geometries</li>
-<li>Do not build: holes-in can avoid some faces (see demo)</li>
-<li>UV Mapping: choose the size of the uvs.</li>
+<li><strong>getGeometry</strong></li>
+<li><strong>mergeMeshes</strong></li>
+</ul>
+<p>You can test all options on the DEMO page.</p>
+<h3 id="getgeometry-api">getGeometry API</h3>
+<p>The avaliable options are:</p>
+<ul>
+<li><strong>frontMesh</strong> <em>Boolean</em> generates the front mesh or not</li>
+<li><strong>backMesh</strong> <em>Boolean</em> generates the back mesh or not</li>
+<li><strong>inMesh</strong> <em>Boolean</em> generates the inner mesh or not</li>
+<li><strong>outMesh</strong> <em>Boolean</em> generates the outer mesh or not</li>
+<li><strong>horizontalMesh</strong> <em>Boolean</em> generates the horizontal mesh or not</li>
+<li><strong>doNotBuild</strong> <em>Array</em> an array of segments that will not be build onto vertical geometries</li>
+<li><strong>mergeVerticalGeometries</strong> <em>Boolean</em> If false, inMesh and outMesh will contain an array of meshes, containing one element per path semgent.</li>
+<li><strong>debug</strong> <em>Boolean</em> If true, holes-in will console.log a link to the demo page with your parametters.</li>
+<li><strong>lengthU</strong> <em>Number</em> If set, uvs will be mapped in such a way that [0;1] texture will fit into [0; lengthU] (path coordinate system)</li>
+<li><strong>lengthV</strong> <em>Number</em> Same as lengthU, belong v axis</li>
 </ul>
 
                 </article>
             </div>
 
             <footer>
-                Copyright (c)  2017 Wanadev
+                Copyright (c)  2018 Wanadev
 - <a href="http://www.wanadev.fr/">www.wanadev.fr</a><br />
 Unless otherwise specified, this documentation is published under the
 <a href="http://creativecommons.org/licenses/by-sa/3.0/deed.en">cc by-sa 3.0</a> license<br />
