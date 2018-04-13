@@ -1,4 +1,4 @@
-![]("doc/images/text-logo.png")
+![](doc/images/text-logo.png)
 
 
 [![Build Status](https://travis-ci.org/wanadev/holes-in.svg?branch=master)](https://travis-ci.org/wanadev/holes-in)
