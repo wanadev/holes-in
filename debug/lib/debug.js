@@ -39,17 +39,17 @@ const debug = {
 
 
 
-        if(store.get("outerShape")) {
+        if(store.get("outerShape")&& store.get("outerShape")!=="undefined") {
             debug.elems.outerShape.value = store.get("outerShape");
         }else{
             debug.elems.outerShape.value = example.outerShape;
         }
-        if(store.get("holes")) {
+        if(store.get("holes")&& store.get("holes")!=="undefined") {
             debug.elems.holes.value = store.get("holes");
         }else{
             debug.elems.holes.value = example.holes;
         }
-        if(store.get("doNotBuild")) {
+        if(store.get("doNotBuild")&& store.get("doNotBuild")!=="undefined") {
             debug.elems.doNotBuild.value = store.get("doNotBuild").trim();
         }
         debug.getUrlParameters("data");
