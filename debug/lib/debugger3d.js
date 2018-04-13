@@ -8,7 +8,7 @@ const debugger3d = {
 
     cssclass: "canvas3d",
     options: {inMesh:true, outMesh:true, frontMesh:true, backMesh:true, horizontalMesh:true,
-                wireframe:false, backFaceCulling:false,normals:false,swapToBabylon:true, displayNormals:false, lengthU: 100, lengthV: 100, enableTexture: "../assets/checkerboard.jpg" },
+                wireframe:false, backFaceCulling:false,normals:false,swapToBabylon:true, displayNormals:false, lengthU: 100, lengthV: 100, enableTexture: "./assets/cat.png" },
 
     engine: null,
     scene: null,
@@ -25,10 +25,9 @@ const debugger3d = {
         if(!debugger3d.meshDirty){return;}
         if(!holes || !outerShape || !outerShape.path){return;}
 
-        let cpyOptions = JSON.parse(JSON.stringify(debugger3d.options));
-        let cpyOut= JSON.parse(JSON.stringify(outerShape));
-        let cpyHoles= JSON.parse(JSON.stringify(holes));
-        let cpyDoNotBuild= JSON.parse(JSON.stringify(holes));
+        const cpyOptions = JSON.parse(JSON.stringify(debugger3d.options));
+        const cpyOut= JSON.parse(JSON.stringify(outerShape));
+        const cpyHoles= JSON.parse(JSON.stringify(holes));
 
 
         if(debugger3d.options.doNotBuild) {
@@ -38,7 +37,7 @@ const debugger3d = {
             pathHelper.scaleUpPath(cpyOptions.doNotBuild);
         }
         cpyOptions.mergeVerticalGeometries = false;
-        let geom= holesIn.getGeometry(cpyOut,cpyHoles,cpyOptions);
+        const geom= holesIn.getGeometry(cpyOut,cpyHoles,cpyOptions);
 
         let geomMerged= holesIn.mergeMeshes([geom.frontMesh, geom.backMesh, geom.inMesh, geom.outMesh,geom.horizontalMesh]);
 
@@ -89,10 +88,10 @@ const debugger3d = {
 
   displayNormals(geom){
        for(let i=0;i<geom.points.length;i+=3){
-           let origin = new BABYLON.Vector3(geom.points[i],geom.points[i+1],geom.points[i+2]);
-           let norm = new BABYLON.Vector3(geom.normals[i],geom.normals[i+1],geom.normals[i+2]).scale(5);
-           let dst= origin.add(norm);
-           var lineMesh =new BABYLON.Mesh.CreateLines("lines"+i, [origin ,dst],debugger3d.scene);
+           const origin = new BABYLON.Vector3(geom.points[i],geom.points[i+1],geom.points[i+2]);
+           const norm = new BABYLON.Vector3(geom.normals[i],geom.normals[i+1],geom.normals[i+2]).scale(5);
+           const dst= origin.add(norm);
+           const lineMesh =new BABYLON.Mesh.CreateLines("lines"+i, [origin ,dst],debugger3d.scene);
        }
    },
 
@@ -104,8 +103,8 @@ const debugger3d = {
       camera.attachControl(canvas, false);
       debugger3d.camera= camera;
 
-      var light1 = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(1,1,1), debugger3d.scene);
-      var light2 = new BABYLON.HemisphericLight('light2', new BABYLON.Vector3(-1,-1,0), debugger3d.scene);
+      const light1 = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(1,1,1), debugger3d.scene);
+      const light2 = new BABYLON.HemisphericLight('light2', new BABYLON.Vector3(-1,-1,0), debugger3d.scene);
 
       light1.diffuse = new BABYLON.Color3(1, 1, 1);
       light1.specular = new BABYLON.Color3(1, 1, 1);
@@ -117,8 +116,8 @@ const debugger3d = {
 
       debugger3d.scene.onPointerDown = function (evt, pickResult) {
         // if the click hits the ground object, we change the impact position
-        var textureCoordinates = pickResult.getTextureCoordinates();
-        console.log("tex ", textureCoordinates, " point ", pickResult.pickedPoint);
+        const  textureCoordinates = pickResult.getTextureCoordinates();
+        // console.log("tex ", textureCoordinates, " point ", pickResult.pickedPoint);
     };
 
   },
@@ -148,9 +147,14 @@ const debugger3d = {
 
       document.querySelectorAll('input').forEach(el =>
           el.checked =debugger3d.options[el.getAttribute("data-target")]);
+      const canvas3d= document.getElementById("babylon");
+      canvas3d.classList.add("canvas3d");
 
-      let canvas3d= document.getElementById("babylon");
-      canvas3d.classList.add(debugger3d.cssclass);
+      setTimeout(() => {
+          canvas3d.height = canvas3d.offsetHeight;
+          canvas3d.width = canvas3d.offsetWidth;
+      }, 200);
+
         debugger3d.engine = new BABYLON.Engine(canvas3d, true);
         debugger3d.scene = new BABYLON.Scene(debugger3d.engine);
         debugger3d.createScene(debugger3d.engine,canvas3d);
@@ -177,13 +181,19 @@ const debugger3d = {
       });
 
       document.getElementById("textureSelect").addEventListener("change", e => {
-
           const  value = "../assets/" + document.getElementById("textureSelect").value;
           debugger3d.options["enableTexture"] = value;
           debugger3d.meshDirty = true;
       });
-
-
+      document.addEventListener('resize', function(){
+	         debugger3d.engine.resize();
+      });
+      document.getElementById("babylon").addEventListener('resize', function(){
+	         debugger3d.engine.resize();
+      });
+      document.addEventListener('DOMContentLoaded', function(){
+	         setTimeout(() =>debugger3d.engine.resize(), 1000);
+      });
   },
 
   pathToEdge (paths) {

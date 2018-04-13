@@ -10,13 +10,11 @@
 
 > A javascript library to generate 3D mesh from a 2D outer path and 2D inner paths.
 
-## Contributing guide
-
-Setup the debug page:
+## Getting started
 
 ```
 npm install
-npm run watchifyDebug&
+npm run watchifyDebug
 python3 -m http.server 3001 .
 # Open http://localhost:3001/debug/debugpage/debugPage.html
 ```
@@ -29,7 +27,7 @@ python3 -m http.server 3001 .
 
 
 ## Changelog
-* **0.5.1:** New doc, new logo,  new style :) 
+* **0.5.1:** New doc, new logo, new style :)
 * **0.5.0:** Simplified getDataByDepth and handle holes into holes.
 * **0.4.0:** Added option mergeVerticalGeometries to be able to separate vertical geometries in an array of meshes
 * **0.3.4:** Added option doNotBuild for a thinner control of the final mesh

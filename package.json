@@ -11,7 +11,7 @@
     "build-uglify": "uglifyjs dist/holes-in.js -o dist/holes-in.min.js",
     "build-doc": "./tools/build-doc.sh",
     "watchify": "mkdir -p dist && watchify -v --debug -s holes-in lib/index.js -o dist/holes-in.js",
-    "watchifyDebug": "npm run build-debug && watchify -v --debug debug/lib/index.js -o debug/dist/debuglib.js"
+    "watchifyDebug": "watchify -v --debug debug/lib/index.js -o debug/debuglib.js"
   },
   "repository": {
     "type": "git",

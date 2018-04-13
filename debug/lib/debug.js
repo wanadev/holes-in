@@ -44,22 +44,7 @@ const debug = {
         if(store.get("doNotBuild")) {
             debug.elems.doNotBuild.value = store.get("doNotBuild").trim();
         }
-        const urlData = debug.getUrlParameters("data");
-
-
-        // const urlOuterShape = debug.getParameterByName("outerShape")
-        // if(urlOuterShape){
-        //
-        // }
-        // const urlHoles = debug.getParameterByName("holes")
-        // if(urlHoles){
-        //     debug.elems.holes.value = urlHoles;
-        // }
-        //
-        // const urlDoNotBuild = debug.getParameterByName("doNotBuild")
-        // if(urlDoNotBuild){
-        //     debug.elems.doNotBuild.value = urlDoNotBuild;
-        // }
+        debug.getUrlParameters("data");
 
         debugger2d.elems = debug.elems;
         debugger3d.elems = debug.elems;
@@ -84,12 +69,6 @@ const debug = {
                   });
               }
           );
-
-
-        document.debugLib = this;
-        document.holesIn = holesIn;
-        document.cdt2d = cdt2d;
-
 
         // init unitary tests select :
         getHoles.getTestPaths().concat(getHoles.getTestDoNotBuild()).forEach((test, index) => {
