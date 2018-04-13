@@ -1,4 +1,5 @@
-# holes-in
+![alt text]("./logo.png")
+
 
 [![Build Status](https://travis-ci.org/wanadev/holes-in.svg?branch=master)](https://travis-ci.org/wanadev/holes-in)
 [![NPM Version](http://img.shields.io/npm/v/holes-in.svg?style=flat)](https://www.npmjs.com/package/holes-in)
