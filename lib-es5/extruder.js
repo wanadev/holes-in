@@ -4,7 +4,6 @@ var pathHelper = require("./path-helper.js");
 var geomHelper = require("./geom-helper.js");
 var cdt2dHelper = require("./cdt2d-helper.js");
 var uvHelper = require("./uv-helper.js");
-var babylonHelper = require("./babylon-helper.js");
 var constants = require("./constants.js");
 
 var extruder = {
@@ -64,9 +63,6 @@ var extruder = {
             res.outMesh = outMesh;
         }
 
-        if (options.swapToBabylon) {
-            babylonHelper.swapAllToBabylon(res);
-        }
         return res;
     },
     getVerticalGeom: function getVerticalGeom(innerPathsByDepth) {

@@ -6,7 +6,7 @@ var exportHelper = {
         var res = "";
 
         for (var i = 0; i < meshes.length; i++) {
-            res += exportHelper.meshToObj(meshes.inMesh, "mesh" + i);
+            res += exportHelper.meshToObj(meshes[i], "mesh-" + i);
             res += "\n";
         }
 
