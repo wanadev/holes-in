@@ -3,6 +3,7 @@
 const pathTracer = require("./pathTracer");
 const debugger2d = require("./debugger2d");
 const debugger3d = require("./debugger3d");
+const example = require("./example");
 const store = require("store");
 const holesIn = require("../../lib/index");
 const extruder = require("../../lib/extruder");
@@ -11,6 +12,7 @@ const cdt2d = require("cdt2d");
 const getHoles = require("../../tests/holes");
 const stringify = require("json-stringify-pretty-compact");
 const pako = require("pako");
+
 
 const debug = {
     elems: null,
@@ -35,11 +37,17 @@ const debug = {
                       debugCheckboxes:  [...document.getElementById('logs').getElementsByTagName('input')]
                   };
 
+
+
         if(store.get("outerShape")) {
             debug.elems.outerShape.value = store.get("outerShape");
+        }else{
+            debug.elems.outerShape.value = example.outerShape;
         }
         if(store.get("holes")) {
             debug.elems.holes.value = store.get("holes");
+        }else{
+            debug.elems.holes.value = example.holes;
         }
         if(store.get("doNotBuild")) {
             debug.elems.doNotBuild.value = store.get("doNotBuild").trim();

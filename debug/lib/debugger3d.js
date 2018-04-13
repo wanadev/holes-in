@@ -8,7 +8,7 @@ const debugger3d = {
 
     cssclass: "canvas3d",
     options: {inMesh:true, outMesh:true, frontMesh:true, backMesh:true, horizontalMesh:true,
-                wireframe:false, backFaceCulling:false,normals:false,swapToBabylon:true, displayNormals:false, lengthU: 100, lengthV: 100, enableTexture: "./assets/cat.png" },
+                wireframe:false, backFaceCulling:false,normals:false,swapToBabylon:true, displayNormals:false, lengthU: 100, lengthV: 100, enableTexture: "./assets/logo-rasterized.jpg" },
 
     engine: null,
     scene: null,
@@ -131,8 +131,8 @@ const debugger3d = {
 
      material.wireframe= debugger3d.options.wireframe;
      material.backFaceCulling = debugger3d.options.backFaceCulling;
-     material.ambientColor= new BABYLON.Color3(0.2,0.7,0.3);
-     material.diffuseColor= new BABYLON.Color3(0.2,0.7,0.3);
+     material.ambientColor= new BABYLON.Color3(1,1,1);
+     material.diffuseColor= new BABYLON.Color3(1,1,1);
 
      mesh.material= material;
      debugger3d.mesh = mesh;
@@ -169,30 +169,18 @@ const debugger3d = {
       ["option", "option3d"].forEach(elementId => {
         [...document.getElementById(elementId).getElementsByTagName('input')].forEach(el => {
             el.addEventListener("change", e => {
-                let value = (e.target.checked);
-                if (el.getAttribute("data-target") == "enableTexture") {
-                    value = "../assets/" + document.getElementById("textureSelect").value;
-                }
+                const value = (e.target.checked);
                 debugger3d.options[el.getAttribute("data-target")] = value;
                 debugger3d.meshDirty = true;
             });
             el.checked = debugger3d.options[el.getAttribute("data-target")];
         });
       });
-
-      document.getElementById("textureSelect").addEventListener("change", e => {
-          const  value = "../assets/" + document.getElementById("textureSelect").value;
-          debugger3d.options["enableTexture"] = value;
-          debugger3d.meshDirty = true;
-      });
       document.addEventListener('resize', function(){
 	         debugger3d.engine.resize();
       });
       document.getElementById("babylon").addEventListener('resize', function(){
 	         debugger3d.engine.resize();
-      });
-      document.addEventListener('DOMContentLoaded', function(){
-	         setTimeout(() =>debugger3d.engine.resize(), 1000);
       });
   },
 
@@ -222,7 +210,6 @@ const debugger3d = {
   toClipperString(string) {
       return string.replace(/x/g,"X").replace(/y/g, "Y");
   }
-
 
 };
 
