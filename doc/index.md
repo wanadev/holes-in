@@ -1,6 +1,7 @@
 ---
 title: Basics
 ---
+![alt text](https://wanadev.github.io/holes-in/images/text-logo.png)
 
 
 > A javascript library to generate 3D mesh from a 2D outer path and 2D inner paths.
