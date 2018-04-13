@@ -25,8 +25,14 @@ python3 -m http.server 3001 .
 
 [Please visit the Documentation page](https://wanadev.github.io/holes-in/)
 
+[Or have a look to the DEMO](https://wanadev.github.io/holes-in/debug/index.html)
+
+
 ## Changelog
-* **0.3.4:** Added option doNotBuild to a thinner control of the final mesh
+* **0.5.1:** New doc, new logo,  new style :) 
+* **0.5.0:** Simplified getDataByDepth and handle holes into holes.
+* **0.4.0:** Added option mergeVerticalGeometries to be able to separate vertical geometries in an array of meshes
+* **0.3.4:** Added option doNotBuild for a thinner control of the final mesh
 * **0.3.2:** Simplified pre processing for more robustness
 * **0.2.5:** Removed `for ...of` for ES5 transpilation
 * **0.2.3:** Added full gestion of paths that modifies the outer geometry
