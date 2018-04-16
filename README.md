@@ -28,6 +28,7 @@ python3 -m http.server 3001 .
 
 
 ## Changelog
+* **0.5.2:** Accept lowercase points
 * **0.5.1:** New doc, new logo, new style :)
 * **0.5.0:** Simplified getDataByDepth and handle holes into holes.
 * **0.4.0:** Added option mergeVerticalGeometries to be able to separate vertical geometries in an array of meshes

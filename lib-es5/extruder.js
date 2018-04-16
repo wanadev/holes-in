@@ -16,7 +16,7 @@ var extruder = {
 
 
         options = Object.assign(extruder.getDefaultOptions(), options);
-
+        extruder.convertInputToHolesInConvention(outerShape, holes);
         extruder.generateDebugLink(outerShape, holes, options);
 
         // get the topology 2D paths by depth
@@ -240,6 +240,23 @@ var extruder = {
                 console.warn("error on holes-in generate debug link. You may need to install pako", error);
             }
         }
+    },
+    convertInputToHolesInConvention: function convertInputToHolesInConvention(outerShape, holes) {
+        outerShape.path = extruder.convertPathToHolesInConvention(outerShape.path);
+        holes.forEach(function (hole) {
+            return hole.path = extruder.convertPathToHolesInConvention(hole.path);
+        });
+    },
+
+
+    // checks if there is X,Y coordinates, if not uses x,y
+    convertPathToHolesInConvention: function convertPathToHolesInConvention(path) {
+        return path.map(function (point) {
+            return {
+                X: point.X !== undefined ? point.X : point.x,
+                Y: point.Y !== undefined ? point.Y : point.y
+            };
+        });
     }
 };
 

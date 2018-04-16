@@ -24,12 +24,12 @@ First you need to include holesIn library into your html code:
 
 Holes and depth are represented by the same structure: a path and a depth. The depth of the out path represents the height of the final mesh.
 
-
 A hole with a 0 depth will be dug throughout the mesh.
 ```javascript
 const out= { path: [ { X: 10, Y: 10 }, { X: 110, Y: 10 }, { X: 110, Y: 110 }, { X: 10, Y: 110 } ], depth: 100 };
 const holes= [ { path: [{ X: 50, Y: 50 }, { X: 50, Y: 100 }, { X: 100, Y: 100 }, { X: 100, Y: 50 } ], depth: 0 } ];
  ```
+ HolesIn accept both points with upper or lowercase coordinates: { X: 0, Y: 0 }, { x: 0, y: 0 }.
 
 ### 2 Choose your options
 You can choose to build all the mesh or only a part of it. Please check-out the DEMO for more details.
