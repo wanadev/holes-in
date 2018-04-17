@@ -1,6 +1,6 @@
 {
   "name": "holes-in",
-  "version": "0.4.5",
+  "version": "0.5.8",
   "description": "Generates a 3D mesh from a 2D outer path and 2D inner paths",
   "main": "lib-es5/index.js",
   "scripts": {
@@ -9,12 +9,10 @@
     "build-dist": "mkdir -p dist/ && browserify -t [babelify --presets [ es2015 ] ] -s holesIn lib/index.js -o dist/holes-in.js",
     "build-es5": "cd lib/ && env babel *.js -d ../lib-es5",
     "build-uglify": "uglifyjs dist/holes-in.js -o dist/holes-in.min.js",
-    "build-doc": "./node_modules/.bin/enlightme",
+    "build-doc": "./tools/build-doc.sh",
+    "publish-doc": "./tools/publish-doc.sh",
     "watchify": "mkdir -p dist && watchify -v --debug -s holes-in lib/index.js -o dist/holes-in.js",
-    "watchifyUI": "rm -f `pwd`/doc.generated/ui-bundle.js && ln -s `pwd`/doc/ui-bundle.js `pwd`/doc.generated/ui-bundle.js && watchify -v --debug doc/js/index.js -o doc.generated/ui-bundle.js",
-    "watchifyDebug": "watchify -v --debug debug/js/index.js -o debug/dist/debuglib.js",
-    "watchifyAll": "npm run watchify & npm run watchifyUI & npm run watchifyDebug",
-    "prepublish": "npm run build-es5"
+    "watchifyDebug": "watchify -v --debug debug/lib/index.js -o debug/debuglib.js"
   },
   "repository": {
     "type": "git",
@@ -36,21 +34,25 @@
     "babel-cli": "^6.24.1",
     "babel-preset-es2015": "^6.22.0",
     "babelify": "^8.0.0",
-    "babylonjs": "^3.0.1-alpha",
-    "browserify": "^14.1.0",
+    "babylonjs": "^3.1.1",
+    "browserify": "^16.0.0",
     "enlightme": "^0.1.1",
     "expect.js": "^0.3.1",
     "jshint": "^2.9.5",
+    "json-stringify-pretty-compact": "^1.1.0",
     "lru-cache": "^4.1.1",
-    "mocha": "^4.0.0",
-    "paper": "^0.11.4",
+    "mocha": "^5.0.1",
+    "paper": "^0.11.5",
     "sigmund": "^1.0.1",
     "store": "^2.0.12",
-    "uglify-js": "^3.0.16",
-    "watchify": "^3.9.0"
+    "uglify-js": "^3.3.9",
+    "watchify": "^3.10.0"
   },
   "dependencies": {
     "cdt2d": "^1.0.0",
     "clipper-lib": "git+https://github.com/wanadev/clipper-lib.git"
+  },
+  "optionalDependencies": {
+    "pako": "^1.0.6"
   }
 }

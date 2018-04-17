@@ -23,12 +23,9 @@ var pathHelper = {
      * Compute the xor of two arrays of path
      *
      */
-    getUnionOfPaths: function getUnionOfPaths(pathsSubj, pathsClip, op) {
-        var options = {
-            subjectFillType: clipperLib.PolyFillType.pftNonZero,
-            clipFillType: clipperLib.PolyFillType.pftNonZero,
-            clipType: clipperLib.ClipType.ctUnion
-        };
+    getUnionOfPaths: function getUnionOfPaths(pathsSubj, pathsClip, options) {
+        options = Object.assign({}, options);
+        options.clipType = clipperLib.ClipType.ctUnion;
         return pathHelper.executeClipper(pathsSubj, pathsClip, options);
     },
 
@@ -37,12 +34,9 @@ var pathHelper = {
      * Compute the xor of two arrays of path
      *
      */
-    getDiffOfPaths: function getDiffOfPaths(pathsSubj, pathsClip, op) {
-        var options = {
-            subjectFillType: clipperLib.PolyFillType.pftNonZero,
-            clipFillType: clipperLib.PolyFillType.pftNonZero,
-            clipType: clipperLib.ClipType.ctDifference
-        };
+    getDiffOfPaths: function getDiffOfPaths(pathsSubj, pathsClip, options) {
+        options = Object.assign({}, options);
+        options.clipType = clipperLib.ClipType.ctDifference;
         return pathHelper.executeClipper(pathsSubj, pathsClip, options);
     },
 
@@ -87,31 +81,38 @@ var pathHelper = {
      * subjectFill: {pftEvenOdd,pftNonZero,pftPositive,pftNegative}
      * clipFill: same as upon
      */
-    executeClipper: function executeClipper(pathsSubj, pathsClip) {
-        var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {
+    executeClipper: function executeClipper(pathsSubj, pathsClip, options) {
+        options = Object.assign({
             clipType: clipperLib.ClipType.ctUnion,
             subjectFill: clipperLib.PolyFillType.pftNonZero,
-            clipFill: clipperLib.PolyFillType.pftNonZero
-        };
+            clipFill: clipperLib.PolyFillType.pftNonZero,
+            polyTree: false,
+            pathPreProcess: true
+        }, options);
 
         if (!pathsSubj && !pathsClip) {
             return;
         }
-        // turn paths so they are negatives:
-        pathHelper.setDirectionPaths(pathsSubj, -1);
-        if (pathsClip) {
-            pathHelper.setDirectionPaths(pathsClip, -1);
+        if (options.pathPreProcess) {
+            pathHelper.setDirectionPaths(pathsSubj, -1);
+            if (pathsClip) {
+                pathHelper.setDirectionPaths(pathsClip, -1);
+            }
         }
-        // settup and execute clipper
         var cpr = new clipperLib.Clipper();
+        cpr.StrictlySimple = true;
         cpr.AddPaths(pathsSubj, clipperLib.PolyType.ptSubject, true);
-        // pathsSubj.forEach(path => cpr.AddPath(path, clipperLib.PolyType.ptSubject, true));
 
         if (pathsClip) {
-            // pathsClip.forEach(path => cpr.AddPath(path, clipperLib.PolyType.ptClip, true));
             cpr.AddPaths(pathsClip, clipperLib.PolyType.ptClip, true);
         }
-        var res = new clipperLib.Paths();
+        var res = void 0;
+        if (options.polyTree) {
+            res = new clipperLib.PolyTree();
+        } else {
+            res = new clipperLib.Paths();
+        }
+
         cpr.Execute(options.clipType, res, options.subjectFill, options.clipFill);
         return res;
     },
@@ -313,7 +314,7 @@ var pathHelper = {
         return point1.X === point2.X && point1.Y === point2.Y;
     },
     cleanPaths: function cleanPaths(paths) {
-        var threshold = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1.5;
+        var threshold = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 10;
 
         return clipperLib.Clipper.CleanPolygons(paths, threshold);
     }

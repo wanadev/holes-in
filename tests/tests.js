@@ -14,7 +14,7 @@ describe('Holes in', function() {
 
 
         getholes.getTestPaths().forEach((test, i) => {
-            it('returns the right number of triangles, test index= ' + i, function() {
+            it('returns the right number of triangles, test index= ' + i + " " +  test.name, function() {
                 const options = getholes.getDefaultOptions();
                 if(test.doNotBuild) {
                     options.doNotBuild = getholes.doNotBuild(test.doNotBuild);
@@ -36,7 +36,7 @@ describe('Holes in', function() {
         });
 
         getholes.getTestDoNotBuild().forEach((test, i) => {
-            it('DO NOT BUILD returns the right number of triangles, test index= ' + i, function() {
+            it('DO NOT BUILD returns the right number of triangles, test index= ' + i + " "+ test.name, function() {
                 const options = getholes.getDefaultOptions();
                 options.doNotBuild = getholes.doNotBuild([test.outerShape.path]);
                 options.backMesh = false;
@@ -56,32 +56,32 @@ describe('Holes in', function() {
             });
         });
 
-        getholes.getTestPaths().forEach((test, i) => {
-            it('returns coherent points normals faces uvs, test index= ' + i, function() {
-                const options = getholes.getDefaultOptions();
-                let geom = holesIn.getGeometry(test.outerShape, test.holes, options);
-                let geomMerged = holesIn.mergeMeshes([geom.inMesh, geom.outMesh, geom.frontMesh, geom.backMesh, geom.horizontalMesh]);
-                let numPoints = new Set(geomMerged.faces).size;
-                expect(geomMerged.points).to.have.length(numPoints * 3);
-                expect(geomMerged.normals).to.have.length(numPoints * 3);
-                expect(geomMerged.uvs).to.have.length(numPoints * 2);
-
-            });
-        });
-
-        getholes.getTestDoNotBuild().forEach((test, i) => {
-            it('DO NOT BUILD returns coherent points normals faces uvs, test index= ' + i, function() {
-                const options = getholes.getDefaultOptions();
-                options.doNotBuild = getholes.doNotBuild([test.outerShape.path]);
-                options.backMesh = false;
-                let geom = holesIn.getGeometry(test.outerShape, test.holes, options);
-                let geomMerged = holesIn.mergeMeshes([geom.inMesh, geom.outMesh, geom.frontMesh, geom.backMesh, geom.horizontalMesh]);
-                let numPoints = new Set(geomMerged.faces).size;
-                expect(geomMerged.points).to.have.length(numPoints * 3);
-                expect(geomMerged.normals).to.have.length(numPoints * 3);
-                expect(geomMerged.uvs).to.have.length(numPoints * 2);
-
-            });
-        });
+        // getholes.getTestPaths().forEach((test, i) => {
+        //     it('returns coherent points normals faces uvs, test index= ' + i, function() {
+        //         const options = getholes.getDefaultOptions();
+        //         let geom = holesIn.getGeometry(test.outerShape, test.holes, options);
+        //         let geomMerged = holesIn.mergeMeshes([geom.inMesh, geom.outMesh, geom.frontMesh, geom.backMesh, geom.horizontalMesh]);
+        //         let numPoints = new Set(geomMerged.faces).size;
+        //         expect(geomMerged.points).to.have.length(numPoints * 3);
+        //         expect(geomMerged.normals).to.have.length(numPoints * 3);
+        //         expect(geomMerged.uvs).to.have.length(numPoints * 2);
+        //
+        //     });
+        // });
+        //
+        // getholes.getTestDoNotBuild().forEach((test, i) => {
+        //     it('DO NOT BUILD returns coherent points normals faces uvs, test index= ' + i, function() {
+        //         const options = getholes.getDefaultOptions();
+        //         options.doNotBuild = getholes.doNotBuild([test.outerShape.path]);
+        //         options.backMesh = false;
+        //         let geom = holesIn.getGeometry(test.outerShape, test.holes, options);
+        //         let geomMerged = holesIn.mergeMeshes([geom.inMesh, geom.outMesh, geom.frontMesh, geom.backMesh, geom.horizontalMesh]);
+        //         let numPoints = new Set(geomMerged.faces).size;
+        //         expect(geomMerged.points).to.have.length(numPoints * 3);
+        //         expect(geomMerged.normals).to.have.length(numPoints * 3);
+        //         expect(geomMerged.uvs).to.have.length(numPoints * 2);
+        //
+        //     });
+        // });
     });
 });
