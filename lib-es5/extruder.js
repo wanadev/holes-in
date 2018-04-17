@@ -4,7 +4,7 @@ var pathHelper = require("./path-helper.js");
 var geomHelper = require("./geom-helper.js");
 var cdt2dHelper = require("./cdt2d-helper.js");
 var uvHelper = require("./uv-helper.js");
-var babylonHelper = require("./babylon-helper.js");
+var constants = require("./constants.js");
 
 var extruder = {
 
@@ -16,6 +16,8 @@ var extruder = {
 
 
         options = Object.assign(extruder.getDefaultOptions(), options);
+        extruder.convertInputToHolesInConvention(outerShape, holes);
+        extruder.generateDebugLink(outerShape, holes, options);
 
         // get the topology 2D paths by depth
         var data = extruder.getDataByDepth(outerShape, holes);
@@ -61,9 +63,6 @@ var extruder = {
             res.outMesh = outMesh;
         }
 
-        if (options.swapToBabylon) {
-            babylonHelper.swapAllToBabylon(res);
-        }
         return res;
     },
     getVerticalGeom: function getVerticalGeom(innerPathsByDepth) {
@@ -226,8 +225,38 @@ var extruder = {
             backMesh: true,
             horizontalMesh: true,
             mergeVerticalGeometries: true,
-            doNotBuild: []
+            doNotBuild: [],
+            debug: false
         };
+    },
+    generateDebugLink: function generateDebugLink(outerShape, holes, options) {
+        if (options.debug) {
+            try {
+                var pako = require("pako");
+                var data64 = pako.deflate(JSON.stringify({ holes: holes, outerShape: outerShape, doNotBuild: options.doNotBuild }));
+                var urlParam = "data=" + encodeURIComponent(data64);
+                console.info("Holes in debug: https://wanadev.github.io/holes-in/debugPage.html?" + urlParam);
+            } catch (error) {
+                console.warn("error on holes-in generate debug link. You may need to install pako", error);
+            }
+        }
+    },
+    convertInputToHolesInConvention: function convertInputToHolesInConvention(outerShape, holes) {
+        outerShape.path = extruder.convertPathToHolesInConvention(outerShape.path);
+        holes.forEach(function (hole) {
+            return hole.path = extruder.convertPathToHolesInConvention(hole.path);
+        });
+    },
+
+
+    // checks if there is X,Y coordinates, if not uses x,y
+    convertPathToHolesInConvention: function convertPathToHolesInConvention(path) {
+        return path.map(function (point) {
+            return {
+                X: point.X !== undefined ? point.X : point.x,
+                Y: point.Y !== undefined ? point.Y : point.y
+            };
+        });
     }
 };
 

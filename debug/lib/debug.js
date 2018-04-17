@@ -3,6 +3,7 @@
 const pathTracer = require("./pathTracer");
 const debugger2d = require("./debugger2d");
 const debugger3d = require("./debugger3d");
+const example = require("./example");
 const store = require("store");
 const holesIn = require("../../lib/index");
 const extruder = require("../../lib/extruder");
@@ -11,6 +12,7 @@ const cdt2d = require("cdt2d");
 const getHoles = require("../../tests/holes");
 const stringify = require("json-stringify-pretty-compact");
 const pako = require("pako");
+
 
 const debug = {
     elems: null,
@@ -35,46 +37,22 @@ const debug = {
                       debugCheckboxes:  [...document.getElementById('logs').getElementsByTagName('input')]
                   };
 
-        if(store.get("outerShape")) {
+
+
+        if(store.get("outerShape")&& store.get("outerShape")!=="undefined") {
             debug.elems.outerShape.value = store.get("outerShape");
+        }else{
+            debug.elems.outerShape.value = example.outerShape;
         }
-        if(store.get("holes")) {
+        if(store.get("holes")&& store.get("holes")!=="undefined") {
             debug.elems.holes.value = store.get("holes");
+        }else{
+            debug.elems.holes.value = example.holes;
         }
-        if(store.get("doNotBuild")) {
+        if(store.get("doNotBuild")&& store.get("doNotBuild")!=="undefined") {
             debug.elems.doNotBuild.value = store.get("doNotBuild").trim();
         }
-        const urlData = debug.getParameterByName("data");
-        if(urlData){
-            const data = JSON.parse(pako.inflate(JSON.parse("[" +urlData+ "]"), {to: "string"}));
-
-            if(data.outerShape){
-                debug.elems.outerShape.value = JSON.stringify(data.outerShape);
-            }
-            if(data.outShape){
-                debug.elems.outerShape.value = JSON.stringify(data.outShape);
-            }
-            if(data.holes){
-                debug.elems.holes.value = JSON.stringify(data.holes);
-            }
-            if(data.doNotBuild){
-                debug.elems.doNotBuild.value = JSON.stringify(data.doNotBuild);
-            }
-        }
-
-        // const urlOuterShape = debug.getParameterByName("outerShape")
-        // if(urlOuterShape){
-        //
-        // }
-        // const urlHoles = debug.getParameterByName("holes")
-        // if(urlHoles){
-        //     debug.elems.holes.value = urlHoles;
-        // }
-        //
-        // const urlDoNotBuild = debug.getParameterByName("doNotBuild")
-        // if(urlDoNotBuild){
-        //     debug.elems.doNotBuild.value = urlDoNotBuild;
-        // }
+        debug.getUrlParameters("data");
 
         debugger2d.elems = debug.elems;
         debugger3d.elems = debug.elems;
@@ -99,12 +77,6 @@ const debug = {
                   });
               }
           );
-
-
-        document.debugLib = this;
-        document.holesIn = holesIn;
-        document.cdt2d = cdt2d;
-
 
         // init unitary tests select :
         getHoles.getTestPaths().concat(getHoles.getTestDoNotBuild()).forEach((test, index) => {
@@ -294,15 +266,28 @@ const debug = {
                        document.documentElement.clientHeight, document.documentElement.scrollHeight, document.documentElement.offsetHeight ))
     },
 
-    getParameterByName(name, url) {
-        if (!url) url = window.location.href;
+    getUrlParameters() {
+        const urlArguments = new URL(window.location.href).searchParams.get("data");
+        if(!urlArguments || !urlArguments.length) return;
         //deflates url:
-        name = name.replace(/[\[\]]/g, "\\$&");
-        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-            results = regex.exec(url);
-        if (!results) return null;
-        if (!results[2]) return '';
-        return decodeURIComponent(results[2].replace(/\+/g, " "));
+        const stringArgs = String.fromCharCode
+        .apply(null,
+            pako.inflate(urlArguments.split(',')
+        ));
+        if(!stringArgs || !stringArgs.length) return;
+        const params = JSON.parse(stringArgs);
+        if(params.outerShape){
+            debug.elems.outerShape.value = JSON.stringify(params.outerShape);
+        }
+        if(params.outShape){
+            debug.elems.outerShape.value = JSON.stringify(params.outShape);
+        }
+        if(params.holes){
+            debug.elems.holes.value = JSON.stringify(params.holes);
+        }
+        if(params.doNotBuild){
+            debug.elems.doNotBuild.value = JSON.stringify(params.doNotBuild);
+        }
     }
 
 

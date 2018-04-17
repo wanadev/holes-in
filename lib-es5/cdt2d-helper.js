@@ -30,8 +30,14 @@ var cdt2dHelper = {
                 y: cdtPoints[triangle[1]][1] - cdtPoints[triangle[0]][1] };
             var bc = { x: cdtPoints[triangle[1]][0] - cdtPoints[triangle[2]][0],
                 y: cdtPoints[triangle[1]][1] - cdtPoints[triangle[2]][1] };
+            var lba = Math.sqrt(ba.x * ba.x + ba.y * ba.y);
+            var lbc = Math.sqrt(bc.x * bc.x + bc.y * bc.y);
+            ba.x /= lba;
+            ba.y /= lba;
+            bc.x /= lbc;
+            bc.y /= lbc;
             var area = 0.5 * (ba.y * bc.x) - ba.x * bc.y;
-            return Math.abs(area) / (constants.scaleFactor * constants.scaleFactor) > 0.1;
+            return Math.abs(area) > 0.001;
         });
         if (paths.length && !triangles.length) {
             var foundProblem = 0;
