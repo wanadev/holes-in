@@ -9,7 +9,6 @@ git checkout gh-pages
 rm -rf ./*
 cp -R $holesInRoot"/doc.generated/." .
 
-git add -A
-git commit -m $0
+git commit -am $0
 git push
 rm -rf  /tmp/holes-in-deploy/
