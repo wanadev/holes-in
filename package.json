@@ -40,7 +40,7 @@
     "expect.js": "^0.3.1",
     "jshint": "^2.9.5",
     "json-stringify-pretty-compact": "^1.1.0",
-    "lru-cache": "^4.1.1",
+    "lru-cache": "^5.0.1",
     "mocha": "^4.1.0",
     "paper": "^0.11.5",
     "sigmund": "^1.0.1",
