@@ -45,7 +45,7 @@
     "paper": "^0.11.5",
     "sigmund": "^1.0.1",
     "store": "^2.0.12",
-    "uglify-js": "^3.3.9",
+    "uglify-js": "^3.5.9",
     "watchify": "^3.10.0"
   },
   "dependencies": {
