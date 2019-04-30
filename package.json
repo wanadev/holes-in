@@ -34,7 +34,7 @@
     "babel-cli": "^6.24.1",
     "babel-preset-es2015": "^6.22.0",
     "babelify": "^7.3.0",
-    "babylonjs": "^3.1.1",
+    "babylonjs": "^4.0.1",
     "browserify": "^14.5.0",
     "enlightme": "^0.1.1",
     "expect.js": "^0.3.1",
