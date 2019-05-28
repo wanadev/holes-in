@@ -1,7 +1,6 @@
 "use strict";
 
-var constants = {
-    scaleFactor: 1000000
+const constants = {
+  scaleFactor: 1000000
 };
-
 module.exports = constants;

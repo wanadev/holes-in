@@ -1,13 +1,11 @@
 "use strict";
 
-var extruder = require("./extruder.js");
-var geomHelper = require("./geom-helper.js");
+const extruder = require("./extruder.js");
 
-var holesIn = {
+const geomHelper = require("./geom-helper.js");
 
-    getGeometry: extruder.getGeometry,
-    mergeMeshes: geomHelper.mergeMeshes
-
+const holesIn = {
+  getGeometry: extruder.getGeometry,
+  mergeMeshes: geomHelper.mergeMeshes
 };
-
 module.exports = holesIn;
