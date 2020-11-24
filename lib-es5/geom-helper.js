@@ -34,6 +34,11 @@ var geomHelper = {
 
             (_geom1$uvs = geom1.uvs).push.apply(_geom1$uvs, _toConsumableArray(geom2.uvs));
         }
+        if (geom2.uvs2) {
+            var _geom1$uvs2;
+
+            (_geom1$uvs2 = geom1.uvs2).push.apply(_geom1$uvs2, _toConsumableArray(geom2.uvs2));
+        }
         return geom1;
     },
 
@@ -261,6 +266,7 @@ var geomHelper = {
             faces: [],
             normals: [],
             uvs: [],
+            uvs2: [],
             offset: 0
         };
     }
