@@ -34,7 +34,7 @@ const holes= [ { path: [{ X: 50, Y: 50 }, { X: 50, Y: 100 }, { X: 100, Y: 100 },
 ### 2 Choose your options
 You can choose to build all the mesh or only a part of it. Please check-out the DEMO for more details.
  ```javascript
-const options= { inMesh: true, outMesh: true, frontMesh: true, backMesh: true, horizontalMesh: true };
+const options= { inMesh: true, outMesh: true, frontMesh: true, backMesh: true, horizontalMesh: true, doNotInvertFrontNormal: false, invertBackNormal: false };
 ```
 
 ### 3 Generate your mesh
@@ -89,3 +89,6 @@ The avaliable options are:
 - **debug** *Boolean* If true, holes-in will console.log a link to the demo page with your parametters.
 - **lengthU** *Number* If set, uvs will be mapped in such a way that [0;1] texture will fit into [0; lengthU] (path coordinate system)
 - **lengthV** *Number* Same as lengthU, belong v axis
+- **doNotInvertFrontNormal** *Boolean* Prevent the front mesh normal to be inverted (inverted by default)
+- **invertBackNormal** *Boolean* Invert the back mesh norma (not inverted by default)
+
