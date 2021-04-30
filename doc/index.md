@@ -90,5 +90,5 @@ The avaliable options are:
 - **lengthU** *Number* If set, uvs will be mapped in such a way that [0;1] texture will fit into [0; lengthU] (path coordinate system)
 - **lengthV** *Number* Same as lengthU, belong v axis
 - **doNotInvertFrontNormal** *Boolean* Prevent the front mesh normal to be inverted (inverted by default)
-- **invertBackNormal** *Boolean* Invert the back mesh norma (not inverted by default)
+- **invertBackNormal** *Boolean* Invert the back mesh normal (not inverted by default)
 
