@@ -91,4 +91,3 @@ The avaliable options are:
 - **lengthV** *Number* Same as lengthU, belong v axis
 - **doNotInvertFrontNormal** *Boolean* Prevent the front mesh normal to be inverted (inverted by default)
 - **invertBackNormal** *Boolean* Invert the back mesh normal (not inverted by default)
-
