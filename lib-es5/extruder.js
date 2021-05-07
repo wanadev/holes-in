@@ -36,11 +36,11 @@ var extruder = {
         var res = {};
 
         if (options.frontMesh) {
-            res.frontMesh = extruder.getHorizontalGeom(horizontalPathsByDepth, innerPathsByDepth, [0], 0, true);
+            res.frontMesh = extruder.getHorizontalGeom(horizontalPathsByDepth, innerPathsByDepth, [0], 0, !options.doNotInvertFrontNormal);
             uvHelper.mapHorizontal(innerPathsByDepth, outerShape, res.frontMesh, options);
         }
         if (options.backMesh) {
-            res.backMesh = extruder.getHorizontalGeom(horizontalPathsByDepth, innerPathsByDepth, [horizontalPathsByDepth.length - 1], 0, false);
+            res.backMesh = extruder.getHorizontalGeom(horizontalPathsByDepth, innerPathsByDepth, [horizontalPathsByDepth.length - 1], 0, options.invertBackNormal);
             uvHelper.mapHorizontal(innerPathsByDepth, outerShape, res.backMesh, options);
         }
         if (options.inMesh) {
@@ -226,7 +226,9 @@ var extruder = {
             horizontalMesh: true,
             mergeVerticalGeometries: true,
             doNotBuild: [],
-            debug: false
+            debug: false,
+            doNotInvertFrontNormal: false,
+            invertBackNormal: false
         };
     },
     generateDebugLink: function generateDebugLink(outerShape, holes, options) {

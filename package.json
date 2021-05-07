@@ -1,6 +1,6 @@
 {
   "name": "holes-in",
-  "version": "0.5.8",
+  "version": "0.6.0",
   "description": "Generates a 3D mesh from a 2D outer path and 2D inner paths",
   "main": "lib-es5/index.js",
   "scripts": {
@@ -50,7 +50,8 @@
   },
   "dependencies": {
     "cdt2d": "^1.0.0",
-    "clipper-lib": "git+https://github.com/wanadev/clipper-lib.git"
+    "clipper-lib": "git+https://github.com/wanadev/clipper-lib.git",
+    "pako": "^1.0.6"
   },
   "optionalDependencies": {
     "pako": "^1.0.6"

@@ -28,6 +28,10 @@ python3 -m http.server 3001 .
 
 
 ## Changelog
+* **0.6.0:**
+  * Adds support of Uvs2 on merge meshes
+  * Adds options to invert front and back normals
+* *0.5.3-0.5.8: ?*
 * **0.5.2:** Accept lowercase points
 * **0.5.1:** New doc, new logo, new style :)
 * **0.5.0:** Simplified getDataByDepth and handle holes into holes.
