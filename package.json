@@ -53,8 +53,7 @@
   },
   "dependencies": {
     "cdt2d": "^1.0.0",
-    "clipper-lib": "git+https://github.com/wanadev/clipper-lib.git#v7.0.0",
-    "pako": "^1.0.6"
+    "clipper-lib": "github:wanadev/clipper-lib#v7.0.1"
   },
   "optionalDependencies": {
     "pako": "^1.0.6"
