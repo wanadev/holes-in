@@ -1,11 +1,19 @@
 declare module "holes-in" {
-    interface Geometry {
+    interface MeshGeometry {
         points: number[];
         faces: number[];
         normals: number[];
         uvs: number[];
         uvs2: number[];
         offset: number;
+    }
+
+    interface MeshesGeometries {
+        frontMesh?: MeshGeometry;
+        backMesh?: MeshGeometry;
+        inMesh?: MeshGeometry;
+        horizontalMesh?: MeshGeometry;
+        outMesh?: MeshGeometry;
     }
 
     type Point = { x: number, y: number } | { X: number, Y: number };
@@ -35,8 +43,8 @@ declare module "holes-in" {
         invertBackNormal: boolean;
     }
 
-    export function getGeometry(outerShape: OuterShape, holes: Hole[], options?: Partial<Options>): Geometry;
+    export function getGeometry(outerShape: OuterShape, holes: Hole[], options?: Partial<Options>): MeshesGeometries;
 
-    export function mergeMeshes(geometries: Geometry[]): Geometry;
+    export function mergeMeshes(geometries: MeshGeometry[]): MeshGeometry;
 
 }
